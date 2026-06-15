@@ -125,16 +125,17 @@
   <div class="cards" id="summary-cards"></div>
 
   <!-- TIMELINE -->
-  <p class="section-title">Timeline — maio a agosto 2026</p>
+  <p class="section-title">Timeline — fevereiro a dezembro 2026</p>
   <div class="panel">
     <div class="tl-header" id="tl-header"></div>
     <div id="tl-body"></div>
-    <div style="margin-top:10px; display:flex; gap:16px; flex-wrap:wrap;">
-      <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-3)"><span style="width:24px;height:8px;border-radius:2px;background:#7F77DD;display:inline-block;"></span>Maio</span>
-      <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-3)"><span style="width:24px;height:8px;border-radius:2px;background:#B06DB8;display:inline-block;"></span>Junho</span>
-      <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-3)"><span style="width:24px;height:8px;border-radius:2px;background:#D4537E;display:inline-block;"></span>Julho</span>
-      <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-3)"><span style="width:24px;height:8px;border-radius:2px;background:#ED93B1;display:inline-block;"></span>Agosto</span>
-      <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-3)"><span style="width:24px;height:8px;border-radius:2px;background:#ccc;opacity:.5;display:inline-block;"></span>Não garantido (opacidade reduzida)</span>
+    <div style="margin-top:10px; display:flex; gap:14px; flex-wrap:wrap;">
+      <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-3)"><span style="width:20px;height:8px;border-radius:2px;background:#7F77DD;display:inline-block;"></span>Fev–Mar</span>
+      <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-3)"><span style="width:20px;height:8px;border-radius:2px;background:#A864BB;display:inline-block;"></span>Abr–Mai</span>
+      <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-3)"><span style="width:20px;height:8px;border-radius:2px;background:#CC4D96;display:inline-block;"></span>Jun–Jul</span>
+      <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-3)"><span style="width:20px;height:8px;border-radius:2px;background:#DC6070;display:inline-block;"></span>Ago–Set</span>
+      <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-3)"><span style="width:20px;height:8px;border-radius:2px;background:#9B72CC;display:inline-block;"></span>Out–Dez</span>
+      <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-3)"><span style="width:20px;height:8px;border-radius:2px;background:#9B72CC;opacity:.4;display:inline-block;"></span>Não garantido</span>
     </div>
   </div>
 
@@ -152,15 +153,23 @@
   <div class="filters">
     <select id="f-mes" onchange="renderTable()">
       <option value="">Todos os meses</option>
+      <option value="2">Fevereiro</option>
+      <option value="3">Março</option>
+      <option value="4">Abril</option>
       <option value="5">Maio</option>
       <option value="6">Junho</option>
       <option value="7">Julho</option>
       <option value="8">Agosto</option>
+      <option value="9">Setembro</option>
+      <option value="10">Outubro</option>
+      <option value="11">Novembro</option>
+      <option value="12">Dezembro</option>
     </select>
     <select id="f-status" onchange="renderTable()">
       <option value="">Todos os status</option>
       <option value="Aprovado">Aprovado</option>
-      <option value="Pendente">Pendente</option>
+      <option value="Vencendo">Vencendo</option>
+      <option value="Aguardando Aprovação">Aguardando aprovação</option>
     </select>
     <select id="f-confirm" onchange="renderTable()">
       <option value="">Todas as confirmações</option>
@@ -203,35 +212,59 @@
 // Última atualização: 2026-06-15
 // ============================================================
 const DATA = [
-  { nome:'Gleidson Andre Duarte Ramos', inicio:'2026-05-04', fim:'2026-05-18', dias:15, mes:5, abono:0,  status:'Aprovado', confirm:'Sim', garantido:'Sim', obs:'', custos:{5:12914.94} },
-  { nome:'Rosangela Silva de Castro',   inicio:'2026-05-04', fim:'2026-05-23', dias:20, mes:5, abono:0,  status:'Aprovado', confirm:'Sim', garantido:'Sim', obs:'', custos:{5:14136.57} },
-  { nome:'Jean Philip Silva',           inicio:'2026-05-04', fim:'2026-05-18', dias:15, mes:5, abono:10, status:'Aprovado', confirm:'Sim', garantido:'Sim', obs:'', custos:{5:11066.69} },
-  { nome:'Raquel Rente Peixoto',        inicio:'2026-05-06', fim:'2026-05-25', dias:20, mes:5, abono:10, status:'Aprovado', confirm:'Sim', garantido:'Sim', obs:'', custos:{5:14517.23} },
-  { nome:'Diego Mariano de Oliveira',   inicio:'2026-05-11', fim:'2026-05-28', dias:18, mes:5, abono:0,  status:'Aprovado', confirm:'Sim', garantido:'Sim', obs:'', custos:{5:23856.93} },
-  { nome:'Igor Dias Rangel',            inicio:'2026-06-01', fim:'2026-06-15', dias:15, mes:6, abono:0,  status:'Aprovado', confirm:'Não', garantido:'Não', obs:'', custos:{6:14259.14} },
-  { nome:'Ivana Mara Rodrigues',        inicio:'2026-06-15', fim:'2026-06-24', dias:10, mes:6, abono:0,  status:'Aprovado', confirm:'Não', garantido:'Não', obs:'', custos:{6:17836.73} },
-  { nome:'Lidia Vieira',                inicio:'2026-06-08', fim:'2026-06-17', dias:10, mes:6, abono:0,  status:'Aprovado', confirm:'Não', garantido:'Não', obs:'', custos:{6:0} },
-  { nome:'Roberto de Souza Batista',    inicio:'2026-07-20', fim:'2026-07-24', dias:5,  mes:7, abono:10, status:'Pendente', confirm:'Não', garantido:'Não', obs:'', custos:{7:18396.20} },
-  { nome:'Rachel Magalhães de Andrade', inicio:'2026-07-20', fim:'2026-08-04', dias:16, mes:7, abono:0,  status:'Pendente', confirm:'Não', garantido:'Não', obs:'', custos:{7:14072.93,8:15924.17} },
-  { nome:'Aline Alvares Boyde',         inicio:'2026-07-21', fim:'2026-07-31', dias:11, mes:7, abono:0,  status:'Pendente', confirm:'Não', garantido:'Não', obs:'', custos:{7:3549.72} },
-  { nome:'Guilherme da Costa Cardoso',  inicio:'2026-07-22', fim:'2026-08-05', dias:15, mes:7, abono:0,  status:'Pendente', confirm:'Não', garantido:'Não', obs:'', custos:{7:0,8:14363.08} },
-  { nome:'Jefferson Rafael Santana',    inicio:'2026-07-06', fim:'2026-07-20', dias:15, mes:7, abono:5,  status:'Pendente', confirm:'Não', garantido:'Não', obs:'', custos:{8:12399.40} },
-  { nome:'Jean Philip Silva (2ª)',       inicio:'2026-08-03', fim:'2026-08-07', dias:5,  mes:8, abono:0,  status:'Pendente', confirm:'Não', garantido:'Não', obs:'', custos:{8:3856.62} },
-  { nome:'Leonardo Santos Ferreira',    inicio:'2026-08-03', fim:'2026-08-22', dias:20, mes:8, abono:0,  status:'Pendente', confirm:'Não', garantido:'Não', obs:'', custos:{8:31729.23} },
-  { nome:'Veronica Pereira Nogueira',   inicio:'2026-08-03', fim:'2026-08-20', dias:18, mes:8, abono:0,  status:'Pendente', confirm:'Não', garantido:'Não', obs:'', custos:{} },
-  { nome:'Felipe Gomes de Souza',       inicio:'2026-08-03', fim:'2026-08-17', dias:15, mes:8, abono:0,  status:'Pendente', confirm:'Não', garantido:'Não', obs:'', custos:{} },
+  { nome:'Rafaela de Orlando Nascimento',          inicio:'2026-02-23', fim:'2026-03-06', dias:12, mes:2,  abono:0,  status:'Aprovado',             confirm:'Sim', garantido:'Sim', obs:'', custos:{} },
+  { nome:'Leonardo Santos Ferreira',               inicio:'2026-02-25', fim:'2026-03-06', dias:10, mes:2,  abono:0,  status:'Aprovado',             confirm:'Sim', garantido:'Sim', obs:'', custos:{} },
+  { nome:'Fellipe Couto Marques Arruda',           inicio:'2026-03-16', fim:'2026-03-25', dias:10, mes:3,  abono:0,  status:'Aprovado',             confirm:'Sim', garantido:'Sim', obs:'', custos:{} },
+  { nome:'Patricia de Araujo Rudas Paternina',     inicio:'2026-03-16', fim:'2026-03-30', dias:15, mes:3,  abono:0,  status:'Aprovado',             confirm:'Sim', garantido:'Sim', obs:'', custos:{} },
+  { nome:'Eduardo Gabriel Delfito do Nascimento',  inicio:'2026-03-23', fim:'2026-04-01', dias:10, mes:3,  abono:0,  status:'Aprovado',             confirm:'Sim', garantido:'Sim', obs:'', custos:{} },
+  { nome:'Davi Alves de Sousa da Silva',           inicio:'2026-04-06', fim:'2026-04-14', dias:9,  mes:4,  abono:0,  status:'Aprovado',             confirm:'Sim', garantido:'Sim', obs:'', custos:{} },
+  { nome:'Edvaldo Braz da Silva',                  inicio:'2026-04-06', fim:'2026-04-25', dias:20, mes:4,  abono:10, status:'Aprovado',             confirm:'Não', garantido:'Não', obs:'', custos:{} },
+  { nome:'Paulo Eugenio da Silva dos Reis',        inicio:'2026-04-06', fim:'2026-04-25', dias:20, mes:4,  abono:10, status:'Aprovado',             confirm:'Não', garantido:'Não', obs:'', custos:{} },
+  { nome:'Luciana dos Santos Dias',                inicio:'2026-04-13', fim:'2026-04-30', dias:18, mes:4,  abono:0,  status:'Aprovado',             confirm:'Não', garantido:'Não', obs:'', custos:{} },
+  { nome:'Gleidson Andre Duarte Ramos',            inicio:'2026-05-04', fim:'2026-05-18', dias:15, mes:5,  abono:0,  status:'Aprovado',             confirm:'Sim', garantido:'Sim', obs:'', custos:{5:12914.94} },
+  { nome:'Rosangela Silva de Castro',              inicio:'2026-05-04', fim:'2026-05-23', dias:20, mes:5,  abono:0,  status:'Aprovado',             confirm:'Não', garantido:'Não', obs:'', custos:{5:14136.57} },
+  { nome:'Jean Philip Silva',                      inicio:'2026-05-04', fim:'2026-05-18', dias:15, mes:5,  abono:10, status:'Aprovado',             confirm:'Não', garantido:'Não', obs:'', custos:{5:11066.69} },
+  { nome:'Raquel Rente Peixoto',                   inicio:'2026-05-06', fim:'2026-05-25', dias:20, mes:5,  abono:10, status:'Aprovado',             confirm:'Não', garantido:'Não', obs:'', custos:{5:14517.23} },
+  { nome:'Diego Mariano de Oliveira',              inicio:'2026-05-11', fim:'2026-05-28', dias:18, mes:5,  abono:0,  status:'Aprovado',             confirm:'Não', garantido:'Não', obs:'', custos:{5:23856.93} },
+  { nome:'Igor Dias Rangel',                       inicio:'2026-06-01', fim:'2026-06-15', dias:15, mes:6,  abono:0,  status:'Aprovado',             confirm:'Não', garantido:'Não', obs:'', custos:{6:14259.14} },
+  { nome:'Ivana Mara Rodrigues Possidio',          inicio:'2026-06-15', fim:'2026-06-24', dias:10, mes:6,  abono:0,  status:'Aprovado',             confirm:'Não', garantido:'Não', obs:'', custos:{6:17836.73} },
+  { nome:'Lidia Vieira',                           inicio:'2026-06-08', fim:'2026-06-17', dias:10, mes:6,  abono:0,  status:'Aprovado',             confirm:'Não', garantido:'Não', obs:'', custos:{} },
+  { nome:'Aline Alvares Boyde',                    inicio:'2026-07-21', fim:'2026-07-31', dias:11, mes:7,  abono:0,  status:'Aprovado',             confirm:'Não', garantido:'Não', obs:'', custos:{7:3549.72} },
+  { nome:'Guilherme da Costa Cardoso',             inicio:'2026-07-22', fim:'2026-08-05', dias:15, mes:7,  abono:0,  status:'Aprovado',             confirm:'Não', garantido:'Não', obs:'', custos:{7:0,8:14363.08} },
+  { nome:'Jefferson Rafael Santana Moraes',        inicio:'2026-07-06', fim:'2026-07-20', dias:15, mes:7,  abono:5,  status:'Aprovado',             confirm:'Não', garantido:'Não', obs:'', custos:{8:12399.40} },
+  { nome:'Roberto de Souza Batista',               inicio:'2026-07-20', fim:'2026-07-24', dias:5,  mes:7,  abono:10, status:'Aprovado',             confirm:'Sim', garantido:'Sim', obs:'', custos:{7:18396.20} },
+  { nome:'Rachel Magalhães de Andrade',            inicio:'2026-07-20', fim:'2026-08-04', dias:16, mes:7,  abono:0,  status:'Aprovado',             confirm:'Sim', garantido:'Sim', obs:'', custos:{7:14072.93,8:15924.17} },
+  { nome:'Jean Philip Silva (2ª)',                  inicio:'2026-08-03', fim:'2026-08-07', dias:5,  mes:8,  abono:0,  status:'Aprovado',             confirm:'Não', garantido:'Não', obs:'', custos:{8:3856.62} },
+  { nome:'Leonardo Santos Ferreira (2ª)',           inicio:'2026-08-03', fim:'2026-08-22', dias:20, mes:8,  abono:0,  status:'Aprovado',             confirm:'Não', garantido:'Não', obs:'', custos:{8:31729.23} },
+  { nome:'Veronica Pereira Nogueira',              inicio:'2026-08-03', fim:'2026-08-20', dias:18, mes:8,  abono:0,  status:'Aprovado',             confirm:'Não', garantido:'Não', obs:'', custos:{} },
+  { nome:'Felipe Gomes de Souza',                  inicio:'2026-08-03', fim:'2026-08-17', dias:15, mes:8,  abono:0,  status:'Aprovado',             confirm:'Não', garantido:'Não', obs:'', custos:{} },
+  { nome:'Fernanda Bertola',                       inicio:'2026-08-24', fim:'2026-09-04', dias:12, mes:8,  abono:0,  status:'Aprovado',             confirm:'Não', garantido:'Não', obs:'', custos:{} },
+  { nome:'Bruno Roberto da Silva',                 inicio:'2026-09-14', fim:'2026-10-03', dias:20, mes:9,  abono:10, status:'Aprovado',             confirm:'Não', garantido:'Não', obs:'', custos:{} },
+  { nome:'Ivana Mara Rodrigues Possidio (2ª)',     inicio:'2026-10-05', fim:'2026-10-09', dias:5,  mes:10, abono:0,  status:'Aprovado',             confirm:'Não', garantido:'Não', obs:'', custos:{} },
+  { nome:'Flavia Cezario de Barros',               inicio:'2026-11-03', fim:'2026-11-19', dias:17, mes:11, abono:0,  status:'Aprovado',             confirm:'Não', garantido:'Não', obs:'', custos:{} },
+  { nome:'Gleidson Andre Duarte Ramos (2ª)',        inicio:'2026-11-03', fim:'2026-11-17', dias:15, mes:11, abono:0,  status:'Aprovado',             confirm:'Não', garantido:'Não', obs:'', custos:{} },
+  { nome:'Ivana Mara Rodrigues Possidio (3ª)',     inicio:'2026-12-21', fim:'2027-01-04', dias:15, mes:12, abono:0,  status:'Aprovado',             confirm:'Não', garantido:'Não', obs:'', custos:{} },
+  { nome:'Rodrigo Zisman Pereira',                 inicio:null,         fim:null,         dias:12, mes:1,  abono:0,  status:'Vencendo',             confirm:'Não', garantido:'Não', obs:'Sinalizado via Teams — gozo até 31/08', custos:{} },
+  { nome:'Vitor Manoel de Oliveira',               inicio:null,         fim:null,         dias:6,  mes:1,  abono:0,  status:'Vencendo',             confirm:'Não', garantido:'Não', obs:'Sinalizado via Teams — gozo até 13/09', custos:{} },
+  { nome:'Rosangela Silva de Castro (vencendo)',   inicio:null,         fim:null,         dias:10, mes:1,  abono:0,  status:'Vencendo',             confirm:'Não', garantido:'Não', obs:'Está em aviso prévio — gozo até 22/09', custos:{} },
 ];
 const UPDATED = '2026-06-15';
 // ============================================================
 
 const MONTHS = [
-  {label:'Maio', days:31}, {label:'Jun', days:30},
-  {label:'Jul',  days:31}, {label:'Ago', days:31},
+  {label:'Fev', days:28}, {label:'Mar', days:31}, {label:'Abr', days:30},
+  {label:'Mai', days:31}, {label:'Jun', days:30}, {label:'Jul', days:31},
+  {label:'Ago', days:31}, {label:'Set', days:30}, {label:'Out', days:31},
+  {label:'Nov', days:30}, {label:'Dez', days:31},
 ];
-const TOTAL_DAYS = 123;
-const RANGE_START = new Date(2026,4,1);
-const COL_MAP = {5:'#7F77DD',6:'#B06DB8',7:'#D4537E',8:'#ED93B1'};
-const COLORS   = ['#7F77DD','#B06DB8','#D4537E','#ED93B1'];
+const TOTAL_DAYS = 334;
+const RANGE_START = new Date(2026,1,1);
+const COL_MAP = {
+  2:'#7F77DD', 3:'#9370CC', 4:'#A864BB', 5:'#BE57AA',
+  6:'#CC4D96', 7:'#D4537E', 8:'#DC6070', 9:'#C460A5',
+  10:'#AFA9EC', 11:'#9B72CC', 12:'#8564C4'
+};
+const COLORS = ['#BE57AA','#CC4D96','#D4537E','#DC6070'];
 
 document.getElementById('updated-at').textContent = 'Atualizado em ' + new Date(UPDATED).toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
 
@@ -242,16 +275,17 @@ function pct(dateStr) {
 }
 
 function renderSummary() {
+  const comDatas    = DATA.filter(d=>d.inicio);
   const confirmados = DATA.filter(d=>d.confirm==='Sim').length;
   const garantidos  = DATA.filter(d=>d.garantido==='Sim').length;
   const totalCusto  = DATA.reduce((s,d)=>s+Object.values(d.custos).reduce((a,b)=>a+b,0),0);
-  const semConfirm  = DATA.filter(d=>d.status==='Aprovado'&&d.confirm!=='Sim').length;
+  const vencendo    = DATA.filter(d=>d.status==='Vencendo').length;
   const cards = [
-    {label:'Colaboradores',  value:DATA.length,           sub:'mai–ago 2026',             cls:''},
-    {label:'Conf. cliente',  value:confirmados,            sub:`${DATA.length-confirmados} sem confirmação`, cls:''},
-    {label:'Garantido',      value:garantidos,             sub:`${DATA.length-garantidos} não garantidos`,  cls:''},
-    {label:'Atenção',        value:semConfirm,             sub:'aprovados sem confirmação', cls: semConfirm>0?'alert':''},
-    {label:'Custo estimado', value:'R$ '+Math.round(totalCusto/1000)+'k', sub:'total mai–ago', cls:''},
+    {label:'Colaboradores',  value:comDatas.length,        sub:'fev–dez 2026',              cls:''},
+    {label:'Conf. cliente',  value:confirmados,             sub:`${DATA.length-confirmados} sem confirmação`, cls:''},
+    {label:'Garantido',      value:garantidos,              sub:`${DATA.length-garantidos} não garantidos`,   cls:''},
+    {label:'Vencendo',       value:vencendo,                sub:'férias a vencer',           cls:vencendo>0?'alert':''},
+    {label:'Custo estimado', value:'R$ '+Math.round(totalCusto/1000)+'k', sub:'mai–ago 2026', cls:''},
   ];
   document.getElementById('summary-cards').innerHTML = cards.map(c=>
     `<div class="card ${c.cls}"><div class="card-label">${c.label}</div><div class="card-value">${c.value}</div><div class="card-sub">${c.sub}</div></div>`
@@ -262,11 +296,12 @@ function renderTimeline() {
   document.getElementById('tl-header').innerHTML = MONTHS.map(m=>
     `<div class="tl-month-label" style="width:${m.days/TOTAL_DAYS*100}%">${m.label}</div>`
   ).join('');
-  document.getElementById('tl-body').innerHTML = DATA.map(d=>{
+  document.getElementById('tl-body').innerHTML = DATA.filter(d=>d.inicio).map(d=>{
     const s = pct(d.inicio);
-    const e = pct(new Date(new Date(d.fim).getTime()+86400000).toISOString().slice(0,10));
+    const fimNext = new Date(new Date(d.fim).getTime()+86400000).toISOString().slice(0,10);
+    const e = pct(fimNext);
     const w = Math.max(0.8, e-s);
-    const col = COL_MAP[d.mes]||'#888';
+    const col = COL_MAP[d.mes]||'#9B72CC';
     const op = d.garantido==='Sim' ? 1 : 0.45;
     const nome2 = d.nome.split(' ').slice(0,2).join(' ');
     return `<div class="tl-row">
@@ -319,16 +354,18 @@ function renderTable() {
     if(fG && d.garantido!==fG) return false;
     return true;
   });
-  const fmt = s => new Date(s).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});
+  const fmt = s => s ? new Date(s).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}) : '—';
   const fmtC = d => {
     const t = Object.values(d.custos).reduce((a,b)=>a+b,0);
     return t>0 ? 'R$ '+t.toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0}) : '—';
   };
   document.getElementById('table-body').innerHTML = rows.map(d=>{
-    const alerta = d.status==='Aprovado' && d.confirm!=='Sim';
+    const alerta = d.status==='Vencendo' || (d.status==='Aprovado' && d.confirm!=='Sim');
     const statusBadge = d.status==='Aprovado'
       ? `<span class="badge b-green">Aprovado</span>`
-      : `<span class="badge b-amber">Pendente</span>`;
+      : d.status==='Vencendo'
+        ? `<span class="badge b-red"><i class="ti ti-alert-triangle" aria-hidden="true"></i>Vencendo</span>`
+        : `<span class="badge b-amber">Aguardando</span>`;
     return `<tr class="${alerta?'alert-row':''}">
       <td>${d.nome}</td>
       <td>${fmt(d.inicio)}</td>
