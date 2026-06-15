@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gestão de Férias — Globo</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f8f8f6;
+      --surface: #ffffff;
+      --surface-2: #f1efea;
+      --border: rgba(0,0,0,0.10);
+      --border-md: rgba(0,0,0,0.18);
+      --text: #1a1a18;
+      --text-2: #5f5e5a;
+      --text-3: #888780;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --green-bg: #EAF3DE; --green-text: #27500A;
+      --amber-bg: #FAEEDA; --amber-text: #633806;
+      --blue-bg:  #E6F1FB; --blue-text:  #0C447C;
+      --gray-bg:  #F1EFE8; --gray-text:  #444441;
+      --red-bg:   #FCEBEB; --red-text:   #791F1F;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #1c1c1a;
+        --surface: #252523;
+        --surface-2: #2e2e2b;
+        --border: rgba(255,255,255,0.10);
+        --border-md: rgba(255,255,255,0.18);
+        --text: #f0ede8;
+        --text-2: #b4b2a9;
+        --text-3: #888780;
+        --green-bg: #173404; --green-text: #C0DD97;
+        --amber-bg: #412402; --amber-text: #FAC775;
+        --blue-bg:  #042C53; --blue-text:  #B5D4F4;
+        --gray-bg:  #2C2C2A; --gray-text:  #D3D1C7;
+        --red-bg:   #501313; --red-text:   #F7C1C1;
+      }
+    }
+
+    body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    header { background: var(--surface); border-bottom: 0.5px solid var(--border); padding: 1rem 1.5rem; display: flex; align-items: center; justify-content: space-between; }
+    header h1 { font-size: 16px; font-weight: 500; }
+    header .updated { font-size: 12px; color: var(--text-3); }
+
+    main { max-width: 1100px; margin: 0 auto; padding: 1.5rem; }
+
+    .section-title { font-size: 11px; font-weight: 500; color: var(--text-3); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 10px; }
+
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 1.75rem; }
+    .card { background: var(--surface-2); border-radius: var(--radius-md); padding: 14px 16px; }
+    .card-label { font-size: 11px; color: var(--text-2); margin-bottom: 5px; }
+    .card-value { font-size: 24px; font-weight: 500; }
+    .card-sub   { font-size: 11px; color: var(--text-3); margin-top: 3px; }
+    .card.alert { background: var(--amber-bg); }
+    .card.alert .card-value { color: var(--amber-text); }
+
+    .panel { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1.25rem; margin-bottom: 1.5rem; }
+
+    .filters { display: flex; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap; }
+    .filters select {
+      font-size: 13px; padding: 6px 10px;
+      border-radius: var(--radius-md);
+      border: 0.5px solid var(--border-md);
+      background: var(--surface); color: var(--text);
+      cursor: pointer;
+    }
+
+    .tl-header { display: flex; margin-bottom: 4px; margin-left: 162px; }
+    .tl-month-label { font-size: 10px; font-weight: 500; color: var(--text-3); text-align: center; border-left: 0.5px solid var(--border); padding: 2px 0; }
+    .tl-row { display: flex; align-items: center; margin-bottom: 3px; }
+    .tl-name { font-size: 12px; width: 160px; min-width: 160px; padding-right: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text); }
+    .tl-grid { position: relative; flex: 1; height: 20px; }
+    .tl-bar  { position: absolute; height: 13px; top: 4px; border-radius: 3px; cursor: default; transition: opacity .15s; }
+    .tl-bar:hover { opacity: .75 !important; }
+
+    .badge { display: inline-flex; align-items: center; gap: 3px; font-size: 11px; padding: 2px 7px; border-radius: var(--radius-md); font-weight: 500; white-space: nowrap; }
+    .b-green { background: var(--green-bg); color: var(--green-text); }
+    .b-amber { background: var(--amber-bg); color: var(--amber-text); }
+    .b-gray  { background: var(--gray-bg);  color: var(--gray-text); }
+    .b-red   { background: var(--red-bg);   color: var(--red-text); }
+
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 780px; }
+    th { font-size: 11px; font-weight: 500; color: var(--text-2); text-align: left; padding: 7px 10px; border-bottom: 0.5px solid var(--border); background: var(--surface-2); white-space: nowrap; }
+    td { padding: 8px 10px; border-bottom: 0.5px solid var(--border); vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: var(--surface-2); }
+    tr.alert-row td { background: color-mix(in srgb, var(--amber-bg) 40%, transparent); }
+
+    .legend { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 12px; }
+    .legend-item { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--text-2); }
+    .legend-sq { width: 10px; height: 10px; border-radius: 2px; }
+
+    footer { text-align: center; padding: 2rem 1rem 1rem; font-size: 11px; color: var(--text-3); }
+  </style>
+</head>
+<body>
+
+<header>
+  <div style="display:flex; align-items:center; gap:10px;">
+    <i class="ti ti-beach" style="font-size:20px; color:#1D9E75;" aria-hidden="true"></i>
+    <h1>Gestão de Férias — Globo</h1>
+  </div>
+  <span class="updated" id="updated-at"></span>
+</header>
+
+<main>
+
+  <!-- CARDS -->
+  <p class="section-title" style="margin-top:.5rem;">Resumo</p>
+  <div class="cards" id="summary-cards"></div>
+
+  <!-- TIMELINE -->
+  <p class="section-title">Timeline — maio a agosto 2026</p>
+  <div class="panel">
+    <div class="tl-header" id="tl-header"></div>
+    <div id="tl-body"></div>
+    <div style="margin-top:10px; display:flex; gap:16px; flex-wrap:wrap;">
+      <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-3)"><span style="width:24px;height:8px;border-radius:2px;background:#1D9E75;display:inline-block;"></span>Maio</span>
+      <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-3)"><span style="width:24px;height:8px;border-radius:2px;background:#378ADD;display:inline-block;"></span>Junho</span>
+      <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-3)"><span style="width:24px;height:8px;border-radius:2px;background:#BA7517;display:inline-block;"></span>Julho</span>
+      <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-3)"><span style="width:24px;height:8px;border-radius:2px;background:#D85A30;display:inline-block;"></span>Agosto</span>
+      <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-3)"><span style="width:24px;height:8px;border-radius:2px;background:#ccc;opacity:.5;display:inline-block;"></span>Não garantido (opacidade reduzida)</span>
+    </div>
+  </div>
+
+  <!-- GRÁFICO -->
+  <p class="section-title">Custo mensal estimado (R$)</p>
+  <div class="panel">
+    <div class="legend" id="chart-legend"></div>
+    <div style="position:relative; width:100%; height:220px;">
+      <canvas id="costChart" role="img" aria-label="Custos de férias por mês de maio a agosto 2026">Custo crescente ao longo dos meses.</canvas>
+    </div>
+  </div>
+
+  <!-- TABELA -->
+  <p class="section-title">Detalhamento por colaborador</p>
+  <div class="filters">
+    <select id="f-mes" onchange="renderTable()">
+      <option value="">Todos os meses</option>
+      <option value="5">Maio</option>
+      <option value="6">Junho</option>
+      <option value="7">Julho</option>
+      <option value="8">Agosto</option>
+    </select>
+    <select id="f-status" onchange="renderTable()">
+      <option value="">Todos os status</option>
+      <option value="Aprovado">Aprovado</option>
+      <option value="Pendente">Pendente</option>
+    </select>
+    <select id="f-confirm" onchange="renderTable()">
+      <option value="">Todas as confirmações</option>
+      <option value="Sim">Confirmado pelo cliente</option>
+      <option value="Não">Não confirmado</option>
+    </select>
+    <select id="f-garantido" onchange="renderTable()">
+      <option value="">Garantido ou não</option>
+      <option value="Sim">Garantido</option>
+      <option value="Não">Não garantido</option>
+    </select>
+  </div>
+  <div class="panel" style="padding:0; overflow:hidden;">
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>Colaborador</th>
+          <th>Início</th>
+          <th>Fim</th>
+          <th>Dias</th>
+          <th>Abono</th>
+          <th>Status</th>
+          <th>Conf. cliente</th>
+          <th>Garantido</th>
+          <th>Custo total</th>
+          <th>Observação</th>
+        </tr></thead>
+        <tbody id="table-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
+
+<footer>Atualizado via Claude Code · Dados: Gestao_Ferias_Globo.xlsx (SharePoint)</footer>
+
+<script>
+// ============================================================
+// DADOS — gerados automaticamente pelo Claude Code
+// Última atualização: 2026-06-15
+// ============================================================
+const DATA = [
+  { nome:'Gleidson Andre Duarte Ramos', inicio:'2026-05-04', fim:'2026-05-18', dias:15, mes:5, abono:0,  status:'Aprovado', confirm:'Sim', garantido:'Sim', obs:'', custos:{5:12914.94} },
+  { nome:'Rosangela Silva de Castro',   inicio:'2026-05-04', fim:'2026-05-23', dias:20, mes:5, abono:0,  status:'Aprovado', confirm:'Sim', garantido:'Sim', obs:'', custos:{5:14136.57} },
+  { nome:'Jean Philip Silva',           inicio:'2026-05-04', fim:'2026-05-18', dias:15, mes:5, abono:10, status:'Aprovado', confirm:'Sim', garantido:'Sim', obs:'', custos:{5:11066.69} },
+  { nome:'Raquel Rente Peixoto',        inicio:'2026-05-06', fim:'2026-05-25', dias:20, mes:5, abono:10, status:'Aprovado', confirm:'Sim', garantido:'Sim', obs:'', custos:{5:14517.23} },
+  { nome:'Diego Mariano de Oliveira',   inicio:'2026-05-11', fim:'2026-05-28', dias:18, mes:5, abono:0,  status:'Aprovado', confirm:'Sim', garantido:'Sim', obs:'', custos:{5:23856.93} },
+  { nome:'Igor Dias Rangel',            inicio:'2026-06-01', fim:'2026-06-15', dias:15, mes:6, abono:0,  status:'Aprovado', confirm:'Não', garantido:'Não', obs:'', custos:{6:14259.14} },
+  { nome:'Ivana Mara Rodrigues',        inicio:'2026-06-15', fim:'2026-06-24', dias:10, mes:6, abono:0,  status:'Aprovado', confirm:'Não', garantido:'Não', obs:'', custos:{6:17836.73} },
+  { nome:'Lidia Vieira',                inicio:'2026-06-08', fim:'2026-06-17', dias:10, mes:6, abono:0,  status:'Aprovado', confirm:'Não', garantido:'Não', obs:'', custos:{6:0} },
+  { nome:'Roberto de Souza Batista',    inicio:'2026-07-20', fim:'2026-07-24', dias:5,  mes:7, abono:10, status:'Pendente', confirm:'Não', garantido:'Não', obs:'', custos:{7:18396.20} },
+  { nome:'Rachel Magalhães de Andrade', inicio:'2026-07-20', fim:'2026-08-04', dias:16, mes:7, abono:0,  status:'Pendente', confirm:'Não', garantido:'Não', obs:'', custos:{7:14072.93,8:15924.17} },
+  { nome:'Aline Alvares Boyde',         inicio:'2026-07-21', fim:'2026-07-31', dias:11, mes:7, abono:0,  status:'Pendente', confirm:'Não', garantido:'Não', obs:'', custos:{7:3549.72} },
+  { nome:'Guilherme da Costa Cardoso',  inicio:'2026-07-22', fim:'2026-08-05', dias:15, mes:7, abono:0,  status:'Pendente', confirm:'Não', garantido:'Não', obs:'', custos:{7:0,8:14363.08} },
+  { nome:'Jefferson Rafael Santana',    inicio:'2026-07-06', fim:'2026-07-20', dias:15, mes:7, abono:5,  status:'Pendente', confirm:'Não', garantido:'Não', obs:'', custos:{8:12399.40} },
+  { nome:'Jean Philip Silva (2ª)',       inicio:'2026-08-03', fim:'2026-08-07', dias:5,  mes:8, abono:0,  status:'Pendente', confirm:'Não', garantido:'Não', obs:'', custos:{8:3856.62} },
+  { nome:'Leonardo Santos Ferreira',    inicio:'2026-08-03', fim:'2026-08-22', dias:20, mes:8, abono:0,  status:'Pendente', confirm:'Não', garantido:'Não', obs:'', custos:{8:31729.23} },
+  { nome:'Veronica Pereira Nogueira',   inicio:'2026-08-03', fim:'2026-08-20', dias:18, mes:8, abono:0,  status:'Pendente', confirm:'Não', garantido:'Não', obs:'', custos:{} },
+  { nome:'Felipe Gomes de Souza',       inicio:'2026-08-03', fim:'2026-08-17', dias:15, mes:8, abono:0,  status:'Pendente', confirm:'Não', garantido:'Não', obs:'', custos:{} },
+];
+const UPDATED = '2026-06-15';
+// ============================================================
+
+const MONTHS = [
+  {label:'Maio', days:31}, {label:'Jun', days:30},
+  {label:'Jul',  days:31}, {label:'Ago', days:31},
+];
+const TOTAL_DAYS = 123;
+const RANGE_START = new Date(2026,4,1);
+const COL_MAP = {5:'#1D9E75',6:'#378ADD',7:'#BA7517',8:'#D85A30'};
+const COLORS   = ['#1D9E75','#378ADD','#BA7517','#D85A30'];
+
+document.getElementById('updated-at').textContent = 'Atualizado em ' + new Date(UPDATED).toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
+
+function pct(dateStr) {
+  const d = new Date(dateStr);
+  const diff = Math.round((d - RANGE_START) / 86400000);
+  return Math.max(0, Math.min(100, diff / TOTAL_DAYS * 100));
+}
+
+function renderSummary() {
+  const confirmados = DATA.filter(d=>d.confirm==='Sim').length;
+  const garantidos  = DATA.filter(d=>d.garantido==='Sim').length;
+  const totalCusto  = DATA.reduce((s,d)=>s+Object.values(d.custos).reduce((a,b)=>a+b,0),0);
+  const semConfirm  = DATA.filter(d=>d.status==='Aprovado'&&d.confirm!=='Sim').length;
+  const cards = [
+    {label:'Colaboradores',  value:DATA.length,           sub:'mai–ago 2026',             cls:''},
+    {label:'Conf. cliente',  value:confirmados,            sub:`${DATA.length-confirmados} sem confirmação`, cls:''},
+    {label:'Garantido',      value:garantidos,             sub:`${DATA.length-garantidos} não garantidos`,  cls:''},
+    {label:'Atenção',        value:semConfirm,             sub:'aprovados sem confirmação', cls: semConfirm>0?'alert':''},
+    {label:'Custo estimado', value:'R$ '+Math.round(totalCusto/1000)+'k', sub:'total mai–ago', cls:''},
+  ];
+  document.getElementById('summary-cards').innerHTML = cards.map(c=>
+    `<div class="card ${c.cls}"><div class="card-label">${c.label}</div><div class="card-value">${c.value}</div><div class="card-sub">${c.sub}</div></div>`
+  ).join('');
+}
+
+function renderTimeline() {
+  document.getElementById('tl-header').innerHTML = MONTHS.map(m=>
+    `<div class="tl-month-label" style="width:${m.days/TOTAL_DAYS*100}%">${m.label}</div>`
+  ).join('');
+  document.getElementById('tl-body').innerHTML = DATA.map(d=>{
+    const s = pct(d.inicio);
+    const e = pct(new Date(new Date(d.fim).getTime()+86400000).toISOString().slice(0,10));
+    const w = Math.max(0.8, e-s);
+    const col = COL_MAP[d.mes]||'#888';
+    const op = d.garantido==='Sim' ? 1 : 0.45;
+    const nome2 = d.nome.split(' ').slice(0,2).join(' ');
+    return `<div class="tl-row">
+      <div class="tl-name" title="${d.nome}">${nome2}</div>
+      <div class="tl-grid">
+        <div class="tl-bar" style="left:${s}%;width:${w}%;background:${col};opacity:${op};"
+          title="${d.nome} · ${d.dias} dias · Conf: ${d.confirm} · Garantido: ${d.garantido}"></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderChart() {
+  const totals = [5,6,7,8].map(m=>DATA.reduce((s,d)=>s+(d.custos[m]||0),0));
+  document.getElementById('chart-legend').innerHTML = ['Maio','Junho','Julho','Agosto'].map((m,i)=>
+    `<span class="legend-item"><span class="legend-sq" style="background:${COLORS[i]}"></span>${m}: R$ ${Math.round(totals[i]/1000)}k</span>`
+  ).join('');
+  new Chart(document.getElementById('costChart'),{
+    type:'bar',
+    data:{
+      labels:['Maio','Junho','Julho','Agosto'],
+      datasets:[{data:totals,backgroundColor:COLORS,borderRadius:6,borderSkipped:false}]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{
+        y:{beginAtZero:true,ticks:{callback:v=>'R$ '+Math.round(v/1000)+'k',font:{size:11}},grid:{color:'rgba(128,128,128,0.1)'}},
+        x:{ticks:{font:{size:12}},grid:{display:false}}
+      }
+    }
+  });
+}
+
+function boolBadge(val,simLabel,naoLabel) {
+  return val==='Sim'
+    ? `<span class="badge b-green"><i class="ti ti-check" aria-hidden="true"></i>${simLabel}</span>`
+    : `<span class="badge b-gray"><i class="ti ti-x" aria-hidden="true"></i>${naoLabel}</span>`;
+}
+
+function renderTable() {
+  const fM = document.getElementById('f-mes').value;
+  const fS = document.getElementById('f-status').value;
+  const fC = document.getElementById('f-confirm').value;
+  const fG = document.getElementById('f-garantido').value;
+  const rows = DATA.filter(d=>{
+    if(fM && d.mes!==parseInt(fM)) return false;
+    if(fS && d.status!==fS) return false;
+    if(fC && d.confirm!==fC) return false;
+    if(fG && d.garantido!==fG) return false;
+    return true;
+  });
+  const fmt = s => new Date(s).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});
+  const fmtC = d => {
+    const t = Object.values(d.custos).reduce((a,b)=>a+b,0);
+    return t>0 ? 'R$ '+t.toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0}) : '—';
+  };
+  document.getElementById('table-body').innerHTML = rows.map(d=>{
+    const alerta = d.status==='Aprovado' && d.confirm!=='Sim';
+    const statusBadge = d.status==='Aprovado'
+      ? `<span class="badge b-green">Aprovado</span>`
+      : `<span class="badge b-amber">Pendente</span>`;
+    return `<tr class="${alerta?'alert-row':''}">
+      <td>${d.nome}</td>
+      <td>${fmt(d.inicio)}</td>
+      <td>${fmt(d.fim)}</td>
+      <td>${d.dias}</td>
+      <td>${d.abono>0?d.abono+' d':'—'}</td>
+      <td>${statusBadge}</td>
+      <td>${boolBadge(d.confirm,'Confirmado','Não confirmado')}</td>
+      <td>${boolBadge(d.garantido,'Garantido','Não garantido')}</td>
+      <td style="font-variant-numeric:tabular-nums;">${fmtC(d)}</td>
+      <td style="color:var(--text-3);">${d.obs||'—'}</td>
+    </tr>`;
+  }).join('');
+}
+
+renderSummary();
+renderTimeline();
+renderChart();
+renderTable();
+</script>
+</body>
+</html>
