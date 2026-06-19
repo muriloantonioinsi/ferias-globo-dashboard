@@ -53,12 +53,12 @@
 
     header { background: var(--brand-dark, #534AB7); border-bottom: none; padding: 1rem 1.5rem; display: flex; align-items: center; justify-content: space-between; }
     header h1 { font-size: 16px; font-weight: 500; color: #fff; }
-    header .updated { color: rgba(255,255,255,0.65) !important; }
-    header .updated { font-size: 12px; color: var(--text-3); }
+    header .updated { font-size: 12px; color: rgba(255,255,255,0.65) !important; }
 
     main { max-width: 1100px; margin: 0 auto; padding: 1.5rem; }
 
     .section-title { font-size: 11px; font-weight: 500; color: var(--text-3); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 10px; }
+    .section-title .hint { text-transform: none; letter-spacing: 0; color: var(--text-3); font-weight: 400; }
 
     .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 1.75rem; }
     .card { background: var(--surface-2); border-radius: var(--radius-md); padding: 14px 16px; }
@@ -68,7 +68,21 @@
     .card.alert { background: var(--amber-bg); }
     .card.alert .card-value { color: var(--amber-text); }
 
+    .hero { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 1.5rem; }
+    .hero-card { background: var(--brand-dark); border-radius: var(--radius-lg); padding: 18px 20px; color: #fff; }
+    .hero-card.soft { background: var(--blue-bg); color: var(--blue-text); }
+    .hero-card.risk { background: var(--amber-bg); color: var(--amber-text); }
+    .hero-label { font-size: 12px; opacity: .85; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+    .hero-value { font-size: 30px; font-weight: 500; line-height: 1.1; }
+    .hero-sub   { font-size: 12px; opacity: .8; margin-top: 6px; }
+
     .panel { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1.25rem; margin-bottom: 1.5rem; }
+
+    .rank-row { display: flex; align-items: center; gap: 10px; margin-bottom: 9px; }
+    .rank-name { font-size: 12px; width: 180px; min-width: 180px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .rank-track { flex: 1; background: var(--surface-2); border-radius: 4px; height: 18px; position: relative; overflow: hidden; }
+    .rank-fill { position: absolute; left: 0; top: 0; height: 100%; background: var(--brand); border-radius: 4px; }
+    .rank-val { font-size: 12px; font-weight: 500; width: 110px; min-width: 110px; text-align: right; font-variant-numeric: tabular-nums; }
 
     .filters { display: flex; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap; }
     .filters select {
@@ -100,6 +114,8 @@
     tr:last-child td { border-bottom: none; }
     tr:hover td { background: var(--surface-2); }
     tr.alert-row td { background: color-mix(in srgb, var(--amber-bg) 40%, transparent); }
+    tr.total-row td { background: var(--surface-2); font-weight: 500; border-top: 1.5px solid var(--border-md); }
+    .num { font-variant-numeric: tabular-nums; text-align: right; }
 
     .legend { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 12px; }
     .legend-item { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--text-2); }
@@ -120,9 +136,26 @@
 
 <main>
 
-  <!-- CARDS -->
+  <!-- CARDS RESUMO -->
   <p class="section-title" style="margin-top:.5rem;">Resumo</p>
   <div class="cards" id="summary-cards"></div>
+
+  <!-- PAINEL EXECUTIVO: IMPACTO NO FATURAMENTO -->
+  <p class="section-title">Impacto no faturamento <span class="hint">· horas não faturadas durante o gozo de férias (dias × 8h × hora-venda)</span></p>
+  <div class="hero" id="hero-cards"></div>
+
+  <div class="panel">
+    <p style="font-size:13px; font-weight:500; margin-bottom:12px;">Faturamento perdido por mês (R$)</p>
+    <div class="legend" id="loss-legend"></div>
+    <div style="position:relative; width:100%; height:230px;">
+      <canvas id="lossChart" role="img" aria-label="Faturamento perdido por mês de fevereiro a dezembro 2026">Faturamento perdido distribuído ao longo dos meses de 2026.</canvas>
+    </div>
+  </div>
+
+  <div class="panel">
+    <p style="font-size:13px; font-weight:500; margin-bottom:14px;">Maiores impactos por colaborador (R$ no ano)</p>
+    <div id="rank-list"></div>
+  </div>
 
   <!-- TIMELINE -->
   <p class="section-title">Timeline — fevereiro a dezembro 2026</p>
@@ -135,20 +168,10 @@
       <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-3)"><span style="width:20px;height:8px;border-radius:2px;background:#CC4D96;display:inline-block;"></span>Jun–Jul</span>
       <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-3)"><span style="width:20px;height:8px;border-radius:2px;background:#DC6070;display:inline-block;"></span>Ago–Set</span>
       <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-3)"><span style="width:20px;height:8px;border-radius:2px;background:#9B72CC;display:inline-block;"></span>Out–Dez</span>
-      <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-3)"><span style="width:20px;height:8px;border-radius:2px;background:#9B72CC;opacity:.4;display:inline-block;"></span>Não garantido</span>
     </div>
   </div>
 
-  <!-- GRÁFICO -->
-  <p class="section-title">Custo mensal estimado (R$)</p>
-  <div class="panel">
-    <div class="legend" id="chart-legend"></div>
-    <div style="position:relative; width:100%; height:220px;">
-      <canvas id="costChart" role="img" aria-label="Custos de férias por mês de maio a agosto 2026">Custo crescente ao longo dos meses.</canvas>
-    </div>
-  </div>
-
-  <!-- TABELA -->
+  <!-- TABELA DETALHAMENTO -->
   <p class="section-title">Detalhamento por colaborador</p>
   <div class="filters">
     <select id="f-mes" onchange="renderTable()">
@@ -169,17 +192,11 @@
       <option value="">Todos os status</option>
       <option value="Aprovado">Aprovado</option>
       <option value="Vencendo">Vencendo</option>
-      <option value="Aguardando Aprovação">Aguardando aprovação</option>
     </select>
     <select id="f-confirm" onchange="renderTable()">
       <option value="">Todas as confirmações</option>
       <option value="Sim">Confirmado pelo cliente</option>
       <option value="Não">Não confirmado</option>
-    </select>
-    <select id="f-garantido" onchange="renderTable()">
-      <option value="">Garantido ou não</option>
-      <option value="Sim">Garantido</option>
-      <option value="Não">Não garantido</option>
     </select>
   </div>
   <div class="panel" style="padding:0; overflow:hidden;">
@@ -193,70 +210,92 @@
           <th>Abono</th>
           <th>Status</th>
           <th>Conf. cliente</th>
-          <th>Garantido</th>
-          <th>Custo total</th>
-          <th>Observação</th>
+          <th class="num">Hora-venda</th>
+          <th class="num">Perda faturamento</th>
         </tr></thead>
         <tbody id="table-body"></tbody>
       </table>
     </div>
   </div>
 
+  <!-- ÚLTIMA SEÇÃO: LISTAGEM DE FATURAMENTO PERDIDO -->
+  <p class="section-title">Faturamento perdido — detalhamento completo</p>
+  <div class="panel" style="padding:0; overflow:hidden;">
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>Colaborador</th>
+          <th>Período</th>
+          <th class="num">Dias gozo</th>
+          <th class="num">Horas (×8h)</th>
+          <th class="num">Hora-venda</th>
+          <th class="num">Faturamento perdido</th>
+        </tr></thead>
+        <tbody id="loss-body"></tbody>
+      </table>
+    </div>
+  </div>
+
 </main>
 
-<footer>Atualizado via Claude Code · Dados: Gestao_Ferias_Globo.xlsx (SharePoint)</footer>
+<footer>Atualizado via Claude Code · Dados: Gestao_Ferias_Globo.xlsx (abas Planejamento de Férias + Hora Venda, SharePoint)</footer>
 
 <script>
 // ============================================================
 // DADOS — gerados automaticamente pelo Claude Code
-// Última atualização: 2026-06-15
+// Fonte: Gestao_Ferias_Globo.xlsx (Planejamento de Férias + Hora Venda)
+// Última atualização: 2026-06-18
+// hv = valor hora-venda (R$). perda = dias × 8h × hv (calculado em JS)
 // ============================================================
 const DATA = [
-  { nome:'Rafaela de Orlando Nascimento',          inicio:'2026-02-23', fim:'2026-03-06', dias:12, mes:2,  abono:0,  status:'Aprovado',             confirm:'Sim', garantido:'Sim', obs:'', custos:{} },
-  { nome:'Leonardo Santos Ferreira',               inicio:'2026-02-25', fim:'2026-03-06', dias:10, mes:2,  abono:0,  status:'Aprovado',             confirm:'Sim', garantido:'Sim', obs:'', custos:{} },
-  { nome:'Fellipe Couto Marques Arruda',           inicio:'2026-03-16', fim:'2026-03-25', dias:10, mes:3,  abono:0,  status:'Aprovado',             confirm:'Sim', garantido:'Sim', obs:'', custos:{} },
-  { nome:'Patricia de Araujo Rudas Paternina',     inicio:'2026-03-16', fim:'2026-03-30', dias:15, mes:3,  abono:0,  status:'Aprovado',             confirm:'Sim', garantido:'Sim', obs:'', custos:{} },
-  { nome:'Eduardo Gabriel Delfito do Nascimento',  inicio:'2026-03-23', fim:'2026-04-01', dias:10, mes:3,  abono:0,  status:'Aprovado',             confirm:'Sim', garantido:'Sim', obs:'', custos:{} },
-  { nome:'Davi Alves de Sousa da Silva',           inicio:'2026-04-06', fim:'2026-04-14', dias:9,  mes:4,  abono:0,  status:'Aprovado',             confirm:'Sim', garantido:'Sim', obs:'', custos:{} },
-  { nome:'Edvaldo Braz da Silva',                  inicio:'2026-04-06', fim:'2026-04-25', dias:20, mes:4,  abono:10, status:'Aprovado',             confirm:'Não', garantido:'Não', obs:'', custos:{} },
-  { nome:'Paulo Eugenio da Silva dos Reis',        inicio:'2026-04-06', fim:'2026-04-25', dias:20, mes:4,  abono:10, status:'Aprovado',             confirm:'Não', garantido:'Não', obs:'', custos:{} },
-  { nome:'Luciana dos Santos Dias',                inicio:'2026-04-13', fim:'2026-04-30', dias:18, mes:4,  abono:0,  status:'Aprovado',             confirm:'Não', garantido:'Não', obs:'', custos:{} },
-  { nome:'Gleidson Andre Duarte Ramos',            inicio:'2026-05-04', fim:'2026-05-18', dias:15, mes:5,  abono:0,  status:'Aprovado',             confirm:'Sim', garantido:'Sim', obs:'', custos:{5:12914.94} },
-  { nome:'Rosangela Silva de Castro',              inicio:'2026-05-04', fim:'2026-05-23', dias:20, mes:5,  abono:0,  status:'Aprovado',             confirm:'Não', garantido:'Não', obs:'', custos:{5:14136.57} },
-  { nome:'Jean Philip Silva',                      inicio:'2026-05-04', fim:'2026-05-18', dias:15, mes:5,  abono:10, status:'Aprovado',             confirm:'Não', garantido:'Não', obs:'', custos:{5:11066.69} },
-  { nome:'Raquel Rente Peixoto',                   inicio:'2026-05-06', fim:'2026-05-25', dias:20, mes:5,  abono:10, status:'Aprovado',             confirm:'Não', garantido:'Não', obs:'', custos:{5:14517.23} },
-  { nome:'Diego Mariano de Oliveira',              inicio:'2026-05-11', fim:'2026-05-28', dias:18, mes:5,  abono:0,  status:'Aprovado',             confirm:'Não', garantido:'Não', obs:'', custos:{5:23856.93} },
-  { nome:'Igor Dias Rangel',                       inicio:'2026-06-01', fim:'2026-06-15', dias:15, mes:6,  abono:0,  status:'Aprovado',             confirm:'Não', garantido:'Não', obs:'', custos:{6:14259.14} },
-  { nome:'Ivana Mara Rodrigues Possidio',          inicio:'2026-06-15', fim:'2026-06-24', dias:10, mes:6,  abono:0,  status:'Aprovado',             confirm:'Não', garantido:'Não', obs:'', custos:{6:17836.73} },
-  { nome:'Lidia Vieira',                           inicio:'2026-06-08', fim:'2026-06-17', dias:10, mes:6,  abono:0,  status:'Aprovado',             confirm:'Não', garantido:'Não', obs:'', custos:{} },
-  { nome:'Aline Alvares Boyde',                    inicio:'2026-07-21', fim:'2026-07-31', dias:11, mes:7,  abono:0,  status:'Aprovado',             confirm:'Não', garantido:'Não', obs:'', custos:{7:3549.72} },
-  { nome:'Guilherme da Costa Cardoso',             inicio:'2026-07-22', fim:'2026-08-05', dias:15, mes:7,  abono:0,  status:'Aprovado',             confirm:'Não', garantido:'Não', obs:'', custos:{7:0,8:14363.08} },
-  { nome:'Jefferson Rafael Santana Moraes',        inicio:'2026-07-06', fim:'2026-07-20', dias:15, mes:7,  abono:5,  status:'Aprovado',             confirm:'Não', garantido:'Não', obs:'', custos:{8:12399.40} },
-  { nome:'Roberto de Souza Batista',               inicio:'2026-07-20', fim:'2026-07-24', dias:5,  mes:7,  abono:10, status:'Aprovado',             confirm:'Sim', garantido:'Sim', obs:'', custos:{7:18396.20} },
-  { nome:'Rachel Magalhães de Andrade',            inicio:'2026-07-20', fim:'2026-08-04', dias:16, mes:7,  abono:0,  status:'Aprovado',             confirm:'Sim', garantido:'Sim', obs:'', custos:{7:14072.93,8:15924.17} },
-  { nome:'Jean Philip Silva (2ª)',                  inicio:'2026-08-03', fim:'2026-08-07', dias:5,  mes:8,  abono:0,  status:'Aprovado',             confirm:'Não', garantido:'Não', obs:'', custos:{8:3856.62} },
-  { nome:'Leonardo Santos Ferreira (2ª)',           inicio:'2026-08-03', fim:'2026-08-22', dias:20, mes:8,  abono:0,  status:'Aprovado',             confirm:'Não', garantido:'Não', obs:'', custos:{8:31729.23} },
-  { nome:'Veronica Pereira Nogueira',              inicio:'2026-08-03', fim:'2026-08-20', dias:18, mes:8,  abono:0,  status:'Aprovado',             confirm:'Não', garantido:'Não', obs:'', custos:{} },
-  { nome:'Felipe Gomes de Souza',                  inicio:'2026-08-03', fim:'2026-08-17', dias:15, mes:8,  abono:0,  status:'Aprovado',             confirm:'Não', garantido:'Não', obs:'', custos:{} },
-  { nome:'Fernanda Bertola',                       inicio:'2026-08-24', fim:'2026-09-04', dias:12, mes:8,  abono:0,  status:'Aprovado',             confirm:'Não', garantido:'Não', obs:'', custos:{} },
-  { nome:'Bruno Roberto da Silva',                 inicio:'2026-09-14', fim:'2026-10-03', dias:20, mes:9,  abono:10, status:'Aprovado',             confirm:'Não', garantido:'Não', obs:'', custos:{} },
-  { nome:'Ivana Mara Rodrigues Possidio (2ª)',     inicio:'2026-10-05', fim:'2026-10-09', dias:5,  mes:10, abono:0,  status:'Aprovado',             confirm:'Não', garantido:'Não', obs:'', custos:{} },
-  { nome:'Flavia Cezario de Barros',               inicio:'2026-11-03', fim:'2026-11-19', dias:17, mes:11, abono:0,  status:'Aprovado',             confirm:'Não', garantido:'Não', obs:'', custos:{} },
-  { nome:'Gleidson Andre Duarte Ramos (2ª)',        inicio:'2026-11-03', fim:'2026-11-17', dias:15, mes:11, abono:0,  status:'Aprovado',             confirm:'Não', garantido:'Não', obs:'', custos:{} },
-  { nome:'Ivana Mara Rodrigues Possidio (3ª)',     inicio:'2026-12-21', fim:'2027-01-04', dias:15, mes:12, abono:0,  status:'Aprovado',             confirm:'Não', garantido:'Não', obs:'', custos:{} },
-  { nome:'Teste Token',                            inicio:'2026-12-01', fim:'2026-12-10', dias:10, mes:12, abono:0,  status:'Aguardando Aprovação',  confirm:'Não', garantido:'Não', obs:'', custos:{} },
-  { nome:'Rodrigo Zisman Pereira',                 inicio:null,         fim:null,         dias:12, mes:1,  abono:0,  status:'Vencendo',             confirm:'Não', garantido:'Não', obs:'Sinalizado via Teams — gozo até 31/08', custos:{} },
-  { nome:'Vitor Manoel de Oliveira',               inicio:null,         fim:null,         dias:6,  mes:1,  abono:0,  status:'Vencendo',             confirm:'Não', garantido:'Não', obs:'Sinalizado via Teams — gozo até 13/09', custos:{} },
-  { nome:'Rosangela Silva de Castro (vencendo)',   inicio:null,         fim:null,         dias:10, mes:1,  abono:0,  status:'Vencendo',             confirm:'Não', garantido:'Não', obs:'Está em aviso prévio — gozo até 22/09', custos:{} },
+  { nome:'Rafaela de Orlando Nascimento',         inicio:'2026-02-23', fim:'2026-03-06', dias:12, mes:2,  abono:0,  status:'Aprovado', confirm:'Sim', hv:158.49 },
+  { nome:'Leonardo Santos Ferreira',              inicio:'2026-02-25', fim:'2026-03-06', dias:10, mes:2,  abono:0,  status:'Aprovado', confirm:'Sim', hv:190.19 },
+  { nome:'Fellipe Couto Marques Arruda',          inicio:'2026-03-16', fim:'2026-03-25', dias:10, mes:3,  abono:0,  status:'Aprovado', confirm:'Sim', hv:165.90 },
+  { nome:'Patricia de Araujo Rudas Paternina',    inicio:'2026-03-16', fim:'2026-03-30', dias:15, mes:3,  abono:0,  status:'Aprovado', confirm:'Sim', hv:169.27 },
+  { nome:'Eduardo Gabriel Delfito do Nascimento', inicio:'2026-03-23', fim:'2026-04-01', dias:10, mes:3,  abono:0,  status:'Aprovado', confirm:'Sim', hv:166.40 },
+  { nome:'Davi Alves de Sousa da Silva',          inicio:'2026-04-06', fim:'2026-04-14', dias:9,  mes:4,  abono:0,  status:'Aprovado', confirm:'Sim', hv:197.28 },
+  { nome:'Edvaldo Braz da Silva',                 inicio:'2026-04-06', fim:'2026-04-25', dias:20, mes:4,  abono:10, status:'Aprovado', confirm:'Não', hv:131.36 },
+  { nome:'Paulo Eugenio da Silva dos Reis',       inicio:'2026-04-06', fim:'2026-04-25', dias:20, mes:4,  abono:10, status:'Aprovado', confirm:'Não', hv:222.79 },
+  { nome:'Luciana dos Santos Dias',               inicio:'2026-04-13', fim:'2026-04-30', dias:18, mes:4,  abono:0,  status:'Aprovado', confirm:'Não', hv:190.20 },
+  { nome:'Gleidson Andre Duarte Ramos',           inicio:'2026-05-04', fim:'2026-05-18', dias:15, mes:5,  abono:0,  status:'Aprovado', confirm:'Sim', hv:158.33 },
+  { nome:'Rosangela Silva de Castro',             inicio:'2026-05-04', fim:'2026-05-23', dias:20, mes:5,  abono:0,  status:'Aprovado', confirm:'Não', hv:147.22 },
+  { nome:'Jean Philip Silva',                     inicio:'2026-05-04', fim:'2026-05-18', dias:15, mes:5,  abono:10, status:'Aprovado', confirm:'Não', hv:127.54 },
+  { nome:'Raquel Rente Peixoto',                  inicio:'2026-05-06', fim:'2026-05-25', dias:20, mes:5,  abono:10, status:'Aprovado', confirm:'Não', hv:172.49 },
+  { nome:'Diego Mariano de Oliveira',             inicio:'2026-05-11', fim:'2026-05-28', dias:18, mes:5,  abono:0,  status:'Aprovado', confirm:'Não', hv:228.09 },
+  { nome:'Igor Dias Rangel',                      inicio:'2026-06-01', fim:'2026-06-15', dias:15, mes:6,  abono:0,  status:'Aprovado', confirm:'Não', hv:153.83 },
+  { nome:'Ivana Mara Rodrigues Possidio',         inicio:'2026-06-15', fim:'2026-06-24', dias:10, mes:6,  abono:0,  status:'Aprovado', confirm:'Não', hv:184.66 },
+  { nome:'Felipe dos Santos Machado',             inicio:'2026-06-29', fim:'2026-07-12', dias:14, mes:6,  abono:10, status:'Aprovado', confirm:'Não', hv:169.26 },
+  { nome:'Aline Alvares Boyde',                   inicio:'2026-07-21', fim:'2026-07-31', dias:11, mes:7,  abono:0,  status:'Aprovado', confirm:'Não', hv:173.71 },
+  { nome:'Guilherme da Costa Cardoso',            inicio:'2026-07-22', fim:'2026-08-05', dias:15, mes:7,  abono:0,  status:'Aprovado', confirm:'Não', hv:127.53 },
+  { nome:'Jefferson Rafael Santana Moraes',       inicio:'2026-07-06', fim:'2026-07-20', dias:15, mes:7,  abono:5,  status:'Aprovado', confirm:'Não', hv:67.41 },
+  { nome:'Roberto de Souza Batista',              inicio:'2026-07-20', fim:'2026-07-24', dias:5,  mes:7,  abono:10, status:'Aprovado', confirm:'Sim', hv:117.00 },
+  { nome:'Rachel Magalhães de Andrade',           inicio:'2026-07-20', fim:'2026-08-04', dias:16, mes:7,  abono:0,  status:'Aprovado', confirm:'Sim', hv:179.22 },
+  { nome:'Jean Philip Silva',                     inicio:'2026-08-03', fim:'2026-08-07', dias:5,  mes:8,  abono:0,  status:'Aprovado', confirm:'Não', hv:127.54 },
+  { nome:'Leonardo Santos Ferreira',              inicio:'2026-08-03', fim:'2026-08-22', dias:20, mes:8,  abono:0,  status:'Aprovado', confirm:'Não', hv:190.19 },
+  { nome:'Veronica Pereira Nogueira',             inicio:'2026-08-03', fim:'2026-08-20', dias:18, mes:8,  abono:0,  status:'Aprovado', confirm:'Não', hv:66.92 },
+  { nome:'Felipe Gomes de Souza',                 inicio:'2026-08-03', fim:'2026-08-17', dias:15, mes:8,  abono:0,  status:'Aprovado', confirm:'Não', hv:293.01 },
+  { nome:'Fernanda Bertola',                      inicio:'2026-08-24', fim:'2026-09-04', dias:12, mes:8,  abono:0,  status:'Aprovado', confirm:'Não', hv:123.06 },
+  { nome:'Bruno Roberto da Silva',                inicio:'2026-09-14', fim:'2026-10-03', dias:20, mes:9,  abono:10, status:'Aprovado', confirm:'Não', hv:153.86 },
+  { nome:'Lidia Vieira',                          inicio:'2026-09-08', fim:'2026-09-17', dias:10, mes:9,  abono:0,  status:'Aprovado', confirm:'Não', hv:186.80 },
+  { nome:'Rafaela de Orlando Nascimento',         inicio:'2026-09-08', fim:'2026-09-25', dias:18, mes:9,  abono:0,  status:'Aprovado', confirm:'Não', hv:158.49 },
+  { nome:'Ivana Mara Rodrigues Possidio',         inicio:'2026-10-05', fim:'2026-10-09', dias:5,  mes:10, abono:0,  status:'Aprovado', confirm:'Não', hv:184.66 },
+  { nome:'Flavia Cezario de Barros',              inicio:'2026-11-03', fim:'2026-11-19', dias:17, mes:11, abono:0,  status:'Aprovado', confirm:'Não', hv:209.63 },
+  { nome:'Gleidson Andre Duarte Ramos',           inicio:'2026-11-03', fim:'2026-11-17', dias:15, mes:11, abono:0,  status:'Aprovado', confirm:'Não', hv:158.33 },
+  { nome:'Ivana Mara Rodrigues Possidio',         inicio:'2026-12-21', fim:'2027-01-04', dias:15, mes:12, abono:0,  status:'Aprovado', confirm:'Não', hv:184.66 },
+  // Vencendo — saldo a programar (sem datas de gozo definidas). dias = saldo a vencer.
+  { nome:'Rodrigo Zisman Pereira',                inicio:null, fim:null, dias:12, mes:null, abono:0, status:'Vencendo', confirm:'Não', hv:174.34, limite:'2026-08-31' },
+  { nome:'Vitor Manoel de Oliveira',              inicio:null, fim:null, dias:6,  mes:null, abono:0, status:'Vencendo', confirm:'Não', hv:91.71,  limite:'2026-09-13' },
+  { nome:'Rosangela Silva de Castro',             inicio:null, fim:null, dias:10, mes:null, abono:0, status:'Vencendo', confirm:'Não', hv:147.22, limite:'2026-09-22' },
 ];
-const UPDATED = '2026-06-15';
+const UPDATED = '2026-06-18';
+const JORNADA = 8; // horas/dia
 // ============================================================
 
 const MONTHS = [
-  {label:'Fev', days:28}, {label:'Mar', days:31}, {label:'Abr', days:30},
-  {label:'Mai', days:31}, {label:'Jun', days:30}, {label:'Jul', days:31},
-  {label:'Ago', days:31}, {label:'Set', days:30}, {label:'Out', days:31},
-  {label:'Nov', days:30}, {label:'Dez', days:31},
+  {label:'Fev', days:28, n:2}, {label:'Mar', days:31, n:3}, {label:'Abr', days:30, n:4},
+  {label:'Mai', days:31, n:5}, {label:'Jun', days:30, n:6}, {label:'Jul', days:31, n:7},
+  {label:'Ago', days:31, n:8}, {label:'Set', days:30, n:9}, {label:'Out', days:31, n:10},
+  {label:'Nov', days:30, n:11}, {label:'Dez', days:31, n:12},
 ];
 const TOTAL_DAYS = 334;
 const RANGE_START = new Date(2026,1,1);
@@ -265,7 +304,13 @@ const COL_MAP = {
   6:'#CC4D96', 7:'#D4537E', 8:'#DC6070', 9:'#C460A5',
   10:'#AFA9EC', 11:'#9B72CC', 12:'#8564C4'
 };
-const COLORS = ['#BE57AA','#CC4D96','#D4537E','#DC6070'];
+
+const aprovadas = DATA.filter(d=>d.status==='Aprovado');
+const vencendo  = DATA.filter(d=>d.status==='Vencendo');
+const perda = d => d.dias * JORNADA * d.hv;
+const horas = d => d.dias * JORNADA;
+const BRL = v => v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const BRLk = v => 'R$ ' + (v/1000).toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0}) + 'k';
 
 document.getElementById('updated-at').textContent = 'Atualizado em ' + new Date(UPDATED).toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
 
@@ -276,20 +321,67 @@ function pct(dateStr) {
 }
 
 function renderSummary() {
-  const comDatas    = DATA.filter(d=>d.inicio);
-  const confirmados = DATA.filter(d=>d.confirm==='Sim').length;
-  const garantidos  = DATA.filter(d=>d.garantido==='Sim').length;
-  const totalCusto  = DATA.reduce((s,d)=>s+Object.values(d.custos).reduce((a,b)=>a+b,0),0);
-  const vencendo    = DATA.filter(d=>d.status==='Vencendo').length;
+  const confirmados = aprovadas.filter(d=>d.confirm==='Sim').length;
+  const totalDias   = aprovadas.reduce((s,d)=>s+d.dias,0);
   const cards = [
-    {label:'Colaboradores',  value:comDatas.length,        sub:'fev–dez 2026',              cls:''},
-    {label:'Conf. cliente',  value:confirmados,             sub:`${DATA.length-confirmados} sem confirmação`, cls:''},
-    {label:'Garantido',      value:garantidos,              sub:`${DATA.length-garantidos} não garantidos`,   cls:''},
-    {label:'Vencendo',       value:vencendo,                sub:'férias a vencer',           cls:vencendo>0?'alert':''},
-    {label:'Custo estimado', value:'R$ '+Math.round(totalCusto/1000)+'k', sub:'mai–ago 2026', cls:''},
+    {label:'Períodos de férias', value:aprovadas.length,  sub:'aprovados · fev–dez 2026', cls:''},
+    {label:'Dias de gozo',       value:totalDias,         sub:`${totalDias*JORNADA}h não faturadas`, cls:''},
+    {label:'Conf. cliente',      value:confirmados,       sub:`${aprovadas.length-confirmados} sem confirmação`, cls:''},
+    {label:'A vencer',           value:vencendo.length,   sub:'saldos a programar', cls:vencendo.length>0?'alert':''},
   ];
   document.getElementById('summary-cards').innerHTML = cards.map(c=>
     `<div class="card ${c.cls}"><div class="card-label">${c.label}</div><div class="card-value">${c.value}</div><div class="card-sub">${c.sub}</div></div>`
+  ).join('');
+}
+
+function renderHero() {
+  const totalPerda = aprovadas.reduce((s,d)=>s+perda(d),0);
+  const totalHoras = aprovadas.reduce((s,d)=>s+horas(d),0);
+  const nColab     = new Set(aprovadas.map(d=>d.nome)).size;
+  const mediaColab = totalPerda / nColab;
+  const riscoPerda = vencendo.reduce((s,d)=>s+perda(d),0);
+  const cards = [
+    {cls:'',     label:'<i class="ti ti-currency-real" aria-hidden="true"></i> Faturamento perdido (ano)', value:BRL(totalPerda), sub:`${aprovadas.length} períodos de férias`},
+    {cls:'soft', label:'<i class="ti ti-clock" aria-hidden="true"></i> Horas não faturadas',                value:totalHoras.toLocaleString('pt-BR')+' h', sub:`${aprovadas.reduce((s,d)=>s+d.dias,0)} dias × ${JORNADA}h`},
+    {cls:'soft', label:'<i class="ti ti-user-dollar" aria-hidden="true"></i> Perda média / colaborador',   value:BRL(mediaColab), sub:`${nColab} colaboradores`},
+    {cls:'risk', label:'<i class="ti ti-alert-triangle" aria-hidden="true"></i> Risco a vencer',            value:BRL(riscoPerda), sub:`${vencendo.length} saldos não programados`},
+  ];
+  document.getElementById('hero-cards').innerHTML = cards.map(c=>
+    `<div class="hero-card ${c.cls}"><div class="hero-label">${c.label}</div><div class="hero-value">${c.value}</div><div class="hero-sub">${c.sub}</div></div>`
+  ).join('');
+}
+
+function renderLossChart() {
+  const totals = MONTHS.map(m => aprovadas.filter(d=>d.mes===m.n).reduce((s,d)=>s+perda(d),0));
+  const cols   = MONTHS.map(m => COL_MAP[m.n]);
+  const grand  = totals.reduce((a,b)=>a+b,0);
+  document.getElementById('loss-legend').innerHTML =
+    `<span class="legend-item" style="font-weight:500;color:var(--text)">Total no ano: ${BRL(grand)}</span>`;
+  new Chart(document.getElementById('lossChart'),{
+    type:'bar',
+    data:{ labels:MONTHS.map(m=>m.label), datasets:[{data:totals, backgroundColor:cols, borderRadius:6, borderSkipped:false}] },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false}, tooltip:{callbacks:{label:ctx=>BRL(ctx.parsed.y)}} },
+      scales:{
+        y:{beginAtZero:true, ticks:{callback:v=>BRLk(v), font:{size:11}}, grid:{color:'rgba(128,128,128,0.1)'}},
+        x:{ticks:{font:{size:12}, autoSkip:false}, grid:{display:false}}
+      }
+    }
+  });
+}
+
+function renderRank() {
+  const byName = {};
+  aprovadas.forEach(d=>{ byName[d.nome] = (byName[d.nome]||0) + perda(d); });
+  const ranked = Object.entries(byName).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const max = ranked[0][1];
+  document.getElementById('rank-list').innerHTML = ranked.map(([nome,val])=>
+    `<div class="rank-row">
+      <div class="rank-name" title="${nome}">${nome}</div>
+      <div class="rank-track"><div class="rank-fill" style="width:${(val/max*100).toFixed(1)}%"></div></div>
+      <div class="rank-val">${BRL(val)}</div>
+    </div>`
   ).join('');
 }
 
@@ -297,95 +389,113 @@ function renderTimeline() {
   document.getElementById('tl-header').innerHTML = MONTHS.map(m=>
     `<div class="tl-month-label" style="width:${m.days/TOTAL_DAYS*100}%">${m.label}</div>`
   ).join('');
-  document.getElementById('tl-body').innerHTML = DATA.filter(d=>d.inicio).map(d=>{
+  document.getElementById('tl-body').innerHTML = aprovadas.map(d=>{
     const s = pct(d.inicio);
     const fimNext = new Date(new Date(d.fim).getTime()+86400000).toISOString().slice(0,10);
     const e = pct(fimNext);
     const w = Math.max(0.8, e-s);
     const col = COL_MAP[d.mes]||'#9B72CC';
-    const op = d.garantido==='Sim' ? 1 : 0.45;
     const nome2 = d.nome.split(' ').slice(0,2).join(' ');
     return `<div class="tl-row">
       <div class="tl-name" title="${d.nome}">${nome2}</div>
       <div class="tl-grid">
-        <div class="tl-bar" style="left:${s}%;width:${w}%;background:${col};opacity:${op};"
-          title="${d.nome} · ${d.dias} dias · Conf: ${d.confirm} · Garantido: ${d.garantido}"></div>
+        <div class="tl-bar" style="left:${s}%;width:${w}%;background:${col};"
+          title="${d.nome} · ${d.dias} dias · ${BRL(perda(d))} perdidos"></div>
       </div>
     </div>`;
   }).join('');
 }
 
-function renderChart() {
-  const totals = [5,6,7,8].map(m=>DATA.reduce((s,d)=>s+(d.custos[m]||0),0));
-  document.getElementById('chart-legend').innerHTML = ['Maio','Junho','Julho','Agosto'].map((m,i)=>
-    `<span class="legend-item"><span class="legend-sq" style="background:${COLORS[i]}"></span>${m}: R$ ${Math.round(totals[i]/1000)}k</span>`
-  ).join('');
-  new Chart(document.getElementById('costChart'),{
-    type:'bar',
-    data:{
-      labels:['Maio','Junho','Julho','Agosto'],
-      datasets:[{data:totals,backgroundColor:COLORS,borderRadius:6,borderSkipped:false}]
-    },
-    options:{
-      responsive:true, maintainAspectRatio:false,
-      plugins:{legend:{display:false}},
-      scales:{
-        y:{beginAtZero:true,ticks:{callback:v=>'R$ '+Math.round(v/1000)+'k',font:{size:11}},grid:{color:'rgba(128,128,128,0.1)'}},
-        x:{ticks:{font:{size:12}},grid:{display:false}}
-      }
-    }
-  });
-}
-
-function boolBadge(val,simLabel,naoLabel) {
+function confBadge(val) {
   return val==='Sim'
-    ? `<span class="badge b-green"><i class="ti ti-check" aria-hidden="true"></i>${simLabel}</span>`
-    : `<span class="badge b-gray"><i class="ti ti-x" aria-hidden="true"></i>${naoLabel}</span>`;
+    ? `<span class="badge b-green"><i class="ti ti-check" aria-hidden="true"></i>Confirmado</span>`
+    : `<span class="badge b-gray"><i class="ti ti-x" aria-hidden="true"></i>Não confirmado</span>`;
 }
 
 function renderTable() {
   const fM = document.getElementById('f-mes').value;
   const fS = document.getElementById('f-status').value;
   const fC = document.getElementById('f-confirm').value;
-  const fG = document.getElementById('f-garantido').value;
   const rows = DATA.filter(d=>{
     if(fM && d.mes!==parseInt(fM)) return false;
     if(fS && d.status!==fS) return false;
     if(fC && d.confirm!==fC) return false;
-    if(fG && d.garantido!==fG) return false;
     return true;
   });
   const fmt = s => s ? new Date(s).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}) : '—';
-  const fmtC = d => {
-    const t = Object.values(d.custos).reduce((a,b)=>a+b,0);
-    return t>0 ? 'R$ '+t.toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0}) : '—';
-  };
   document.getElementById('table-body').innerHTML = rows.map(d=>{
-    const alerta = d.status==='Vencendo' || (d.status==='Aprovado' && d.confirm!=='Sim');
+    const alerta = d.status==='Vencendo';
     const statusBadge = d.status==='Aprovado'
       ? `<span class="badge b-green">Aprovado</span>`
-      : d.status==='Vencendo'
-        ? `<span class="badge b-red"><i class="ti ti-alert-triangle" aria-hidden="true"></i>Vencendo</span>`
-        : `<span class="badge b-amber">Aguardando</span>`;
+      : `<span class="badge b-red"><i class="ti ti-alert-triangle" aria-hidden="true"></i>Vencendo</span>`;
     return `<tr class="${alerta?'alert-row':''}">
       <td>${d.nome}</td>
       <td>${fmt(d.inicio)}</td>
       <td>${fmt(d.fim)}</td>
-      <td>${d.dias}</td>
+      <td>${d.dias}${d.status==='Vencendo'?' <span style="color:var(--text-3)">(saldo)</span>':''}</td>
       <td>${d.abono>0?d.abono+' d':'—'}</td>
       <td>${statusBadge}</td>
-      <td>${boolBadge(d.confirm,'Confirmado','Não confirmado')}</td>
-      <td>${boolBadge(d.garantido,'Garantido','Não garantido')}</td>
-      <td style="font-variant-numeric:tabular-nums;">${fmtC(d)}</td>
-      <td style="color:var(--text-3);">${d.obs||'—'}</td>
+      <td>${confBadge(d.confirm)}</td>
+      <td class="num">${BRL(d.hv)}</td>
+      <td class="num">${BRL(perda(d))}</td>
     </tr>`;
   }).join('');
 }
 
+function renderLossList() {
+  const fmtP = d => d.inicio
+    ? new Date(d.inicio).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}) + ' – ' + new Date(d.fim).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit'})
+    : 'A programar (limite '+new Date(d.limite).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})+')';
+  const ordered = [...aprovadas].sort((a,b)=>perda(b)-perda(a));
+  let html = ordered.map(d=>
+    `<tr>
+      <td>${d.nome}</td>
+      <td style="color:var(--text-2)">${fmtP(d)}</td>
+      <td class="num">${d.dias}</td>
+      <td class="num">${horas(d)} h</td>
+      <td class="num">${BRL(d.hv)}</td>
+      <td class="num">${BRL(perda(d))}</td>
+    </tr>`
+  ).join('');
+  const totalDias = aprovadas.reduce((s,d)=>s+d.dias,0);
+  const totalH    = aprovadas.reduce((s,d)=>s+horas(d),0);
+  const totalP    = aprovadas.reduce((s,d)=>s+perda(d),0);
+  html += `<tr class="total-row">
+      <td>Total aprovado</td><td></td>
+      <td class="num">${totalDias}</td>
+      <td class="num">${totalH} h</td>
+      <td></td>
+      <td class="num">${BRL(totalP)}</td>
+    </tr>`;
+  // bloco a vencer
+  html += vencendo.map(d=>
+    `<tr class="alert-row">
+      <td>${d.nome} <span class="badge b-red" style="margin-left:4px"><i class="ti ti-alert-triangle" aria-hidden="true"></i>Vencendo</span></td>
+      <td style="color:var(--text-2)">${fmtP(d)}</td>
+      <td class="num">${d.dias}</td>
+      <td class="num">${horas(d)} h</td>
+      <td class="num">${BRL(d.hv)}</td>
+      <td class="num">${BRL(perda(d))}</td>
+    </tr>`
+  ).join('');
+  const riscoP = vencendo.reduce((s,d)=>s+perda(d),0);
+  html += `<tr class="total-row">
+      <td>Total a vencer (risco)</td><td></td>
+      <td class="num">${vencendo.reduce((s,d)=>s+d.dias,0)}</td>
+      <td class="num">${vencendo.reduce((s,d)=>s+horas(d),0)} h</td>
+      <td></td>
+      <td class="num">${BRL(riscoP)}</td>
+    </tr>`;
+  document.getElementById('loss-body').innerHTML = html;
+}
+
 renderSummary();
+renderHero();
+renderLossChart();
+renderRank();
 renderTimeline();
-renderChart();
 renderTable();
+renderLossList();
 </script>
 </body>
 </html>
