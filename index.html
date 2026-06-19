@@ -288,7 +288,7 @@ const DATA = [
   { nome:'Vitor Manoel de Oliveira',              inicio:null, fim:null, dias:6,  mes:null, abono:0, status:'Vencendo', confirm:'Não', hv:91.71,  limite:'2026-09-13' },
   { nome:'Rosangela Silva de Castro',             inicio:null, fim:null, dias:10, mes:null, abono:0, status:'Vencendo', confirm:'Não', hv:147.22, limite:'2026-09-22' },
 ];
-const UPDATED = '2026-06-18';
+const UPDATED = '2026-06-19';
 const JORNADA = 8; // horas/dia
 // ============================================================
 
@@ -313,10 +313,12 @@ const horas = d => d.dias * JORNADA;
 const BRL = v => v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 const BRLk = v => 'R$ ' + (v/1000).toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0}) + 'k';
 
-document.getElementById('updated-at').textContent = 'Atualizado em ' + new Date(UPDATED).toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
+// parse 'YYYY-MM-DD' como data LOCAL (evita deslocamento de 1 dia por fuso horário)
+const pd = s => { const [y,m,dd] = s.split('-').map(Number); return new Date(y, m-1, dd); };
 
-function pct(dateStr) {
-  const d = new Date(dateStr);
+document.getElementById('updated-at').textContent = 'Atualizado em ' + pd(UPDATED).toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
+
+function pct(d) {
   const diff = Math.round((d - RANGE_START) / 86400000);
   return Math.max(0, Math.min(100, diff / TOTAL_DAYS * 100));
 }
@@ -405,10 +407,12 @@ function renderTimeline() {
   document.getElementById('tl-header').innerHTML = MONTHS.map(m=>
     `<div class="tl-month-label" style="width:${m.days/TOTAL_DAYS*100}%">${m.label}</div>`
   ).join('');
-  const dm = s => new Date(s).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});
+  const dm = s => pd(s).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});
   document.getElementById('tl-body').innerHTML = aprovadas.map(d=>{
-    const s = pct(d.inicio);
-    const fimNext = new Date(new Date(d.fim).getTime()+86400000).toISOString().slice(0,10);
+    const ini = pd(d.inicio);
+    const s = pct(ini);
+    const fimD = pd(d.fim);
+    const fimNext = new Date(fimD.getFullYear(), fimD.getMonth(), fimD.getDate()+1);
     const e = pct(fimNext);
     const w = Math.max(0.8, e-s);
     const col = COL_MAP[d.mes]||'#9B72CC';
@@ -446,7 +450,7 @@ function renderTable() {
     if(fC && d.confirm!==fC) return false;
     return true;
   });
-  const fmt = s => s ? new Date(s).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}) : '—';
+  const fmt = s => s ? pd(s).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}) : '—';
   document.getElementById('table-body').innerHTML = rows.map(d=>{
     const alerta = d.status==='Vencendo';
     const statusBadge = d.status==='Aprovado'
@@ -468,8 +472,8 @@ function renderTable() {
 
 function renderLossList() {
   const fmtP = d => d.inicio
-    ? new Date(d.inicio).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}) + ' – ' + new Date(d.fim).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit'})
-    : 'A programar (limite '+new Date(d.limite).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})+')';
+    ? pd(d.inicio).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}) + ' – ' + pd(d.fim).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit'})
+    : 'A programar (limite '+pd(d.limite).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})+')';
   const ordered = [...aprovadas].sort((a,b)=>perda(b)-perda(a));
   let html = ordered.map(d=>
     `<tr>
