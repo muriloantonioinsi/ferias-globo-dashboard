@@ -142,11 +142,11 @@
   <div class="cards" id="summary-cards"></div>
 
   <!-- PAINEL EXECUTIVO: IMPACTO NO FATURAMENTO -->
-  <p class="section-title">GAP Faturamento — revenue impact <span class="hint">· horas não faturadas durante o gozo de férias (dias × 8h × hora-venda)</span></p>
+  <p class="section-title">Desconto de Faturamento — revenue impact <span class="hint">· horas não faturadas (dias úteis seg–sex × 8h × hora-venda)</span></p>
   <div class="hero" id="hero-cards"></div>
 
   <div class="panel">
-    <p style="font-size:13px; font-weight:500; margin-bottom:12px;">GAP Faturamento por mês (R$)</p>
+    <p style="font-size:13px; font-weight:500; margin-bottom:12px;">Desconto de Faturamento por mês (R$)</p>
     <div class="legend" id="loss-legend"></div>
     <div style="position:relative; width:100%; height:230px;">
       <canvas id="lossChart" role="img" aria-label="Faturamento perdido por mês de fevereiro a dezembro 2026">Faturamento perdido distribuído ao longo dos meses de 2026.</canvas>
@@ -212,7 +212,7 @@
           <th>Status</th>
           <th>Conf. cliente</th>
           <th class="num">Hora-venda</th>
-          <th class="num">Perda faturamento</th>
+          <th class="num">Desconto faturamento</th>
         </tr></thead>
         <tbody id="table-body"></tbody>
       </table>
@@ -228,9 +228,10 @@
           <th>Colaborador</th>
           <th>Período</th>
           <th class="num">Dias gozo</th>
+          <th class="num">Dias úteis</th>
           <th class="num">Horas (×8h)</th>
           <th class="num">Hora-venda</th>
-          <th class="num">Faturamento perdido</th>
+          <th class="num">Desconto faturamento</th>
         </tr></thead>
         <tbody id="loss-body"></tbody>
       </table>
@@ -308,8 +309,15 @@ const COL_MAP = {
 
 const aprovadas = DATA.filter(d=>d.status==='Aprovado');
 const vencendo  = DATA.filter(d=>d.status==='Vencendo');
-const perda = d => d.dias * JORNADA * d.hv;
-const horas = d => d.dias * JORNADA;
+// dias ÚTEIS (seg–sex) dentro do período — base do desconto de faturamento
+const diasUteis = (iniStr, fimStr) => {
+  let n = 0, cur = pd(iniStr); const end = pd(fimStr);
+  while (cur <= end) { const w = cur.getDay(); if (w!==0 && w!==6) n++; cur = new Date(cur.getFullYear(), cur.getMonth(), cur.getDate()+1); }
+  return n;
+};
+const diasCalc = d => d.inicio ? diasUteis(d.inicio, d.fim) : d.dias; // Vencendo usa saldo
+const horas = d => diasCalc(d) * JORNADA;
+const perda = d => horas(d) * d.hv;
 const BRL = v => v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 const BRLk = v => 'R$ ' + (v/1000).toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0}) + 'k';
 
@@ -341,9 +349,9 @@ function renderHero() {
   const totalHoras = aprovadas.reduce((s,d)=>s+horas(d),0);
   const riscoPerda = vencendo.reduce((s,d)=>s+perda(d),0);
   const cards = [
-    {cls:'',     label:'<i class="ti ti-currency-real" aria-hidden="true"></i> GAP Faturamento (ano)',  value:BRL(totalPerda), sub:`${aprovadas.length} períodos de férias`},
-    {cls:'soft', label:'<i class="ti ti-clock" aria-hidden="true"></i> Horas não faturadas',            value:totalHoras.toLocaleString('pt-BR')+' h', sub:`${aprovadas.reduce((s,d)=>s+d.dias,0)} dias × ${JORNADA}h`},
-    {cls:'risk', label:'<i class="ti ti-alert-triangle" aria-hidden="true"></i> GAP a vencer (risco)',  value:BRL(riscoPerda), sub:`${vencendo.length} saldos não programados`},
+    {cls:'',     label:'<i class="ti ti-currency-real" aria-hidden="true"></i> Desconto de Faturamento (ano)', value:BRL(totalPerda), sub:`${aprovadas.length} períodos de férias`},
+    {cls:'soft', label:'<i class="ti ti-clock" aria-hidden="true"></i> Horas não faturadas',                    value:totalHoras.toLocaleString('pt-BR')+' h', sub:`${aprovadas.reduce((s,d)=>s+diasCalc(d),0)} dias úteis × ${JORNADA}h`},
+    {cls:'risk', label:'<i class="ti ti-alert-triangle" aria-hidden="true"></i> Desconto a vencer (risco)',     value:BRL(riscoPerda), sub:`${vencendo.length} saldos não programados`},
   ];
   document.getElementById('hero-cards').innerHTML = cards.map(c=>
     `<div class="hero-card ${c.cls}"><div class="hero-label">${c.label}</div><div class="hero-value">${c.value}</div><div class="hero-sub">${c.sub}</div></div>`
@@ -355,7 +363,7 @@ function renderLossChart() {
   const cols   = MONTHS.map(m => COL_MAP[m.n]);
   const grand  = totals.reduce((a,b)=>a+b,0);
   document.getElementById('loss-legend').innerHTML =
-    `<span class="legend-item" style="font-weight:500;color:var(--text)">GAP total no ano: ${BRL(grand)}</span>`;
+    `<span class="legend-item" style="font-weight:500;color:var(--text)">Desconto total no ano: ${BRL(grand)}</span>`;
   const labelColor = matchMedia('(prefers-color-scheme: dark)').matches ? '#ede8f8' : '#1e1428';
   const dataLabels = {
     id:'dataLabels',
@@ -427,7 +435,7 @@ function renderTimeline() {
       <div class="tl-name" title="${d.nome}">${nome2}</div>
       <div class="tl-grid">
         <div class="tl-bar" style="left:${s}%;width:${w}%;background:${col};"
-          title="${d.nome} · ${d.dias} dias · ${BRL(perda(d))} perdidos"></div>
+          title="${d.nome} · ${d.dias} dias (${diasCalc(d)} úteis) · ${BRL(perda(d))} de desconto"></div>
         <span class="tl-label" style="${labelStyle}">${periodo}</span>
       </div>
     </div>`;
@@ -460,7 +468,7 @@ function renderTable() {
       <td>${d.nome}</td>
       <td>${fmt(d.inicio)}</td>
       <td>${fmt(d.fim)}</td>
-      <td>${d.dias}${d.status==='Vencendo'?' <span style="color:var(--text-3)">(saldo)</span>':''}</td>
+      <td>${d.dias}${d.inicio?` <span style="color:var(--text-3)">(${diasUteis(d.inicio,d.fim)} úteis)</span>`:' <span style="color:var(--text-3)">(saldo)</span>'}</td>
       <td>${d.abono>0?d.abono+' d':'—'}</td>
       <td>${statusBadge}</td>
       <td>${confBadge(d.confirm)}</td>
@@ -480,17 +488,20 @@ function renderLossList() {
       <td>${d.nome}</td>
       <td style="color:var(--text-2)">${fmtP(d)}</td>
       <td class="num">${d.dias}</td>
+      <td class="num">${diasCalc(d)}</td>
       <td class="num">${horas(d)} h</td>
       <td class="num">${BRL(d.hv)}</td>
       <td class="num">${BRL(perda(d))}</td>
     </tr>`
   ).join('');
   const totalDias = aprovadas.reduce((s,d)=>s+d.dias,0);
+  const totalU    = aprovadas.reduce((s,d)=>s+diasCalc(d),0);
   const totalH    = aprovadas.reduce((s,d)=>s+horas(d),0);
   const totalP    = aprovadas.reduce((s,d)=>s+perda(d),0);
   html += `<tr class="total-row">
       <td>Total aprovado</td><td></td>
       <td class="num">${totalDias}</td>
+      <td class="num">${totalU}</td>
       <td class="num">${totalH} h</td>
       <td></td>
       <td class="num">${BRL(totalP)}</td>
@@ -501,6 +512,7 @@ function renderLossList() {
       <td>${d.nome} <span class="badge b-red" style="margin-left:4px"><i class="ti ti-alert-triangle" aria-hidden="true"></i>Vencendo</span></td>
       <td style="color:var(--text-2)">${fmtP(d)}</td>
       <td class="num">${d.dias}</td>
+      <td class="num">${diasCalc(d)}</td>
       <td class="num">${horas(d)} h</td>
       <td class="num">${BRL(d.hv)}</td>
       <td class="num">${BRL(perda(d))}</td>
@@ -510,6 +522,7 @@ function renderLossList() {
   html += `<tr class="total-row">
       <td>Total a vencer (risco)</td><td></td>
       <td class="num">${vencendo.reduce((s,d)=>s+d.dias,0)}</td>
+      <td class="num">${vencendo.reduce((s,d)=>s+diasCalc(d),0)}</td>
       <td class="num">${vencendo.reduce((s,d)=>s+horas(d),0)} h</td>
       <td></td>
       <td class="num">${BRL(riscoP)}</td>
