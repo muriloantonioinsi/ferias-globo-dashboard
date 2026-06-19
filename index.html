@@ -100,6 +100,7 @@
     .tl-grid { position: relative; flex: 1; height: 20px; }
     .tl-bar  { position: absolute; height: 13px; top: 4px; border-radius: 3px; cursor: default; transition: opacity .15s; }
     .tl-bar:hover { opacity: .75 !important; }
+    .tl-label { position: absolute; top: 3px; font-size: 10px; font-variant-numeric: tabular-nums; color: var(--text-2); white-space: nowrap; line-height: 15px; }
 
     .badge { display: inline-flex; align-items: center; gap: 3px; font-size: 11px; padding: 2px 7px; border-radius: var(--radius-md); font-weight: 500; white-space: nowrap; }
     .b-green { background: var(--green-bg); color: var(--green-text); }
@@ -141,11 +142,11 @@
   <div class="cards" id="summary-cards"></div>
 
   <!-- PAINEL EXECUTIVO: IMPACTO NO FATURAMENTO -->
-  <p class="section-title">Impacto no faturamento <span class="hint">· horas não faturadas durante o gozo de férias (dias × 8h × hora-venda)</span></p>
+  <p class="section-title">GAP Faturamento — revenue impact <span class="hint">· horas não faturadas durante o gozo de férias (dias × 8h × hora-venda)</span></p>
   <div class="hero" id="hero-cards"></div>
 
   <div class="panel">
-    <p style="font-size:13px; font-weight:500; margin-bottom:12px;">Faturamento perdido por mês (R$)</p>
+    <p style="font-size:13px; font-weight:500; margin-bottom:12px;">GAP Faturamento por mês (R$)</p>
     <div class="legend" id="loss-legend"></div>
     <div style="position:relative; width:100%; height:230px;">
       <canvas id="lossChart" role="img" aria-label="Faturamento perdido por mês de fevereiro a dezembro 2026">Faturamento perdido distribuído ao longo dos meses de 2026.</canvas>
@@ -325,7 +326,6 @@ function renderSummary() {
   const totalDias   = aprovadas.reduce((s,d)=>s+d.dias,0);
   const cards = [
     {label:'Períodos de férias', value:aprovadas.length,  sub:'aprovados · fev–dez 2026', cls:''},
-    {label:'Dias de gozo',       value:totalDias,         sub:`${totalDias*JORNADA}h não faturadas`, cls:''},
     {label:'Conf. cliente',      value:confirmados,       sub:`${aprovadas.length-confirmados} sem confirmação`, cls:''},
     {label:'A vencer',           value:vencendo.length,   sub:'saldos a programar', cls:vencendo.length>0?'alert':''},
   ];
@@ -337,14 +337,11 @@ function renderSummary() {
 function renderHero() {
   const totalPerda = aprovadas.reduce((s,d)=>s+perda(d),0);
   const totalHoras = aprovadas.reduce((s,d)=>s+horas(d),0);
-  const nColab     = new Set(aprovadas.map(d=>d.nome)).size;
-  const mediaColab = totalPerda / nColab;
   const riscoPerda = vencendo.reduce((s,d)=>s+perda(d),0);
   const cards = [
-    {cls:'',     label:'<i class="ti ti-currency-real" aria-hidden="true"></i> Faturamento perdido (ano)', value:BRL(totalPerda), sub:`${aprovadas.length} períodos de férias`},
-    {cls:'soft', label:'<i class="ti ti-clock" aria-hidden="true"></i> Horas não faturadas',                value:totalHoras.toLocaleString('pt-BR')+' h', sub:`${aprovadas.reduce((s,d)=>s+d.dias,0)} dias × ${JORNADA}h`},
-    {cls:'soft', label:'<i class="ti ti-user-dollar" aria-hidden="true"></i> Perda média / colaborador',   value:BRL(mediaColab), sub:`${nColab} colaboradores`},
-    {cls:'risk', label:'<i class="ti ti-alert-triangle" aria-hidden="true"></i> Risco a vencer',            value:BRL(riscoPerda), sub:`${vencendo.length} saldos não programados`},
+    {cls:'',     label:'<i class="ti ti-currency-real" aria-hidden="true"></i> GAP Faturamento (ano)',  value:BRL(totalPerda), sub:`${aprovadas.length} períodos de férias`},
+    {cls:'soft', label:'<i class="ti ti-clock" aria-hidden="true"></i> Horas não faturadas',            value:totalHoras.toLocaleString('pt-BR')+' h', sub:`${aprovadas.reduce((s,d)=>s+d.dias,0)} dias × ${JORNADA}h`},
+    {cls:'risk', label:'<i class="ti ti-alert-triangle" aria-hidden="true"></i> GAP a vencer (risco)',  value:BRL(riscoPerda), sub:`${vencendo.length} saldos não programados`},
   ];
   document.getElementById('hero-cards').innerHTML = cards.map(c=>
     `<div class="hero-card ${c.cls}"><div class="hero-label">${c.label}</div><div class="hero-value">${c.value}</div><div class="hero-sub">${c.sub}</div></div>`
@@ -356,18 +353,37 @@ function renderLossChart() {
   const cols   = MONTHS.map(m => COL_MAP[m.n]);
   const grand  = totals.reduce((a,b)=>a+b,0);
   document.getElementById('loss-legend').innerHTML =
-    `<span class="legend-item" style="font-weight:500;color:var(--text)">Total no ano: ${BRL(grand)}</span>`;
+    `<span class="legend-item" style="font-weight:500;color:var(--text)">GAP total no ano: ${BRL(grand)}</span>`;
+  const labelColor = matchMedia('(prefers-color-scheme: dark)').matches ? '#ede8f8' : '#1e1428';
+  const dataLabels = {
+    id:'dataLabels',
+    afterDatasetsDraw(chart){
+      const {ctx} = chart;
+      const meta = chart.getDatasetMeta(0);
+      ctx.save();
+      ctx.font = '500 11px system-ui, sans-serif';
+      ctx.fillStyle = labelColor;
+      ctx.textAlign = 'center';
+      meta.data.forEach((bar,i)=>{
+        if(totals[i] <= 0) return;
+        ctx.fillText(BRLk(totals[i]), bar.x, bar.y - 6);
+      });
+      ctx.restore();
+    }
+  };
   new Chart(document.getElementById('lossChart'),{
     type:'bar',
     data:{ labels:MONTHS.map(m=>m.label), datasets:[{data:totals, backgroundColor:cols, borderRadius:6, borderSkipped:false}] },
     options:{
       responsive:true, maintainAspectRatio:false,
+      layout:{padding:{top:22}},
       plugins:{ legend:{display:false}, tooltip:{callbacks:{label:ctx=>BRL(ctx.parsed.y)}} },
       scales:{
         y:{beginAtZero:true, ticks:{callback:v=>BRLk(v), font:{size:11}}, grid:{color:'rgba(128,128,128,0.1)'}},
         x:{ticks:{font:{size:12}, autoSkip:false}, grid:{display:false}}
       }
-    }
+    },
+    plugins:[dataLabels]
   });
 }
 
@@ -389,6 +405,7 @@ function renderTimeline() {
   document.getElementById('tl-header').innerHTML = MONTHS.map(m=>
     `<div class="tl-month-label" style="width:${m.days/TOTAL_DAYS*100}%">${m.label}</div>`
   ).join('');
+  const dm = s => new Date(s).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});
   document.getElementById('tl-body').innerHTML = aprovadas.map(d=>{
     const s = pct(d.inicio);
     const fimNext = new Date(new Date(d.fim).getTime()+86400000).toISOString().slice(0,10);
@@ -396,11 +413,18 @@ function renderTimeline() {
     const w = Math.max(0.8, e-s);
     const col = COL_MAP[d.mes]||'#9B72CC';
     const nome2 = d.nome.split(' ').slice(0,2).join(' ');
+    const periodo = `${dm(d.inicio)}–${dm(d.fim)}`;
+    // rótulo à direita da barra; se a barra terminar perto do fim, joga para a esquerda
+    const labelLeft = e > 80;
+    const labelStyle = labelLeft
+      ? `right:${(100-s).toFixed(1)}%; margin-right:6px; text-align:right;`
+      : `left:${e.toFixed(1)}%; margin-left:6px;`;
     return `<div class="tl-row">
       <div class="tl-name" title="${d.nome}">${nome2}</div>
       <div class="tl-grid">
         <div class="tl-bar" style="left:${s}%;width:${w}%;background:${col};"
           title="${d.nome} · ${d.dias} dias · ${BRL(perda(d))} perdidos"></div>
+        <span class="tl-label" style="${labelStyle}">${periodo}</span>
       </div>
     </div>`;
   }).join('');
