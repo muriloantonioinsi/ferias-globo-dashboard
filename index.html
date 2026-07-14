@@ -72,6 +72,11 @@
     .card.alert { background: var(--amber-bg); }
     .card.alert .card-value { color: var(--amber-text); }
 
+    .month-filter { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 1.75rem; }
+    .mf-btn { font-size: 12px; font-weight: 500; padding: 6px 13px; border-radius: 999px; border: 0.5px solid var(--border-md); background: var(--surface); color: var(--text-2); cursor: pointer; transition: all .12s; }
+    .mf-btn:hover { border-color: var(--brand); color: var(--brand); }
+    .mf-btn.active { background: var(--deep); color: #fff; border-color: var(--deep); }
+
     .hero { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 1.5rem; }
     .hero-card { background: var(--deep); border-radius: var(--radius-lg); padding: 18px 20px; color: #fff; }
     .hero-card.soft { background: var(--blue-bg); color: var(--blue-text); }
@@ -141,8 +146,12 @@
 
 <main>
 
+  <!-- FILTRO DE MÊS -->
+  <p class="section-title" style="margin-top:.5rem;">Filtrar por mês</p>
+  <div class="month-filter" id="month-filter"></div>
+
   <!-- CARDS RESUMO -->
-  <p class="section-title" style="margin-top:.5rem;">Resumo</p>
+  <p class="section-title">Resumo</p>
   <div class="cards" id="summary-cards"></div>
 
   <!-- PAINEL EXECUTIVO: IMPACTO NO FATURAMENTO -->
@@ -197,20 +206,6 @@
   <!-- TABELA DETALHAMENTO -->
   <p class="section-title">Detalhamento por colaborador</p>
   <div class="filters">
-    <select id="f-mes" onchange="renderTable()">
-      <option value="">Todos os meses</option>
-      <option value="2">Fevereiro</option>
-      <option value="3">Março</option>
-      <option value="4">Abril</option>
-      <option value="5">Maio</option>
-      <option value="6">Junho</option>
-      <option value="7">Julho</option>
-      <option value="8">Agosto</option>
-      <option value="9">Setembro</option>
-      <option value="10">Outubro</option>
-      <option value="11">Novembro</option>
-      <option value="12">Dezembro</option>
-    </select>
     <select id="f-status" onchange="renderTable()">
       <option value="">Todos os status</option>
       <option value="Aprovado">Aprovado</option>
@@ -383,8 +378,17 @@ const CUSTOS = [
 const custoMes = {};
 CUSTOS.forEach(p => { for (const [m,v] of Object.entries(p.c)) custoMes[m] = (custoMes[m]||0)+v; });
 const custoTotal = Object.values(custoMes).reduce((a,b)=>a+b,0);
-const MESNOME = {5:'Maio',6:'Junho',7:'Julho',8:'Agosto',9:'Setembro',10:'Outubro',11:'Novembro',12:'Dezembro'};
-const MESAB = {5:'Mai',6:'Jun',7:'Jul',8:'Ago',9:'Set',10:'Out',11:'Nov',12:'Dez'};
+const MESNOME = {2:'Fevereiro',3:'Março',4:'Abril',5:'Maio',6:'Junho',7:'Julho',8:'Agosto',9:'Setembro',10:'Outubro',11:'Novembro',12:'Dezembro'};
+const MESAB = {2:'Fev',3:'Mar',4:'Abr',5:'Mai',6:'Jun',7:'Jul',8:'Ago',9:'Set',10:'Out',11:'Nov',12:'Dez'};
+
+// ---- Filtro global de mês ----
+let filtroMes = null; // null = todos os meses
+const apMes       = () => filtroMes==null ? aprovadas : aprovadas.filter(d=>d.mes===filtroMes);
+const vencMes     = () => filtroMes==null ? vencendo  : [];   // Vencendo não têm mês de gozo
+const custosDoMes = () => filtroMes==null ? CUSTOS : CUSTOS.filter(p=>p.c[filtroMes]!=null).map(p=>({nome:p.nome, c:{[filtroMes]:p.c[filtroMes]}}));
+const custoMesDe  = list => { const o={}; list.forEach(p=>{ for (const [m,v] of Object.entries(p.c)) o[m]=(o[m]||0)+v; }); return o; };
+const chartRefs = {};
+const mkChart = (id,cfg) => { if(chartRefs[id]) chartRefs[id].destroy(); chartRefs[id]=new Chart(document.getElementById(id),cfg); };
 
 // parse 'YYYY-MM-DD' como data LOCAL (evita deslocamento de 1 dia por fuso horário)
 const pd = s => { const [y,m,dd] = s.split('-').map(Number); return new Date(y, m-1, dd); };
@@ -397,12 +401,13 @@ function pct(d) {
 }
 
 function renderSummary() {
-  const confirmados = aprovadas.filter(d=>d.confirm==='Sim').length;
-  const totalDias   = aprovadas.reduce((s,d)=>s+d.dias,0);
+  const ap = apMes(), venc = vencMes();
+  const confirmados = ap.filter(d=>d.confirm==='Sim').length;
+  const sub1 = filtroMes==null ? 'aprovados · fev–dez 2026' : 'aprovados em '+MESNOME[filtroMes];
   const cards = [
-    {label:'Períodos de férias', value:aprovadas.length,  sub:'aprovados · fev–dez 2026', cls:''},
-    {label:'Conf. cliente',      value:confirmados,       sub:`${aprovadas.length-confirmados} sem confirmação`, cls:''},
-    {label:'A vencer',           value:vencendo.length,   sub:'saldos a programar', cls:vencendo.length>0?'alert':''},
+    {label:'Períodos de férias', value:ap.length,   sub:sub1, cls:''},
+    {label:'Conf. cliente',      value:confirmados, sub:`${ap.length-confirmados} sem confirmação`, cls:''},
+    {label:'A vencer',           value:venc.length, sub: filtroMes==null?'saldos a programar':'sem mês de gozo', cls:venc.length>0?'alert':''},
   ];
   document.getElementById('summary-cards').innerHTML = cards.map(c=>
     `<div class="card ${c.cls}"><div class="card-label">${c.label}</div><div class="card-value">${c.value}</div><div class="card-sub">${c.sub}</div></div>`
@@ -410,13 +415,15 @@ function renderSummary() {
 }
 
 function renderHero() {
-  const totalPerda = aprovadas.reduce((s,d)=>s+perda(d),0);
-  const totalHoras = aprovadas.reduce((s,d)=>s+horas(d),0);
-  const riscoPerda = vencendo.reduce((s,d)=>s+perda(d),0);
+  const ap = apMes(), venc = vencMes();
+  const totalPerda = ap.reduce((s,d)=>s+perda(d),0);
+  const totalHoras = ap.reduce((s,d)=>s+horas(d),0);
+  const riscoPerda = venc.reduce((s,d)=>s+perda(d),0);
+  const lbl = filtroMes==null ? 'Desconto de Faturamento (ano)' : 'Desconto de Faturamento ('+MESNOME[filtroMes]+')';
   const cards = [
-    {cls:'',     label:'<i class="ti ti-currency-real" aria-hidden="true"></i> Desconto de Faturamento (ano)', value:BRL(totalPerda), sub:`${aprovadas.length} períodos de férias`},
-    {cls:'soft', label:'<i class="ti ti-clock" aria-hidden="true"></i> Horas não faturadas',                    value:totalHoras.toLocaleString('pt-BR')+' h', sub:`${aprovadas.reduce((s,d)=>s+diasCalc(d),0)} dias úteis × ${JORNADA}h`},
-    {cls:'risk', label:'<i class="ti ti-alert-triangle" aria-hidden="true"></i> Desconto a vencer (risco)',     value:BRL(riscoPerda), sub:`${vencendo.length} saldos não programados`},
+    {cls:'',     label:'<i class="ti ti-currency-real" aria-hidden="true"></i> '+lbl, value:BRL(totalPerda), sub:`${ap.length} períodos de férias`},
+    {cls:'soft', label:'<i class="ti ti-clock" aria-hidden="true"></i> Horas não faturadas',                    value:totalHoras.toLocaleString('pt-BR')+' h', sub:`${ap.reduce((s,d)=>s+diasCalc(d),0)} dias úteis × ${JORNADA}h`},
+    {cls:'risk', label:'<i class="ti ti-alert-triangle" aria-hidden="true"></i> Desconto a vencer (risco)',     value:BRL(riscoPerda), sub:`${venc.length} saldos não programados`},
   ];
   document.getElementById('hero-cards').innerHTML = cards.map(c=>
     `<div class="hero-card ${c.cls}"><div class="hero-label">${c.label}</div><div class="hero-value">${c.value}</div><div class="hero-sub">${c.sub}</div></div>`
@@ -424,31 +431,25 @@ function renderHero() {
 }
 
 function renderLossChart() {
-  const totals = MONTHS.map(m => aprovadas.filter(d=>d.mes===m.n).reduce((s,d)=>s+perda(d),0));
-  const cols   = MONTHS.map(m => COL_MAP[m.n]);
+  const mm = filtroMes==null ? MONTHS : MONTHS.filter(m=>m.n===filtroMes);
+  const totals = mm.map(m => aprovadas.filter(d=>d.mes===m.n).reduce((s,d)=>s+perda(d),0));
+  const cols   = mm.map(m => COL_MAP[m.n]);
   const grand  = totals.reduce((a,b)=>a+b,0);
   document.getElementById('loss-legend').innerHTML =
-    `<span class="legend-item" style="font-weight:500;color:var(--text)">Desconto total no ano: ${BRL(grand)}</span>`;
-  const labelColor = matchMedia('(prefers-color-scheme: dark)').matches ? '#ede8f8' : '#1e1428';
+    `<span class="legend-item" style="font-weight:500;color:var(--text)">${filtroMes==null?'Desconto total no ano':'Desconto em '+MESNOME[filtroMes]}: ${BRL(grand)}</span>`;
+  const labelColor = matchMedia('(prefers-color-scheme: dark)').matches ? '#f1e8fb' : '#2b0a63';
   const dataLabels = {
     id:'dataLabels',
     afterDatasetsDraw(chart){
-      const {ctx} = chart;
-      const meta = chart.getDatasetMeta(0);
-      ctx.save();
-      ctx.font = '500 11px system-ui, sans-serif';
-      ctx.fillStyle = labelColor;
-      ctx.textAlign = 'center';
-      meta.data.forEach((bar,i)=>{
-        if(totals[i] <= 0) return;
-        ctx.fillText(BRLk(totals[i]), bar.x, bar.y - 6);
-      });
+      const {ctx} = chart; const meta = chart.getDatasetMeta(0);
+      ctx.save(); ctx.font='500 11px system-ui, sans-serif'; ctx.fillStyle=labelColor; ctx.textAlign='center';
+      meta.data.forEach((bar,i)=>{ if(totals[i] <= 0) return; ctx.fillText(BRLk(totals[i]), bar.x, bar.y - 6); });
       ctx.restore();
     }
   };
-  new Chart(document.getElementById('lossChart'),{
+  mkChart('lossChart',{
     type:'bar',
-    data:{ labels:MONTHS.map(m=>m.label), datasets:[{data:totals, backgroundColor:cols, borderRadius:6, borderSkipped:false}] },
+    data:{ labels:mm.map(m=>m.label), datasets:[{data:totals, backgroundColor:cols, borderRadius:6, borderSkipped:false}] },
     options:{
       responsive:true, maintainAspectRatio:false,
       layout:{padding:{top:22}},
@@ -481,7 +482,8 @@ function renderTimeline() {
     `<div class="tl-month-label" style="width:${m.days/TOTAL_DAYS*100}%">${m.label}</div>`
   ).join('');
   const dm = s => pd(s).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});
-  document.getElementById('tl-body').innerHTML = aprovadas.map(d=>{
+  const body = apMes();
+  document.getElementById('tl-body').innerHTML = body.length===0 ? '<p style="font-size:12px;color:var(--text-3);padding:6px 0;">Nenhuma férias aprovada neste mês.</p>' : body.map(d=>{
     const ini = pd(d.inicio);
     const s = pct(ini);
     const fimD = pd(d.fim);
@@ -514,11 +516,10 @@ function confBadge(val) {
 }
 
 function renderTable() {
-  const fM = document.getElementById('f-mes').value;
   const fS = document.getElementById('f-status').value;
   const fC = document.getElementById('f-confirm').value;
   const rows = DATA.filter(d=>{
-    if(fM && d.mes!==parseInt(fM)) return false;
+    if(filtroMes!=null && d.mes!==filtroMes) return false;
     if(fS && d.status!==fS) return false;
     if(fC && d.confirm!==fC) return false;
     return true;
@@ -547,7 +548,8 @@ function renderLossList() {
   const fmtP = d => d.inicio
     ? pd(d.inicio).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}) + ' – ' + pd(d.fim).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit'})
     : 'A programar (limite '+pd(d.limite).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})+')';
-  const ordered = [...aprovadas].sort((a,b)=>perda(b)-perda(a));
+  const ap = apMes(), venc = vencMes();
+  const ordered = [...ap].sort((a,b)=>perda(b)-perda(a));
   let html = ordered.map(d=>
     `<tr>
       <td>${d.nome}</td>
@@ -559,10 +561,10 @@ function renderLossList() {
       <td class="num">${d.gestor?'<span class="badge b-blue">Custo da operação</span>':(d.hv==null?'<span style="color:var(--text-3)">a confirmar</span>':BRL(perda(d)))}</td>
     </tr>`
   ).join('');
-  const totalDias = aprovadas.reduce((s,d)=>s+d.dias,0);
-  const totalU    = aprovadas.reduce((s,d)=>s+diasCalc(d),0);
-  const totalH    = aprovadas.reduce((s,d)=>s+horas(d),0);
-  const totalP    = aprovadas.reduce((s,d)=>s+perda(d),0);
+  const totalDias = ap.reduce((s,d)=>s+d.dias,0);
+  const totalU    = ap.reduce((s,d)=>s+diasCalc(d),0);
+  const totalH    = ap.reduce((s,d)=>s+horas(d),0);
+  const totalP    = ap.reduce((s,d)=>s+perda(d),0);
   html += `<tr class="total-row">
       <td>Total aprovado</td><td></td>
       <td class="num">${totalDias}</td>
@@ -572,7 +574,7 @@ function renderLossList() {
       <td class="num">${BRL(totalP)}</td>
     </tr>`;
   // bloco a vencer
-  html += vencendo.map(d=>
+  html += venc.map(d=>
     `<tr class="alert-row">
       <td>${d.nome} <span class="badge b-red" style="margin-left:4px"><i class="ti ti-alert-triangle" aria-hidden="true"></i>Vencendo</span></td>
       <td style="color:var(--text-2)">${fmtP(d)}</td>
@@ -583,26 +585,32 @@ function renderLossList() {
       <td class="num">${d.gestor?'<span class="badge b-blue">Custo da operação</span>':(d.hv==null?'<span style="color:var(--text-3)">a confirmar</span>':BRL(perda(d)))}</td>
     </tr>`
   ).join('');
-  const riscoP = vencendo.reduce((s,d)=>s+perda(d),0);
-  html += `<tr class="total-row">
+  if(venc.length){
+    const riscoP = venc.reduce((s,d)=>s+perda(d),0);
+    html += `<tr class="total-row">
       <td>Total a vencer (risco)</td><td></td>
-      <td class="num">${vencendo.reduce((s,d)=>s+d.dias,0)}</td>
-      <td class="num">${vencendo.reduce((s,d)=>s+diasCalc(d),0)}</td>
-      <td class="num">${vencendo.reduce((s,d)=>s+horas(d),0)} h</td>
+      <td class="num">${venc.reduce((s,d)=>s+d.dias,0)}</td>
+      <td class="num">${venc.reduce((s,d)=>s+diasCalc(d),0)}</td>
+      <td class="num">${venc.reduce((s,d)=>s+horas(d),0)} h</td>
       <td></td>
       <td class="num">${BRL(riscoP)}</td>
     </tr>`;
+  }
   document.getElementById('loss-body').innerHTML = html;
 }
 
 function renderCustoHero(){
-  const meses = Object.keys(custoMes).map(Number).sort((a,b)=>a-b);
-  const maior = meses.reduce((a,b)=>custoMes[b]>custoMes[a]?b:a, meses[0]);
-  const nomes = new Set(CUSTOS.map(p=>p.nome)).size;
+  const list = custosDoMes();
+  const cMes = custoMesDe(list);
+  const total = Object.values(cMes).reduce((a,b)=>a+b,0);
+  const meses = Object.keys(cMes).map(Number).sort((a,b)=>a-b);
+  const maior = meses.length ? meses.reduce((a,b)=>cMes[b]>cMes[a]?b:a, meses[0]) : null;
+  const nomes = new Set(list.map(p=>p.nome)).size;
+  const subTotal = filtroMes==null ? 'provisão mai–dez 2026' : 'em '+MESNOME[filtroMes];
   const cards = [
-    {cls:'',     label:'<i class="ti ti-cash" aria-hidden="true"></i> Custo total de férias',    value:BRL(custoTotal), sub:'provisão mai–dez 2026'},
-    {cls:'soft', label:'<i class="ti ti-calendar-stats" aria-hidden="true"></i> Mês de maior custo', value:MESNOME[maior], sub:BRL(custoMes[maior])},
-    {cls:'soft', label:'<i class="ti ti-users" aria-hidden="true"></i> Colaboradores com custo',   value:nomes, sub:`${CUSTOS.length} períodos`},
+    {cls:'',     label:'<i class="ti ti-cash" aria-hidden="true"></i> Custo total de férias',    value:BRL(total), sub:subTotal},
+    {cls:'soft', label:'<i class="ti ti-calendar-stats" aria-hidden="true"></i> Mês de maior custo', value:maior?MESNOME[maior]:'—', sub:maior?BRL(cMes[maior]):'sem custo'},
+    {cls:'soft', label:'<i class="ti ti-users" aria-hidden="true"></i> Colaboradores com custo',   value:nomes, sub:`${list.length} períodos`},
   ];
   document.getElementById('custo-hero').innerHTML = cards.map(c=>
     `<div class="hero-card ${c.cls}"><div class="hero-label">${c.label}</div><div class="hero-value">${c.value}</div><div class="hero-sub">${c.sub}</div></div>`
@@ -610,14 +618,16 @@ function renderCustoHero(){
 }
 
 function renderCustoChart(){
-  const meses=[5,6,7,8,9,10,11,12];
-  const totals=meses.map(m=>custoMes[m]||0);
+  const meses = filtroMes==null ? [5,6,7,8,9,10,11,12] : [filtroMes];
+  const cMes = custoMesDe(custosDoMes());
+  const total = Object.values(cMes).reduce((a,b)=>a+b,0);
+  const totals=meses.map(m=>cMes[m]||0);
   const cols=meses.map(m=>COL_MAP[m]);
   document.getElementById('custo-legend').innerHTML =
-    `<span class="legend-item" style="font-weight:500;color:var(--text)">Custo total: ${BRL(custoTotal)}</span>`;
-  const labelColor = matchMedia('(prefers-color-scheme: dark)').matches ? '#ede8f8' : '#1e1428';
+    `<span class="legend-item" style="font-weight:500;color:var(--text)">Custo total: ${BRL(total)}</span>`;
+  const labelColor = matchMedia('(prefers-color-scheme: dark)').matches ? '#f1e8fb' : '#2b0a63';
   const dl={id:'custoDl',afterDatasetsDraw(ch){const{ctx}=ch;const m=ch.getDatasetMeta(0);ctx.save();ctx.font='500 11px system-ui, sans-serif';ctx.fillStyle=labelColor;ctx.textAlign='center';m.data.forEach((b,i)=>{if(totals[i]>0)ctx.fillText(BRLk(totals[i]),b.x,b.y-6);});ctx.restore();}};
-  new Chart(document.getElementById('custoChart'),{
+  mkChart('custoChart',{
     type:'bar',
     data:{labels:meses.map(m=>MESAB[m]),datasets:[{data:totals,backgroundColor:cols,borderRadius:6,borderSkipped:false}]},
     options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:22}},
@@ -629,8 +639,9 @@ function renderCustoChart(){
 
 function renderCustoRank(){
   const byName={};
-  CUSTOS.forEach(p=>{const t=Object.values(p.c).reduce((a,b)=>a+b,0);byName[p.nome]=(byName[p.nome]||0)+t;});
+  custosDoMes().forEach(p=>{const t=Object.values(p.c).reduce((a,b)=>a+b,0);byName[p.nome]=(byName[p.nome]||0)+t;});
   const ranked=Object.entries(byName).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  if(!ranked.length){ document.getElementById('custo-rank').innerHTML='<p style="font-size:12px;color:var(--text-3)">Sem custo lançado neste mês.</p>'; return; }
   const max=ranked[0][1];
   document.getElementById('custo-rank').innerHTML=ranked.map(([nome,val])=>
     `<div class="rank-row"><div class="rank-name" title="${nome}">${nome}</div><div class="rank-track"><div class="rank-fill" style="width:${(val/max*100).toFixed(1)}%"></div></div><div class="rank-val">${BRL(val)}</div></div>`
@@ -638,20 +649,21 @@ function renderCustoRank(){
 }
 
 function renderCompare(){
-  const meses=[2,3,4,5,6,7,8,9,10,11,12];
-  const lab={2:'Fev',3:'Mar',4:'Abr',5:'Mai',6:'Jun',7:'Jul',8:'Ago',9:'Set',10:'Out',11:'Nov',12:'Dez'};
+  const meses = filtroMes==null ? [2,3,4,5,6,7,8,9,10,11,12] : [filtroMes];
+  const cMes = custoMesDe(custosDoMes());
   const descMes={};
-  aprovadas.forEach(d => { descMes[d.mes] = (descMes[d.mes]||0) + perda(d); });
-  const descTotal = Object.values(descMes).reduce((a,b)=>a+b,0);
-  const custo=meses.map(m=>custoMes[m]||0);
+  apMes().forEach(d => { descMes[d.mes] = (descMes[d.mes]||0) + perda(d); });
+  const custoTot = Object.values(cMes).reduce((a,b)=>a+b,0);
+  const descTot  = Object.values(descMes).reduce((a,b)=>a+b,0);
+  const custo=meses.map(m=>cMes[m]||0);
   const desc=meses.map(m=>descMes[m]||0);
   const cCusto='#4B1197', cDesc='#D21B7C';
   document.getElementById('cmp-legend').innerHTML =
-    `<span class="legend-item"><span class="legend-sq" style="background:${cCusto}"></span>Custo de férias · ${BRL(custoTotal)}</span>`+
-    `<span class="legend-item"><span class="legend-sq" style="background:${cDesc}"></span>Desconto de faturamento · ${BRL(descTotal)}</span>`;
-  new Chart(document.getElementById('cmpChart'),{
+    `<span class="legend-item"><span class="legend-sq" style="background:${cCusto}"></span>Custo de férias · ${BRL(custoTot)}</span>`+
+    `<span class="legend-item"><span class="legend-sq" style="background:${cDesc}"></span>Desconto de faturamento · ${BRL(descTot)}</span>`;
+  mkChart('cmpChart',{
     type:'bar',
-    data:{labels:meses.map(m=>lab[m]),datasets:[
+    data:{labels:meses.map(m=>MESAB[m]),datasets:[
       {label:'Custo de férias',data:custo,backgroundColor:cCusto,borderRadius:4,borderSkipped:false},
       {label:'Desconto de faturamento',data:desc,backgroundColor:cDesc,borderRadius:4,borderSkipped:false}
     ]},
@@ -661,16 +673,27 @@ function renderCompare(){
   });
 }
 
-renderSummary();
-renderHero();
-renderLossChart();
-renderCompare();
-renderCustoHero();
-renderCustoChart();
-renderCustoRank();
-renderTimeline();
-renderTable();
-renderLossList();
+function renderFilter(){
+  const meses=[2,3,4,5,6,7,8,9,10,11,12];
+  let html=`<button class="mf-btn ${filtroMes==null?'active':''}" onclick="setMes(null)">Todos</button>`;
+  meses.forEach(m=>{ html+=`<button class="mf-btn ${filtroMes===m?'active':''}" onclick="setMes(${m})">${MESNOME[m]}</button>`; });
+  document.getElementById('month-filter').innerHTML=html;
+}
+window.setMes = function(m){ filtroMes = m; renderAll(); };
+function renderAll(){
+  renderFilter();
+  renderSummary();
+  renderHero();
+  renderLossChart();
+  renderCompare();
+  renderCustoHero();
+  renderCustoChart();
+  renderCustoRank();
+  renderTimeline();
+  renderTable();
+  renderLossList();
+}
+renderAll();
 </script>
 </body>
 </html>
