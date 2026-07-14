@@ -142,7 +142,7 @@
   <div class="cards" id="summary-cards"></div>
 
   <!-- PAINEL EXECUTIVO: IMPACTO NO FATURAMENTO -->
-  <p class="section-title">Desconto de Faturamento — revenue impact <span class="hint">· horas não faturadas (dias úteis seg–sex × 8h × hora-venda)</span></p>
+  <p class="section-title">Desconto de Faturamento — revenue impact <span class="hint">· horas não faturadas (dias úteis seg–sex × 8h × hora-venda) · gestores da operação não são faturados ao cliente (Custo da Operação)</span></p>
   <div class="hero" id="hero-cards"></div>
 
   <div class="panel">
@@ -292,7 +292,7 @@ const DATA = [
   { nome:'Leonardo Santos Ferreira',              inicio:'2026-08-03', fim:'2026-08-22', dias:20, mes:8,  abono:0,  status:'Aprovado', confirm:'Não', hv:190.19 },
   { nome:'Veronica Pereira Nogueira',             inicio:'2026-08-03', fim:'2026-08-20', dias:18, mes:8,  abono:0,  status:'Aprovado', confirm:'Não', hv:66.92 },
   { nome:'Felipe Gomes de Souza',                 inicio:'2026-08-03', fim:'2026-08-17', dias:15, mes:8,  abono:0,  status:'Aprovado', confirm:'Não', hv:293.01 },
-  { nome:'Murilo Antonio da Silva',               inicio:'2026-08-03', fim:'2026-08-07', dias:5,  mes:8,  abono:0,  status:'Aprovado', confirm:'Sim', hv:null },
+  { nome:'Murilo Antonio da Silva',               inicio:'2026-08-03', fim:'2026-08-07', dias:5,  mes:8,  abono:0,  status:'Aprovado', confirm:'Sim', hv:null, gestor:true },
   { nome:'Laryssa Fernanda Peter',                inicio:'2026-08-10', fim:'2026-08-19', dias:10, mes:8,  abono:0,  status:'Aprovado', confirm:'Sim', hv:122.68 },
   { nome:'Vitor Manoel de Oliveira',              inicio:'2026-08-24', fim:'2026-08-29', dias:6,  mes:8,  abono:0,  status:'Aprovado', confirm:'Não', hv:91.71 },
   { nome:'Fernanda Bertola',                      inicio:'2026-08-24', fim:'2026-09-04', dias:12, mes:8,  abono:0,  status:'Aprovado', confirm:'Não', hv:123.06 },
@@ -530,8 +530,8 @@ function renderTable() {
       <td>${d.abono>0?d.abono+' d':'—'}</td>
       <td>${statusBadge}</td>
       <td>${confBadge(d.confirm)}</td>
-      <td class="num">${d.hv==null?'<span style="color:var(--text-3)">a confirmar</span>':BRL(d.hv)}</td>
-      <td class="num">${d.hv==null?'<span style="color:var(--text-3)">a confirmar</span>':BRL(perda(d))}</td>
+      <td class="num">${d.gestor?'<span style="color:var(--text-3)">gestor</span>':(d.hv==null?'<span style="color:var(--text-3)">a confirmar</span>':BRL(d.hv))}</td>
+      <td class="num">${d.gestor?'<span class="badge b-blue">Custo da operação</span>':(d.hv==null?'<span style="color:var(--text-3)">a confirmar</span>':BRL(perda(d)))}</td>
     </tr>`;
   }).join('');
 }
@@ -548,8 +548,8 @@ function renderLossList() {
       <td class="num">${d.dias}</td>
       <td class="num">${diasCalc(d)}</td>
       <td class="num">${horas(d)} h</td>
-      <td class="num">${d.hv==null?'<span style="color:var(--text-3)">a confirmar</span>':BRL(d.hv)}</td>
-      <td class="num">${d.hv==null?'<span style="color:var(--text-3)">a confirmar</span>':BRL(perda(d))}</td>
+      <td class="num">${d.gestor?'<span style="color:var(--text-3)">gestor</span>':(d.hv==null?'<span style="color:var(--text-3)">a confirmar</span>':BRL(d.hv))}</td>
+      <td class="num">${d.gestor?'<span class="badge b-blue">Custo da operação</span>':(d.hv==null?'<span style="color:var(--text-3)">a confirmar</span>':BRL(perda(d)))}</td>
     </tr>`
   ).join('');
   const totalDias = aprovadas.reduce((s,d)=>s+d.dias,0);
@@ -572,8 +572,8 @@ function renderLossList() {
       <td class="num">${d.dias}</td>
       <td class="num">${diasCalc(d)}</td>
       <td class="num">${horas(d)} h</td>
-      <td class="num">${d.hv==null?'<span style="color:var(--text-3)">a confirmar</span>':BRL(d.hv)}</td>
-      <td class="num">${d.hv==null?'<span style="color:var(--text-3)">a confirmar</span>':BRL(perda(d))}</td>
+      <td class="num">${d.gestor?'<span style="color:var(--text-3)">gestor</span>':(d.hv==null?'<span style="color:var(--text-3)">a confirmar</span>':BRL(d.hv))}</td>
+      <td class="num">${d.gestor?'<span class="badge b-blue">Custo da operação</span>':(d.hv==null?'<span style="color:var(--text-3)">a confirmar</span>':BRL(perda(d)))}</td>
     </tr>`
   ).join('');
   const riscoP = vencendo.reduce((s,d)=>s+perda(d),0);
