@@ -17,13 +17,13 @@
     .top .sub { font-size: 12.5px; opacity: .8; margin-top: 4px; }
     .top .brand { font-size: 26px; font-weight: 700; letter-spacing: -1px; }
     .top .brand .dot { color: #E6449B; }
-    .body { padding: 26px 30px 30px; }
+    .body { padding: 20px 30px 14px; }
 
-    .sec { font-size: 11px; font-weight: 500; color: #9b85c0; text-transform: uppercase; letter-spacing: .06em; margin: 0 0 12px; }
-    .sec:not(:first-child) { margin-top: 26px; }
+    .sec { font-size: 11px; font-weight: 500; color: #9b85c0; text-transform: uppercase; letter-spacing: .06em; margin: 0 0 11px; }
+    .sec:not(:first-child) { margin-top: 18px; }
 
     .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-    .kpi { background: #3A0E8C; color: #fff; border-radius: 10px; padding: 14px 15px; }
+    .kpi { background: #3A0E8C; color: #fff; border-radius: 10px; padding: 12px 15px; }
     .kpi.mag { background: #D21B7C; }
     .kpi.soft { background: #ede6fa; color: #3A0E8C; }
     .kpi-l { font-size: 10.5px; opacity: .85; margin-bottom: 6px; line-height: 1.3; }
@@ -31,18 +31,18 @@
     .kpi-s { font-size: 10.5px; opacity: .8; margin-top: 5px; line-height: 1.3; }
 
     .tl { position: relative; padding-left: 20px; border-left: 2px solid rgba(58,14,140,.14); margin-left: 4px; }
-    .tl-item { position: relative; margin-bottom: 15px; }
+    .tl-item { position: relative; margin-bottom: 9px; }
     .tl-item:last-child { margin-bottom: 0; }
     .tl-item::before { content:''; position:absolute; left:-27px; top:3px; width:10px; height:10px; border-radius:50%; background:#D21B7C; border:2px solid #fff; }
     .tl-date { font-size: 11px; font-weight: 500; color: #6e2cbf; }
     .tl-title { font-size: 14.5px; font-weight: 500; margin: 1px 0 3px; }
-    .tl-desc { font-size: 13px; color: #5f4a86; line-height: 1.55; }
+    .tl-desc { font-size: 13px; color: #5f4a86; line-height: 1.42; }
 
     .chips { display: flex; flex-wrap: wrap; gap: 8px; }
     .chip { font-size: 12px; background: #f0e8f8; color: #3A0E8C; border-radius: 999px; padding: 6px 13px; display: inline-flex; align-items: center; gap: 6px; }
     .chip i { color: #D21B7C; font-size: 15px; }
 
-    .foot { margin-top: 26px; border-top: 1px solid rgba(58,14,140,.12); padding-top: 12px; font-size: 12px; color: #9b85c0; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+    .foot { margin-top: 16px; border-top: 1px solid rgba(58,14,140,.12); padding-top: 11px; font-size: 12px; color: #9b85c0; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
     .foot a { color: #6e2cbf; text-decoration: none; }
 
     @media print {
@@ -57,7 +57,7 @@
     <div class="top">
       <div>
         <div class="ttl">Dashboard de Gestão de Férias — Globo</div>
-        <div class="sub">Relatório de evolução · v1 (15/jun) → versão atual (14/jul/2026) · 17 publicações</div>
+        <div class="sub">Relatório de evolução · v1 (15/jun) → versão atual (20/jul/2026) · 19 publicações</div>
       </div>
       <div class="brand">insi<span class="dot">.</span></div>
     </div>
@@ -65,10 +65,10 @@
     <div class="body">
       <p class="sec">Onde chegamos — números do painel hoje</p>
       <div class="kpis">
-        <div class="kpi"><div class="kpi-l">Desconto de faturamento (ano)</div><div class="kpi-v">R$ 518 mil</div><div class="kpi-s">receita não realizada nas férias</div></div>
-        <div class="kpi mag"><div class="kpi-l">Custo de férias (mai–dez)</div><div class="kpi-v">R$ 513 mil</div><div class="kpi-s">provisão de custo</div></div>
-        <div class="kpi soft"><div class="kpi-l">Risco a vencer</div><div class="kpi-v">R$ 165 mil</div><div class="kpi-s">5 saldos não programados</div></div>
-        <div class="kpi soft"><div class="kpi-l">Cobertura</div><div class="kpi-v">38 períodos</div><div class="kpi-s">fev–dez · 25 confirmados</div></div>
+        <div class="kpi"><div class="kpi-l">Desconto de faturamento (ano)</div><div class="kpi-v">R$ 558 mil</div><div class="kpi-s">receita não realizada nas férias</div></div>
+        <div class="kpi mag"><div class="kpi-l">Custo de férias (mai–dez)</div><div class="kpi-v">R$ 597 mil</div><div class="kpi-s">provisão de custo</div></div>
+        <div class="kpi soft"><div class="kpi-l">Risco a vencer</div><div class="kpi-v">R$ 154 mil</div><div class="kpi-s">4 saldos não programados</div></div>
+        <div class="kpi soft"><div class="kpi-l">Cobertura</div><div class="kpi-v">39 períodos</div><div class="kpi-s">fev–dez · 25 confirmados</div></div>
       </div>
 
       <p class="sec">Como evoluiu</p>
@@ -94,9 +94,14 @@
           <div class="tl-desc">Sincronizações da planilha (novos colaboradores e agendamentos) e a regra de gestores da operação = Custo da Operação (não são faturados ao cliente, então não geram desconto).</div>
         </div>
         <div class="tl-item">
-          <div class="tl-date">14 JUL · versão atual</div>
+          <div class="tl-date">14 JUL</div>
           <div class="tl-title">Identidade Insi + interatividade</div>
           <div class="tl-desc">Paleta oficial Insi (indigo + magenta), gráfico comparativo Custo × Desconto e filtro por mês que recorta o painel inteiro num clique.</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-date">20 JUL · versão atual</div>
+          <div class="tl-title">Novo ciclo de sincronização</div>
+          <div class="tl-desc">Planejamento de setembro/outubro atualizado: Rosangela sai do "a vencer" com férias marcadas, Flavia ganha um 2º período e entra o Pedro Paulo. Cobertura passa a 39 períodos.</div>
         </div>
       </div>
 
@@ -114,7 +119,7 @@
 
       <div class="foot">
         <span>Painel ao vivo: <a href="https://muriloantonioinsi.github.io/ferias-globo-dashboard">muriloantonioinsi.github.io/ferias-globo-dashboard</a></span>
-        <span>Gestão de Férias · Operação Globo</span>
+        <span>Gestão de Férias · Operação Globo · atualizado em 20/jul/2026</span>
       </div>
     </div>
   </div>
