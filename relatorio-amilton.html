@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Relatório de Férias — Gerência (Amilton)</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #ece7f5; color: #2b0a63; padding: 24px; }
+    .page { max-width: 900px; margin: 0 auto; background: #fff; border-radius: 14px; overflow: hidden; box-shadow: 0 1px 4px rgba(58,14,140,.10); }
+    .top { background: #3A0E8C; color: #fff; padding: 22px 30px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .top .ttl { font-size: 19px; font-weight: 500; }
+    .top .sub { font-size: 12.5px; opacity: .82; margin-top: 4px; }
+    .top .brand { font-size: 26px; font-weight: 700; letter-spacing: -1px; }
+    .top .brand .dot { color: #E6449B; }
+    .body { padding: 24px 30px 28px; }
+    .lead { font-size: 14px; color: #5f4a86; line-height: 1.6; margin-bottom: 22px; }
+
+    .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 24px; }
+    .kpi { border-radius: 10px; padding: 12px 14px; }
+    .kpi.a { background: #3A0E8C; color:#fff; } .kpi.b { background:#D21B7C; color:#fff; }
+    .kpi.c { background:#ede6fa; color:#3A0E8C; } .kpi.d { background:#f0e8f8; color:#3A0E8C; }
+    .kpi-l { font-size: 10.5px; opacity:.85; margin-bottom:5px; line-height:1.3; }
+    .kpi-v { font-size: 19px; font-weight: 500; }
+    .kpi-s { font-size: 10.5px; opacity:.8; margin-top:3px; }
+
+    .sec { margin-top: 26px; }
+    .sec:first-of-type { margin-top: 0; }
+    .sec-h { display:flex; align-items:baseline; gap:8px; margin-bottom: 4px; }
+    .sec-h h3 { font-size: 15.5px; font-weight: 500; }
+    .sec-h .cnt { font-size: 12px; color:#9b85c0; }
+    .sec-d { font-size: 12.5px; color:#7a68a0; margin-bottom: 10px; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+    thead th { background:#f0e8f8; color:#3A0E8C; font-weight: 500; text-align: left; padding: 7px 10px; border-bottom: 1.5px solid #d9cdf0; }
+    thead th.r { text-align: right; }
+    tbody td { padding: 7px 10px; border-bottom: 0.5px solid #ece4f6; }
+    tbody td.r { text-align: right; font-variant-numeric: tabular-nums; }
+    tbody tr:nth-child(even) { background: #faf7fd; }
+    .gap { color:#B01268; font-weight: 500; }
+    .oper { color:#9b85c0; font-style: italic; }
+    tr.tot td { border-top: 1.5px solid #d9cdf0; font-weight: 600; background:#f7f2fc; }
+    tr.tot td.r { color:#3A0E8C; }
+    .pill { display:inline-block; font-size:11px; padding:2px 8px; border-radius:999px; background:#fbe3ef; color:#B01268; font-weight:500; }
+
+    .foot { margin-top: 26px; border-top: 1px solid rgba(58,14,140,.12); padding-top: 12px; font-size: 11.5px; color: #9b85c0; line-height: 1.6; }
+    .foot a { color:#6e2cbf; text-decoration:none; }
+
+    @media print { body { background:#fff; padding:0; } .page { box-shadow:none; border-radius:0; max-width:100%; } @page { size:A4; margin:11mm; } .sec { break-inside: avoid; } }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="top">
+      <div>
+        <div class="ttl">Gestão de Férias — Globo · Relatório gerencial</div>
+        <div class="sub">Preparado para Amilton Mamede · referência 12/ago/2026 · dados da planilha Gestao_Ferias_Globo</div>
+      </div>
+      <div class="brand">insi<span class="dot">.</span></div>
+    </div>
+
+    <div class="body">
+      <p class="lead">Amilton, segue o detalhamento das férias para você acompanhar sem precisar de reunião: quem tem <b>saldo a vencer</b> (2026 e janeiro/2027, em quadros separados) e quem estará de férias em <b>agosto</b> e <b>setembro</b> — com o <b>gap de faturamento</b> (receita que deixamos de faturar) que cada um gera.</p>
+
+      <div class="kpis">
+        <div class="kpi a"><div class="kpi-l">Gap — férias de agosto</div><div class="kpi-v">R$ 124.944</div><div class="kpi-s">11 faturáveis + 1 gestor</div></div>
+        <div class="kpi b"><div class="kpi-l">Gap — férias de setembro</div><div class="kpi-v">R$ 108.903</div><div class="kpi-s">8 profissionais</div></div>
+        <div class="kpi c"><div class="kpi-l">A vencer em 2026</div><div class="kpi-v">R$ 54.752</div><div class="kpi-s">3 profissionais</div></div>
+        <div class="kpi d"><div class="kpi-l">A vencer em jan/2027</div><div class="kpi-v">R$ 72.982</div><div class="kpi-s">2 profissionais</div></div>
+      </div>
+
+      <!-- 1. A VENCER 2026 -->
+      <div class="sec">
+        <div class="sec-h"><h3>Férias a vencer ainda em 2026</h3><span class="cnt">· 3 profissionais</span></div>
+        <div class="sec-d">Saldos sem período marcado, com data-limite dentro de 2026. Gap estimado sobre o saldo de dias (× 8h × hora-venda), até a marcação.</div>
+        <table>
+          <thead><tr><th>Profissional</th><th class="r">Saldo (dias)</th><th>Data-limite</th><th class="r">Gap potencial</th></tr></thead>
+          <tbody>
+            <tr><td>Jefferson Rafael Santana Moraes</td><td class="r">10</td><td>13/12/2026</td><td class="r gap">R$ 5.392,80</td></tr>
+            <tr><td>Igor Dias Rangel</td><td class="r">15</td><td>20/12/2026</td><td class="r gap">R$ 18.459,60</td></tr>
+            <tr><td>Yuri Dambroysk</td><td class="r">30</td><td>23/12/2026</td><td class="r gap">R$ 30.900,00</td></tr>
+            <tr class="tot"><td>Total</td><td class="r">55</td><td></td><td class="r">R$ 54.752,40</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 2. A VENCER JAN/2027 -->
+      <div class="sec">
+        <div class="sec-h"><h3>Férias vencendo em janeiro/2027</h3><span class="cnt">· 2 profissionais</span> <span class="pill" style="margin-left:6px">quadro separado</span></div>
+        <div class="sec-d">Data-limite já em 2027 — fora do ano-calendário, mas mapeadas para antecedência.</div>
+        <table>
+          <thead><tr><th>Profissional</th><th class="r">Saldo (dias)</th><th>Data-limite</th><th class="r">Gap potencial</th></tr></thead>
+          <tbody>
+            <tr><td>Paulo Sergio da Costa Moreira Filho</td><td class="r">30</td><td>04/01/2027</td><td class="r gap">R$ 33.429,60</td></tr>
+            <tr><td>Ana Clara Paixão Cardoso</td><td class="r">30</td><td>23/01/2027</td><td class="r gap">R$ 39.552,00</td></tr>
+            <tr class="tot"><td>Total</td><td class="r">60</td><td></td><td class="r">R$ 72.981,60</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 3. AGOSTO -->
+      <div class="sec">
+        <div class="sec-h"><h3>Férias em agosto/2026</h3><span class="cnt">· 11 profissionais + 1 gestor</span></div>
+        <div class="sec-d">Todos que têm ao menos um dia de férias em agosto (inclui períodos que começam em julho ou terminam em setembro). Gap = dias úteis do período × 8h × hora-venda.</div>
+        <table>
+          <thead><tr><th>Profissional</th><th>Período</th><th class="r">Dias úteis</th><th class="r">Gap de faturamento</th></tr></thead>
+          <tbody>
+            <tr><td>Rachel Magalhães de Andrade</td><td>20/07 – 04/08</td><td class="r">12</td><td class="r gap">R$ 17.205,12</td></tr>
+            <tr><td>Guilherme da Costa Cardoso</td><td>22/07 – 05/08</td><td class="r">11</td><td class="r gap">R$ 11.222,64</td></tr>
+            <tr><td>Rodrigo Zisman Pereira</td><td>27/07 – 07/08</td><td class="r">10</td><td class="r gap">R$ 13.947,20</td></tr>
+            <tr><td>Jean Philip Silva</td><td>03/08 – 07/08</td><td class="r">5</td><td class="r gap">R$ 5.101,60</td></tr>
+            <tr><td>Leonardo Santos Ferreira</td><td>03/08 – 22/08</td><td class="r">15</td><td class="r gap">R$ 22.822,80</td></tr>
+            <tr><td>Veronica Pereira Nogueira</td><td>03/08 – 20/08</td><td class="r">14</td><td class="r gap">R$ 7.495,04</td></tr>
+            <tr><td>Felipe Gomes de Souza</td><td>03/08 – 17/08</td><td class="r">11</td><td class="r gap">R$ 25.784,88</td></tr>
+            <tr><td>Murilo Antonio da Silva <span class="pill" style="background:#ede6fa;color:#3A0E8C">gestor</span></td><td>03/08 – 07/08</td><td class="r">5</td><td class="r oper">Custo da Operação</td></tr>
+            <tr><td>Laryssa Fernanda Peter</td><td>10/08 – 19/08</td><td class="r">8</td><td class="r gap">R$ 7.851,52</td></tr>
+            <tr><td>Vitor Manoel de Oliveira</td><td>24/08 – 29/08</td><td class="r">5</td><td class="r gap">R$ 3.668,40</td></tr>
+            <tr><td>Fernanda Bertola</td><td>24/08 – 04/09</td><td class="r">10</td><td class="r gap">R$ 9.844,80</td></tr>
+            <tr class="tot"><td>Total faturável (exclui gestor)</td><td></td><td class="r">101</td><td class="r">R$ 124.944,00</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 4. SETEMBRO -->
+      <div class="sec">
+        <div class="sec-h"><h3>Férias em setembro/2026</h3><span class="cnt">· 8 profissionais</span></div>
+        <div class="sec-d">Todos com ao menos um dia de férias em setembro (inclui quem começa em agosto ou termina em outubro).</div>
+        <table>
+          <thead><tr><th>Profissional</th><th>Período</th><th class="r">Dias úteis</th><th class="r">Gap de faturamento</th></tr></thead>
+          <tbody>
+            <tr><td>Fernanda Bertola</td><td>24/08 – 04/09</td><td class="r">10</td><td class="r gap">R$ 9.844,80</td></tr>
+            <tr><td>Lidia Vieira</td><td>08/09 – 17/09</td><td class="r">8</td><td class="r gap">R$ 11.955,20</td></tr>
+            <tr><td>Rafaela de Orlando Nascimento</td><td>08/09 – 25/09</td><td class="r">14</td><td class="r gap">R$ 17.750,88</td></tr>
+            <tr><td>Flavia Cezario de Barros</td><td>08/09 – 20/09</td><td class="r">9</td><td class="r gap">R$ 15.093,36</td></tr>
+            <tr><td>Rosangela Silva de Castro</td><td>08/09 – 17/09</td><td class="r">8</td><td class="r gap">R$ 9.422,08</td></tr>
+            <tr><td>Bruno Roberto da Silva</td><td>14/09 – 03/10</td><td class="r">15</td><td class="r gap">R$ 18.463,20</td></tr>
+            <tr><td>Lindsay Fernandes de Souza Filho</td><td>23/09 – 02/10</td><td class="r">8</td><td class="r gap">R$ 11.157,76</td></tr>
+            <tr><td>Pedro Paulo Ferreira Corazza</td><td>28/09 – 09/10</td><td class="r">10</td><td class="r gap">R$ 15.216,00</td></tr>
+            <tr class="tot"><td>Total</td><td></td><td class="r">82</td><td class="r">R$ 108.903,28</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="foot">
+        <b>Como o gap é calculado:</b> dias úteis (seg–sex) dentro do período de gozo × 8h × hora-venda do profissional. É a receita não faturada ao cliente durante as férias — não confundir com o custo/provisão trabalhista. Para saldos a vencer (sem período marcado), o gap é estimado sobre o saldo de dias. Gestores da operação (ex.: Murilo) não são faturados ao cliente, então entram como <b>Custo da Operação</b>, sem gap.<br>
+        Fernanda Bertola aparece em agosto e setembro por ter período entre 24/08 e 04/09 — o gap dela (R$ 9.844,80) é do período único, não somado duas vezes.<br>
+        Painel completo e sempre atualizado: <a href="https://muriloantonioinsi.github.io/ferias-globo-dashboard">muriloantonioinsi.github.io/ferias-globo-dashboard</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
