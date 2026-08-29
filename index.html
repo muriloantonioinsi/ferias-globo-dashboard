@@ -150,6 +150,9 @@
   <p class="section-title" style="margin-top:.5rem;">Filtrar por mês</p>
   <div class="month-filter" id="month-filter"></div>
 
+  <p class="section-title">Filtrar por centro de custo</p>
+  <div class="month-filter" id="cc-filter"></div>
+
   <!-- CARDS RESUMO -->
   <p class="section-title">Resumo</p>
   <div class="cards" id="summary-cards"></div>
@@ -166,27 +169,20 @@
     </div>
   </div>
 
-  <div class="panel">
-    <p style="font-size:13px; font-weight:500; margin-bottom:12px;">Custo de Férias × Desconto de Faturamento por mês (R$)</p>
-    <div class="legend" id="cmp-legend"></div>
-    <div style="position:relative; width:100%; height:300px;">
-      <canvas id="cmpChart" role="img" aria-label="Comparativo mensal entre custo de férias e desconto de faturamento de fevereiro a dezembro 2026">Comparativo de custo de férias e desconto de faturamento por mês.</canvas>
+  <!-- POR CENTRO DE CUSTO -->
+  <p class="section-title">Por centro de custo <span class="hint">· gap de faturamento e custo de férias somados por CC (respeita o filtro de mês)</span></p>
+  <div class="panel" style="padding:0; overflow:hidden;">
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>Centro de custo</th>
+          <th class="num">Profissionais</th>
+          <th class="num">Gap de faturamento</th>
+          <th class="num">Custo de férias</th>
+        </tr></thead>
+        <tbody id="cc-body"></tbody>
+      </table>
     </div>
-  </div>
-
-  <!-- CUSTOS DE FÉRIAS -->
-  <p class="section-title">Custos de Férias <span class="hint">· provisão de custo por período de gozo (aba Custos de Férias · mai–dez 2026)</span></p>
-  <div class="hero" id="custo-hero"></div>
-  <div class="panel">
-    <p style="font-size:13px; font-weight:500; margin-bottom:12px;">Custo de férias por mês (R$)</p>
-    <div class="legend" id="custo-legend"></div>
-    <div style="position:relative; width:100%; height:230px;">
-      <canvas id="custoChart" role="img" aria-label="Custo de férias por mês de maio a dezembro 2026">Custo de férias distribuído por mês.</canvas>
-    </div>
-  </div>
-  <div class="panel">
-    <p style="font-size:13px; font-weight:500; margin-bottom:14px;">Maiores custos por colaborador (R$ no ano)</p>
-    <div id="custo-rank"></div>
   </div>
 
   <!-- TIMELINE -->
@@ -228,6 +224,7 @@
           <th>Abono</th>
           <th>Status</th>
           <th>Conf. cliente</th>
+          <th>Centro custo</th>
           <th class="num">Hora-venda</th>
           <th class="num">Desconto faturamento</th>
         </tr></thead>
@@ -236,24 +233,6 @@
     </div>
   </div>
 
-  <!-- ÚLTIMA SEÇÃO: LISTAGEM DE FATURAMENTO PERDIDO -->
-  <p class="section-title">Faturamento perdido — detalhamento completo</p>
-  <div class="panel" style="padding:0; overflow:hidden;">
-    <div class="table-wrap">
-      <table>
-        <thead><tr>
-          <th>Colaborador</th>
-          <th>Período</th>
-          <th class="num">Dias gozo</th>
-          <th class="num">Dias úteis</th>
-          <th class="num">Horas (×8h)</th>
-          <th class="num">Hora-venda</th>
-          <th class="num">Desconto faturamento</th>
-        </tr></thead>
-        <tbody id="loss-body"></tbody>
-      </table>
-    </div>
-  </div>
 
 </main>
 
@@ -317,7 +296,7 @@ const DATA = [
   { nome:'Jefferson Rafael Santana Moraes',       inicio:null, fim:null, dias:10, mes:null, abono:0, status:'Vencendo', confirm:'Não', hv:67.41,  limite:'2026-12-13' },
   { nome:'Ana Clara Paixão Cardoso',              inicio:null, fim:null, dias:30, mes:null, abono:0, status:'Vencendo', confirm:'Não', hv:164.80, limite:'2027-01-23' },
 ];
-const UPDATED = '2026-08-12';
+const UPDATED = '2026-08-29';
 const JORNADA = 8; // horas/dia
 // ============================================================
 
@@ -391,11 +370,31 @@ const custoTotal = Object.values(custoMes).reduce((a,b)=>a+b,0);
 const MESNOME = {2:'Fevereiro',3:'Março',4:'Abril',5:'Maio',6:'Junho',7:'Julho',8:'Agosto',9:'Setembro',10:'Outubro',11:'Novembro',12:'Dezembro'};
 const MESAB = {2:'Fev',3:'Mar',4:'Abr',5:'Mai',6:'Jun',7:'Jul',8:'Ago',9:'Set',10:'Out',11:'Nov',12:'Dez'};
 
-// ---- Filtro global de mês ----
+// ---- Centro de custo (aba Hora Venda) ----
+const CC = {
+  'Rafaela de Orlando Nascimento':'ED','Leonardo Santos Ferreira':'ED','Fellipe Couto Marques Arruda':'SD',
+  'Patricia de Araujo Rudas Paternina':'ED','Eduardo Gabriel Delfito do Nascimento':'SD','Davi Alves de Sousa da Silva':'SD',
+  'Edvaldo Braz da Silva':'SD','Paulo Eugenio da Silva dos Reis':'SD','Luciana dos Santos Dias':'ED',
+  'Gleidson Andre Duarte Ramos':'ED','Rosangela Silva de Castro':'ED','Jean Philip Silva':'SD',
+  'Raquel Rente Peixoto':'ED','Diego Mariano de Oliveira':'ED','Igor Dias Rangel':'SD',
+  'Ivana Mara Rodrigues Possidio':'ED','Felipe dos Santos Machado':'ED','Aline Alvares Boyde':'ED',
+  'Guilherme da Costa Cardoso':'SD','Jefferson Rafael Santana Moraes':'SD','Roberto de Souza Batista':'ED',
+  'Rachel Magalhães de Andrade':'ED','Rodrigo Zisman Pereira':'ED','Veronica Pereira Nogueira':'SD',
+  'Felipe Gomes de Souza':'SD','Laryssa Fernanda Peter':'ED','Vitor Manoel de Oliveira':'SD',
+  'Fernanda Bertola':'ED','Bruno Roberto da Silva':'SD','Lidia Vieira':'ED','Flavia Cezario de Barros':'ED',
+  'Pedro Paulo Ferreira Corazza':'ED','Lindsay Fernandes de Souza Filho':'ED','Sidney Rosa Alves da Rocha':'ED',
+  'Yuri Dambroysk':'ED','Paulo Sergio da Costa Moreira Filho':'ED','Ana Clara Paixão Cardoso':'ED',
+};
+const CC_FULL = 'GLOBO - ALOCAÇÃO DE PROFISSIONAIS';
+const ccDe = d => d.gestor ? '—' : (CC[d.nome] || '—');
+
+// ---- Filtros globais (mês + centro de custo) ----
 let filtroMes = null; // null = todos os meses
-const apMes       = () => filtroMes==null ? aprovadas : aprovadas.filter(d=>d.mes===filtroMes);
-const vencMes     = () => filtroMes==null ? vencendo  : [];   // Vencendo não têm mês de gozo
-const custosDoMes = () => filtroMes==null ? CUSTOS : CUSTOS.filter(p=>p.c[filtroMes]!=null).map(p=>({nome:p.nome, c:{[filtroMes]:p.c[filtroMes]}}));
+let filtroCC = null;  // null | 'ED' | 'SD'
+const matchCC     = d => filtroCC==null || ccDe(d)===filtroCC;
+const apMes       = () => aprovadas.filter(d => (filtroMes==null || d.mes===filtroMes) && matchCC(d));
+const vencMes     = () => (filtroMes==null ? vencendo : []).filter(matchCC);
+const custosDoMes = () => (filtroMes==null ? CUSTOS : CUSTOS.filter(p=>p.c[filtroMes]!=null).map(p=>({nome:p.nome, c:{[filtroMes]:p.c[filtroMes]}})));
 const custoMesDe  = list => { const o={}; list.forEach(p=>{ for (const [m,v] of Object.entries(p.c)) o[m]=(o[m]||0)+v; }); return o; };
 const chartRefs = {};
 const mkChart = (id,cfg) => { if(chartRefs[id]) chartRefs[id].destroy(); chartRefs[id]=new Chart(document.getElementById(id),cfg); };
@@ -442,7 +441,7 @@ function renderHero() {
 
 function renderLossChart() {
   const mm = filtroMes==null ? MONTHS : MONTHS.filter(m=>m.n===filtroMes);
-  const totals = mm.map(m => aprovadas.filter(d=>d.mes===m.n).reduce((s,d)=>s+perda(d),0));
+  const totals = mm.map(m => aprovadas.filter(d=>d.mes===m.n && matchCC(d)).reduce((s,d)=>s+perda(d),0));
   const cols   = mm.map(m => COL_MAP[m.n]);
   const grand  = totals.reduce((a,b)=>a+b,0);
   document.getElementById('loss-legend').innerHTML =
@@ -530,6 +529,7 @@ function renderTable() {
   const fC = document.getElementById('f-confirm').value;
   const rows = DATA.filter(d=>{
     if(filtroMes!=null && d.mes!==filtroMes) return false;
+    if(filtroCC!=null && ccDe(d)!==filtroCC) return false;
     if(fS && d.status!==fS) return false;
     if(fC && d.confirm!==fC) return false;
     return true;
@@ -548,10 +548,17 @@ function renderTable() {
       <td>${d.abono>0?d.abono+' d':'—'}</td>
       <td>${statusBadge}</td>
       <td>${confBadge(d.confirm)}</td>
+      <td>${ccBadge(d)}</td>
       <td class="num">${d.gestor?'<span style="color:var(--text-3)">gestor</span>':(d.hv==null?'<span style="color:var(--text-3)">a confirmar</span>':BRL(d.hv))}</td>
       <td class="num">${d.gestor?'<span class="badge b-blue">Custo da operação</span>':(d.hv==null?'<span style="color:var(--text-3)">a confirmar</span>':BRL(perda(d)))}</td>
     </tr>`;
   }).join('');
+}
+
+function ccBadge(d){
+  const c = ccDe(d);
+  if(c==='—') return '<span style="color:var(--text-3)">—</span>';
+  return `<span class="badge ${c==='ED'?'b-blue':'b-amber'}" title="${CC_FULL} ${c}">${c}</span>`;
 }
 
 function renderLossList() {
@@ -683,25 +690,48 @@ function renderCompare(){
   });
 }
 
+function renderCC(){
+  const apList = filtroMes==null ? aprovadas : aprovadas.filter(d=>d.mes===filtroMes);
+  const agg = {};
+  const ensure = k => agg[k] || (agg[k] = {gap:0, custo:0, nomes:new Set()});
+  apList.forEach(d=>{ const k=ccDe(d); ensure(k).gap += perda(d); ensure(k).nomes.add(d.nome); });
+  custosDoMes().forEach(p=>{ const k=CC[p.nome]||'—'; ensure(k).custo += Object.values(p.c).reduce((a,b)=>a+b,0); });
+  const label = {'ED':'Alocação de Profissionais · ED','SD':'Alocação de Profissionais · SD','—':'Gestor / sem centro de custo'};
+  const order = ['ED','SD','—'].filter(k=>agg[k]);
+  let rows = order.map(k=>`<tr>
+      <td>${label[k]||k}</td>
+      <td class="num">${agg[k].nomes.size||'—'}</td>
+      <td class="num">${BRL(agg[k].gap)}</td>
+      <td class="num">${agg[k].custo?BRL(agg[k].custo):'—'}</td>
+    </tr>`).join('');
+  const allNames=new Set(); order.forEach(k=>agg[k].nomes.forEach(n=>allNames.add(n)));
+  const tGap=order.reduce((s,k)=>s+agg[k].gap,0);
+  const tCusto=order.reduce((s,k)=>s+agg[k].custo,0);
+  rows += `<tr class="total-row"><td>Total</td><td class="num">${allNames.size}</td><td class="num">${BRL(tGap)}</td><td class="num">${BRL(tCusto)}</td></tr>`;
+  document.getElementById('cc-body').innerHTML = rows;
+}
+
 function renderFilter(){
   const meses=[2,3,4,5,6,7,8,9,10,11,12];
   let html=`<button class="mf-btn ${filtroMes==null?'active':''}" onclick="setMes(null)">Todos</button>`;
   meses.forEach(m=>{ html+=`<button class="mf-btn ${filtroMes===m?'active':''}" onclick="setMes(${m})">${MESNOME[m]}</button>`; });
   document.getElementById('month-filter').innerHTML=html;
 }
+function renderCCfilter(){
+  const mk=(lbl,v)=>`<button class="mf-btn ${filtroCC===v?'active':''}" onclick="setCC(${v==null?'null':`'${v}'`})">${lbl}</button>`;
+  document.getElementById('cc-filter').innerHTML = mk('Todos',null)+mk('ED','ED')+mk('SD','SD');
+}
 window.setMes = function(m){ filtroMes = m; renderAll(); };
+window.setCC  = function(v){ filtroCC = v; renderAll(); };
 function renderAll(){
   renderFilter();
+  renderCCfilter();
   renderSummary();
   renderHero();
   renderLossChart();
-  renderCompare();
-  renderCustoHero();
-  renderCustoChart();
-  renderCustoRank();
+  renderCC();
   renderTimeline();
   renderTable();
-  renderLossList();
 }
 renderAll();
 </script>
