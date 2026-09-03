@@ -116,6 +116,7 @@
     .b-amber { background: var(--amber-bg); color: var(--amber-text); }
     .b-gray  { background: var(--gray-bg);  color: var(--gray-text); }
     .b-red   { background: var(--red-bg);   color: var(--red-text); }
+    .b-blue  { background: var(--blue-bg);  color: var(--blue-text); }
 
     .table-wrap { overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 780px; }
@@ -131,6 +132,16 @@
     .legend-item { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--text-2); }
     .legend-sq { width: 10px; height: 10px; border-radius: 2px; }
 
+    /* Abas de navegação */
+    .tabs { background: var(--deep); display: flex; gap: 2px; padding: 0 1.5rem; overflow-x: auto; position: sticky; top: 0; z-index: 20; }
+    .tab { font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.66); background: transparent; border: 0; border-bottom: 2.5px solid transparent; padding: 11px 15px; cursor: pointer; display: flex; align-items: center; gap: 6px; white-space: nowrap; transition: color .12s, border-color .12s; }
+    .tab:hover { color: #fff; }
+    .tab.active { color: #fff; border-bottom-color: #E6449B; }
+    .tab i { font-size: 16px; }
+
+    .route { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+    .route i { color: var(--text-3); font-size: 13px; }
+
     footer { text-align: center; padding: 2rem 1rem 1rem; font-size: 11px; color: var(--text-3); }
   </style>
 </head>
@@ -138,13 +149,21 @@
 
 <header>
   <div style="display:flex; align-items:center; gap:10px;">
-    <i class="ti ti-beach" style="font-size:20px; color:#E6449B;" aria-hidden="true"></i>
-    <h1>Gestão de Férias — Globo</h1>
+    <i id="hdr-icon" class="ti ti-beach" style="font-size:20px; color:#E6449B;" aria-hidden="true"></i>
+    <h1 id="hdr-title">Gestão de Férias — Globo</h1>
   </div>
   <span class="updated" id="updated-at"></span>
 </header>
 
+<nav class="tabs" role="tablist" aria-label="Seções do painel">
+  <button class="tab active" data-page="ferias"   role="tab" onclick="switchTab('ferias')"><i class="ti ti-beach" aria-hidden="true"></i> Férias</button>
+  <button class="tab"         data-page="viagens"  role="tab" onclick="switchTab('viagens')"><i class="ti ti-plane-tilt" aria-hidden="true"></i> Viagens</button>
+  <button class="tab"         data-page="excecoes" role="tab" onclick="switchTab('excecoes')"><i class="ti ti-receipt" aria-hidden="true"></i> Exceções de Ajuda de Custo</button>
+</nav>
+
 <main>
+
+  <section id="page-ferias" class="page">
 
   <!-- FILTRO DE MÊS -->
   <p class="section-title" style="margin-top:.5rem;">Filtrar por mês</p>
@@ -233,10 +252,151 @@
     </div>
   </div>
 
+  </section>
+
+  <!-- ===================== PÁGINA VIAGENS ===================== -->
+  <section id="page-viagens" class="page" hidden>
+
+    <p class="section-title" style="margin-top:.5rem;">Filtrar por mês <span class="hint">· mês da ida</span></p>
+    <div class="month-filter" id="v-month-filter"></div>
+
+    <p class="section-title">Filtrar por centro de custo</p>
+    <div class="month-filter" id="v-cc-filter"></div>
+
+    <p class="section-title">Resumo</p>
+    <div class="cards" id="v-summary-cards"></div>
+
+    <p class="section-title">Custo de viagens <span class="hint">· custo total = passagem + hospedagem + imposto + juros de financiamento (JF)</span></p>
+    <div class="hero" id="v-hero-cards"></div>
+
+    <div class="panel">
+      <p style="font-size:13px; font-weight:500; margin-bottom:12px;">Custo de viagens por mês (R$)</p>
+      <div class="legend" id="v-loss-legend"></div>
+      <div style="position:relative; width:100%; height:230px;">
+        <canvas id="vChart" role="img" aria-label="Custo de viagens por mês"></canvas>
+      </div>
+    </div>
+
+    <p class="section-title">Por centro de custo <span class="hint">· custo de viagens somado por CC (respeita o filtro de mês)</span></p>
+    <div class="panel" style="padding:0; overflow:hidden;">
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Centro de custo</th>
+            <th class="num">Viagens</th>
+            <th class="num">Custo total</th>
+            <th class="num">A cobrar</th>
+          </tr></thead>
+          <tbody id="v-cc-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <p class="section-title">Detalhamento de viagens</p>
+    <div class="filters">
+      <select id="v-f-cobranca" onchange="renderViagensTable()">
+        <option value="">Todas as cobranças</option>
+        <option value="Sim">Cobrado</option>
+        <option value="Não">A cobrar</option>
+        <option value="Pendente">Pendente</option>
+      </select>
+      <select id="v-f-motivo" onchange="renderViagensTable()">
+        <option value="">Todos os motivos</option>
+      </select>
+    </div>
+    <div class="panel" style="padding:0; overflow:hidden;">
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Colaborador</th>
+            <th>CC</th>
+            <th>Motivo</th>
+            <th>Trajeto</th>
+            <th>Ida</th>
+            <th>Volta</th>
+            <th class="num">Aéreo</th>
+            <th class="num">Hospedagem</th>
+            <th class="num">Custo total</th>
+            <th>Cobrança</th>
+            <th>Solicitante</th>
+          </tr></thead>
+          <tbody id="v-table-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ===================== PÁGINA EXCEÇÕES DE AJUDA DE CUSTO ===================== -->
+  <section id="page-excecoes" class="page" hidden>
+
+    <p class="section-title" style="margin-top:.5rem;">Filtrar por competência</p>
+    <div class="month-filter" id="e-month-filter"></div>
+
+    <p class="section-title">Filtrar por centro de custo</p>
+    <div class="month-filter" id="e-cc-filter"></div>
+
+    <p class="section-title">Resumo</p>
+    <div class="cards" id="e-summary-cards"></div>
+
+    <p class="section-title">Ajuda de custo — exceções <span class="hint">· cada colaborador tem um limite de exceções · 1ª = baixo · 2ª = médio · 3ª = limite atingido</span></p>
+    <div class="hero" id="e-hero-cards"></div>
+
+    <div class="panel">
+      <p style="font-size:13px; font-weight:500; margin-bottom:12px;">Valor reembolsado por competência (R$)</p>
+      <div class="legend" id="e-loss-legend"></div>
+      <div style="position:relative; width:100%; height:230px;">
+        <canvas id="eChart" role="img" aria-label="Valor reembolsado por competência"></canvas>
+      </div>
+    </div>
+
+    <p class="section-title">Atenção — colaboradores com exceções recorrentes <span class="hint">· 2ª exceção ou mais</span></p>
+    <div class="panel" style="padding:0; overflow:hidden;">
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Colaborador</th>
+            <th>CC</th>
+            <th class="num">Nº de exceções</th>
+            <th class="num">Valor acumulado</th>
+            <th>Situação</th>
+          </tr></thead>
+          <tbody id="e-risk-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <p class="section-title">Detalhamento de exceções</p>
+    <div class="filters">
+      <select id="e-f-risco" onchange="renderExcecoesTable()">
+        <option value="">Todas as situações</option>
+        <option value="Baixo risco">Baixo risco</option>
+        <option value="Médio risco">Médio risco</option>
+        <option value="Limite atingido">Limite atingido</option>
+      </select>
+    </div>
+    <div class="panel" style="padding:0; overflow:hidden;">
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Colaborador</th>
+            <th>CC</th>
+            <th>Competência</th>
+            <th class="num">Valor</th>
+            <th>Data da exceção</th>
+            <th>Nº</th>
+            <th>Situação</th>
+          </tr></thead>
+          <tbody id="e-table-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </section>
 
 </main>
 
-<footer>Atualizado via Claude Code · Dados: Gestao_Ferias_Globo.xlsx (abas Planejamento de Férias + Hora Venda, SharePoint)</footer>
+<footer>Atualizado via Claude Code · Fontes: Gestao_Ferias_Globo.xlsx (Planejamento + Hora Venda) · Viagens · Exceções de Ajuda de Custo (SharePoint)</footer>
 
 <script>
 // ============================================================
@@ -296,7 +456,7 @@ const DATA = [
   { nome:'Jefferson Rafael Santana Moraes',       inicio:null, fim:null, dias:10, mes:null, abono:0, status:'Vencendo', confirm:'Não', hv:67.41,  limite:'2026-12-13' },
   { nome:'Ana Clara Paixão Cardoso',              inicio:null, fim:null, dias:30, mes:null, abono:0, status:'Vencendo', confirm:'Não', hv:164.80, limite:'2027-01-23' },
 ];
-const UPDATED = '2026-08-29';
+const UPDATED = '2026-09-03';
 const JORNADA = 8; // horas/dia
 // ============================================================
 
@@ -734,6 +894,254 @@ function renderAll(){
   renderTable();
 }
 renderAll();
+
+// ============================================================
+// ABA VIAGENS
+// Fonte: planilha Viagens (SharePoint) · custo total = passagem + hospedagem + imposto + JF (juros de financiamento)
+// Correções aplicadas: data de volta '18/08/206' -> 2026-08-18; cobrança em branco -> 'Pendente'; espaços removidos.
+// ============================================================
+const VIAGENS = [
+  { nome:'Raquel Rente Peixoto',      cc:'ED', motivo:'Set Expo',         orig:'Rio de Janeiro', dest:'São Paulo',      ida:'2026-08-17', volta:'2026-08-18', aereo:1189.43, hosp:782.46,  total:4024.45, modelo:'Nota Fiscal',    cobranca:'Sim',      solic:'Rodrigo Octavio',      mes:8 },
+  { nome:'Raquel Rente Peixoto',      cc:'ED', motivo:'Visita a cliente', orig:'Rio de Janeiro', dest:'Recife',         ida:'2026-09-08', volta:'2026-09-11', aereo:3186.16, hosp:1605.46, total:4791.62, modelo:'Nota Fiscal',    cobranca:'Não',      solic:'Rodrigo Octavio',      mes:9 },
+  { nome:'Raquel Rente Peixoto',      cc:'ED', motivo:'Visita a cliente', orig:'Rio de Janeiro', dest:'Brasília',       ida:'2026-09-15', volta:'2026-09-18', aereo:1865.70, hosp:2781.83, total:4647.53, modelo:'Nota Fiscal',    cobranca:'Não',      solic:'Rodrigo Octavio',      mes:9 },
+  { nome:'Daniele Freitas',           cc:'SD', motivo:'Set Expo',         orig:'Rio de Janeiro', dest:'São Paulo',      ida:'2026-08-17', volta:'2026-08-20', aereo:3804.87, hosp:2039.09, total:7689.39, modelo:'Nota Fiscal',    cobranca:'Sim',      solic:'Marcela Dornellas',    mes:8 },
+  { nome:'Diego Mariano De Oliveira', cc:'ED', motivo:'Visita a cliente', orig:'São Paulo',      dest:'Rio de Janeiro', ida:'2026-05-12', volta:'2026-05-15', aereo:1105.55, hosp:1811.28, total:2916.83, modelo:'—',              cobranca:'Pendente', solic:'Wilson Balbo',         mes:5 },
+  { nome:'Lindsay Fernandes',         cc:'ED', motivo:'Visita a cliente', orig:'São Paulo',      dest:'Rio de Janeiro', ida:'2026-05-24', volta:'2026-05-26', aereo:5239.52, hosp:419.76,  total:5659.28, modelo:'Nota de Débito', cobranca:'Pendente', solic:'Rafael Motta',         mes:5 },
+  { nome:'Marcelo Augusto',           cc:'ED', motivo:'Visita a cliente', orig:'São Paulo',      dest:'Rio de Janeiro', ida:'2026-08-25', volta:'2026-08-28', aereo:2188.46, hosp:1923.61, total:2956.00, modelo:'Nota Fiscal',    cobranca:'Pendente', solic:'Ana Paula de Miranda', mes:8, flag:true },
+  { nome:'Mustafa Ribeiro',           cc:'SD', motivo:'Rio Innovation',   orig:'Rio de Janeiro', dest:'Rio de Janeiro', ida:'2026-08-03', volta:'2026-08-08', aereo:null,    hosp:2005.50, total:3334.75, modelo:'Nota Fiscal',    cobranca:'Sim',      solic:'—',                    mes:8 },
+  { nome:'Veronica Pereira',          cc:'SD', motivo:'Rio Innovation',   orig:'Rio de Janeiro', dest:'Rio de Janeiro', ida:'2026-08-03', volta:'2026-08-07', aereo:null,    hosp:null,    total:960.00,  modelo:'Nota Fiscal',    cobranca:'Sim',      solic:'—',                    mes:8 },
+  { nome:'Daniele Freitas',           cc:'SD', motivo:'Rio Innovation',   orig:'Rio de Janeiro', dest:'Rio de Janeiro', ida:'2026-08-03', volta:'2026-08-07', aereo:null,    hosp:null,    total:880.00,  modelo:'Nota Fiscal',    cobranca:'Sim',      solic:'—',                    mes:8 },
+];
+let vMes = null, vCC = null;
+const vMonths = [...new Set(VIAGENS.map(t=>t.mes))].sort((a,b)=>a-b);
+const vFiltered = () => VIAGENS.filter(t => (vMes==null||t.mes===vMes) && (vCC==null||t.cc===vCC));
+const ccBadge2 = cc => `<span class="badge ${cc==='ED'?'b-blue':'b-amber'}" title="${CC_FULL} ${cc}">${cc}</span>`;
+const cobrancaBadge = c => c==='Sim'
+  ? '<span class="badge b-green"><i class="ti ti-check" aria-hidden="true"></i>Cobrado</span>'
+  : c==='Não'
+  ? '<span class="badge b-red"><i class="ti ti-alert-triangle" aria-hidden="true"></i>A cobrar</span>'
+  : '<span class="badge b-amber"><i class="ti ti-clock" aria-hidden="true"></i>Pendente</span>';
+const cardValStyle = v => `style="font-size:${typeof v==='string'&&v.length>9?'19px':'24px'}"`;
+
+function renderViagensFilters(){
+  let h = `<button class="mf-btn ${vMes==null?'active':''}" onclick="setVMes(null)">Todos</button>`;
+  vMonths.forEach(m=>{ h += `<button class="mf-btn ${vMes===m?'active':''}" onclick="setVMes(${m})">${MESNOME[m]}</button>`; });
+  document.getElementById('v-month-filter').innerHTML = h;
+  const mk = (l,v) => `<button class="mf-btn ${vCC===v?'active':''}" onclick="setVCC(${v==null?'null':`'${v}'`})">${l}</button>`;
+  document.getElementById('v-cc-filter').innerHTML = mk('Todos',null)+mk('ED','ED')+mk('SD','SD');
+}
+window.setVMes = function(m){ vMes = m; renderViagens(); };
+window.setVCC  = function(v){ vCC = v; renderViagens(); };
+
+function renderViagens(){
+  renderViagensFilters();
+  const list = vFiltered();
+  const total = list.reduce((s,t)=>s+t.total,0);
+  const aCobrarList = list.filter(t=>t.cobranca!=='Sim');
+  const aCobrar = aCobrarList.reduce((s,t)=>s+t.total,0);
+  const cobradoList = list.filter(t=>t.cobranca==='Sim');
+  const cobrado = cobradoList.reduce((s,t)=>s+t.total,0);
+  const nomes = new Set(list.map(t=>t.nome)).size;
+  const subP = vMes==null ? 'todas · 2026' : 'em '+MESNOME[vMes];
+  const cards = [
+    {label:'Viagens',      value:list.length, sub:subP, cls:''},
+    {label:'Custo total',  value:BRL(total),  sub:'passagem+hosp+imp.+JF', cls:''},
+    {label:'A cobrar',     value:BRL(aCobrar),sub:`${aCobrarList.length} viagem(ns)`, cls:aCobrarList.length?'alert':''},
+    {label:'Colaboradores',value:nomes,       sub:'em viagem', cls:''},
+  ];
+  document.getElementById('v-summary-cards').innerHTML = cards.map(c=>
+    `<div class="card ${c.cls}"><div class="card-label">${c.label}</div><div class="card-value" ${cardValStyle(c.value)}>${c.value}</div><div class="card-sub">${c.sub}</div></div>`).join('');
+  const hero = [
+    {cls:'',    label:'<i class="ti ti-plane-tilt" aria-hidden="true"></i> Custo total de viagens', value:BRL(total),   sub:`${list.length} viagens`},
+    {cls:'risk',label:'<i class="ti ti-cash" aria-hidden="true"></i> A cobrar do cliente',           value:BRL(aCobrar), sub:`${aCobrarList.length} pendente(s) de cobrança`},
+    {cls:'soft',label:'<i class="ti ti-circle-check" aria-hidden="true"></i> Já cobrado',            value:BRL(cobrado), sub:`${cobradoList.length} viagens faturadas`},
+  ];
+  document.getElementById('v-hero-cards').innerHTML = hero.map(c=>
+    `<div class="hero-card ${c.cls}"><div class="hero-label">${c.label}</div><div class="hero-value">${c.value}</div><div class="hero-sub">${c.sub}</div></div>`).join('');
+  // gráfico por mês
+  const mm = vMes==null ? vMonths : [vMes];
+  const totals = mm.map(m => VIAGENS.filter(t=>t.mes===m && (vCC==null||t.cc===vCC)).reduce((s,t)=>s+t.total,0));
+  const cols = mm.map(m => COL_MAP[m]||'#6e2cbf');
+  const grand = totals.reduce((a,b)=>a+b,0);
+  document.getElementById('v-loss-legend').innerHTML =
+    `<span class="legend-item" style="font-weight:500;color:var(--text)">${vMes==null?'Custo total no ano':'Custo em '+MESNOME[vMes]}: ${BRL(grand)}</span>`;
+  const labelColor = matchMedia('(prefers-color-scheme: dark)').matches ? '#f1e8fb' : '#2b0a63';
+  const dl = {id:'vdl',afterDatasetsDraw(ch){const{ctx}=ch;const m=ch.getDatasetMeta(0);ctx.save();ctx.font='500 11px system-ui, sans-serif';ctx.fillStyle=labelColor;ctx.textAlign='center';m.data.forEach((b,i)=>{if(totals[i]>0)ctx.fillText(BRLk(totals[i]),b.x,b.y-6);});ctx.restore();}};
+  mkChart('vChart',{type:'bar',data:{labels:mm.map(m=>MESAB[m]),datasets:[{data:totals,backgroundColor:cols,borderRadius:6,borderSkipped:false}]},
+    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:22}},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>BRL(c.parsed.y)}}},
+      scales:{y:{beginAtZero:true,ticks:{callback:v=>BRLk(v),font:{size:11}},grid:{color:'rgba(128,128,128,0.1)'}},x:{ticks:{font:{size:12},autoSkip:false},grid:{display:false}}}},plugins:[dl]});
+  // por centro de custo
+  const agg = {};
+  const ens = k => agg[k] || (agg[k]={n:0,total:0,cobrar:0});
+  list.forEach(t=>{ const a=ens(t.cc); a.n++; a.total+=t.total; if(t.cobranca!=='Sim') a.cobrar+=t.total; });
+  const lbl = {'ED':'Alocação de Profissionais · ED','SD':'Alocação de Profissionais · SD'};
+  const ord = ['ED','SD'].filter(k=>agg[k]);
+  let rows = ord.map(k=>`<tr><td>${lbl[k]||k}</td><td class="num">${agg[k].n}</td><td class="num">${BRL(agg[k].total)}</td><td class="num">${agg[k].cobrar?BRL(agg[k].cobrar):'—'}</td></tr>`).join('');
+  rows += `<tr class="total-row"><td>Total</td><td class="num">${list.length}</td><td class="num">${BRL(total)}</td><td class="num">${BRL(aCobrar)}</td></tr>`;
+  document.getElementById('v-cc-body').innerHTML = rows;
+  // opções do filtro de motivo
+  const sel = document.getElementById('v-f-motivo');
+  const cur = sel.value;
+  const motivos = [...new Set(VIAGENS.map(t=>t.motivo))];
+  sel.innerHTML = '<option value="">Todos os motivos</option>'+motivos.map(m=>`<option value="${m}">${m}</option>`).join('');
+  sel.value = cur;
+  renderViagensTable();
+}
+
+function renderViagensTable(){
+  const fc = document.getElementById('v-f-cobranca').value;
+  const fm = document.getElementById('v-f-motivo').value;
+  const list = vFiltered().filter(t => (!fc||t.cobranca===fc) && (!fm||t.motivo===fm));
+  const dm = s => pd(s).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});
+  const money = v => v==null ? '<span style="color:var(--text-3)">n/a</span>' : BRL(v);
+  let html = list.map(t=>`<tr>
+     <td>${t.nome}</td>
+     <td>${ccBadge2(t.cc)}</td>
+     <td>${t.motivo}</td>
+     <td><span class="route">${t.orig} <i class="ti ti-arrow-narrow-right" aria-hidden="true"></i> ${t.dest}</span></td>
+     <td>${dm(t.ida)}</td>
+     <td>${dm(t.volta)}</td>
+     <td class="num">${money(t.aereo)}</td>
+     <td class="num">${money(t.hosp)}</td>
+     <td class="num">${BRL(t.total)}${t.flag?' <i class="ti ti-alert-triangle" title="Custo total menor que passagem + hospedagem — conferir na planilha" style="color:var(--amber-text)"></i>':''}</td>
+     <td>${cobrancaBadge(t.cobranca)}</td>
+     <td style="color:var(--text-2)">${t.solic}</td>
+   </tr>`).join('');
+  if(list.length){
+    const tA=list.reduce((s,t)=>s+(t.aereo||0),0), tH=list.reduce((s,t)=>s+(t.hosp||0),0), tT=list.reduce((s,t)=>s+t.total,0);
+    html += `<tr class="total-row"><td>Total</td><td></td><td></td><td></td><td></td><td></td><td class="num">${BRL(tA)}</td><td class="num">${BRL(tH)}</td><td class="num">${BRL(tT)}</td><td></td><td></td></tr>`;
+  } else html = '<tr><td colspan="11" style="color:var(--text-3);padding:14px 10px;">Nenhuma viagem para este filtro.</td></tr>';
+  document.getElementById('v-table-body').innerHTML = html;
+}
+
+// ============================================================
+// ABA EXCEÇÕES DE AJUDA DE CUSTO
+// Fonte: planilha Exceções de Ajuda de Custo (SharePoint)
+// Regra: nº da exceção define o risco -> 1ª = Baixo · 2ª = Médio · 3ª = Limite atingido
+// ============================================================
+const EXCECOES = [
+  { nome:'Lidia De Oliveira Vieira',          cc:'ED', comp:2, valor:1000, data:'2026-03-12', num:1, risco:'Baixo risco' },
+  { nome:'Danielle Arins',                    cc:'ED', comp:2, valor:500,  data:'2026-03-12', num:2, risco:'Médio risco' },
+  { nome:'Larissa Da Silva Leao Pacheco',     cc:'ED', comp:3, valor:500,  data:'2026-04-16', num:1, risco:'Baixo risco' },
+  { nome:'Luciana Dos Santos Dias',           cc:'ED', comp:3, valor:1000, data:'2026-05-06', num:1, risco:'Baixo risco' },
+  { nome:'Ana Clara Paixao Cardoso',          cc:'ED', comp:3, valor:500,  data:'2026-05-06', num:1, risco:'Baixo risco' },
+  { nome:'Lidia De Oliveira Vieira',          cc:'ED', comp:4, valor:1000, data:'2026-05-07', num:2, risco:'Médio risco' },
+  { nome:'Layssa Belfort Rizzi Ximenes',      cc:'ED', comp:3, valor:1000, data:'2026-05-12', num:1, risco:'Baixo risco' },
+  { nome:'Janaina Lamas Filgueiras',          cc:'ED', comp:3, valor:500,  data:'2026-05-14', num:1, risco:'Baixo risco' },
+  { nome:'Pedro Paulo Ferreira Corazza',      cc:'ED', comp:4, valor:1000, data:'2026-05-29', num:1, risco:'Baixo risco' },
+  { nome:'Rodrigo Zisman Pereira',            cc:'ED', comp:4, valor:2000, data:'2026-06-15', num:1, risco:'Baixo risco' },
+  { nome:'Mustafa Ribeiro De Almeida Neto',   cc:'SD', comp:6, valor:500,  data:'2026-07-13', num:1, risco:'Baixo risco' },
+  { nome:'Christopher Peters Ferraz',         cc:'ED', comp:6, valor:100,  data:'2026-07-15', num:1, risco:'Baixo risco' },
+  { nome:'Lucas Barbosa De Souza',            cc:'ED', comp:6, valor:500,  data:'2026-07-27', num:1, risco:'Baixo risco' },
+  { nome:'Danielle Arins',                    cc:'ED', comp:6, valor:500,  data:'2026-08-11', num:3, risco:'Limite atingido' },
+  { nome:'Edynilson De Oliveira Meirelles',   cc:'SD', comp:6, valor:500,  data:'2026-08-12', num:1, risco:'Baixo risco' },
+  { nome:'Lidia De Oliveira Vieira',          cc:'ED', comp:7, valor:1000, data:'2026-08-12', num:3, risco:'Limite atingido' },
+  { nome:'Luis Henrique Azevedo De Oliveira', cc:'ED', comp:7, valor:1000, data:'2026-09-03', num:1, risco:'Baixo risco' },
+];
+let eMes = null, eCC = null;
+const eMonths = [...new Set(EXCECOES.map(x=>x.comp))].sort((a,b)=>a-b);
+const eFiltered = () => EXCECOES.filter(x => (eMes==null||x.comp===eMes) && (eCC==null||x.cc===eCC));
+const numOrd = n => n+'ª';
+const riscoBadge = r => r==='Limite atingido'
+  ? '<span class="badge b-red"><i class="ti ti-alert-triangle" aria-hidden="true"></i>Limite atingido</span>'
+  : r==='Médio risco'
+  ? '<span class="badge b-amber"><i class="ti ti-alert-circle" aria-hidden="true"></i>Médio risco</span>'
+  : '<span class="badge b-green"><i class="ti ti-check" aria-hidden="true"></i>Baixo risco</span>';
+
+function renderExcecoesFilters(){
+  let h = `<button class="mf-btn ${eMes==null?'active':''}" onclick="setEMes(null)">Todas</button>`;
+  eMonths.forEach(m=>{ h += `<button class="mf-btn ${eMes===m?'active':''}" onclick="setEMes(${m})">${MESNOME[m]}</button>`; });
+  document.getElementById('e-month-filter').innerHTML = h;
+  const mk = (l,v) => `<button class="mf-btn ${eCC===v?'active':''}" onclick="setECC(${v==null?'null':`'${v}'`})">${l}</button>`;
+  document.getElementById('e-cc-filter').innerHTML = mk('Todos',null)+mk('ED','ED')+mk('SD','SD');
+}
+window.setEMes = function(m){ eMes = m; renderExcecoes(); };
+window.setECC  = function(v){ eCC = v; renderExcecoes(); };
+
+function renderExcecoes(){
+  renderExcecoesFilters();
+  const list = eFiltered();
+  const total = list.reduce((s,x)=>s+x.valor,0);
+  const nomes = new Set(list.map(x=>x.nome)).size;
+  const noLimite = new Set(list.filter(x=>x.risco==='Limite atingido').map(x=>x.nome)).size;
+  const medio = new Set(list.filter(x=>x.risco==='Médio risco').map(x=>x.nome)).size;
+  const subP = eMes==null ? 'todas · 2026' : 'competência '+MESNOME[eMes];
+  const cards = [
+    {label:'Exceções',     value:list.length, sub:subP, cls:''},
+    {label:'Valor total',  value:BRL(total),  sub:'reembolsado', cls:''},
+    {label:'No limite',    value:noLimite,    sub:'3ª exceção', cls:noLimite?'alert':''},
+    {label:'Colaboradores',value:nomes,       sub:'com exceção', cls:''},
+  ];
+  document.getElementById('e-summary-cards').innerHTML = cards.map(c=>
+    `<div class="card ${c.cls}"><div class="card-label">${c.label}</div><div class="card-value" ${cardValStyle(c.value)}>${c.value}</div><div class="card-sub">${c.sub}</div></div>`).join('');
+  const hero = [
+    {cls:'',    label:'<i class="ti ti-receipt" aria-hidden="true"></i> Valor total reembolsado', value:BRL(total), sub:`${list.length} exceções`},
+    {cls:'risk',label:'<i class="ti ti-alert-triangle" aria-hidden="true"></i> No limite de exceções', value:noLimite, sub:'atingiram a 3ª exceção'},
+    {cls:'soft',label:'<i class="ti ti-alert-circle" aria-hidden="true"></i> Em médio risco', value:medio, sub:'na 2ª exceção'},
+  ];
+  document.getElementById('e-hero-cards').innerHTML = hero.map(c=>
+    `<div class="hero-card ${c.cls}"><div class="hero-label">${c.label}</div><div class="hero-value">${c.value}</div><div class="hero-sub">${c.sub}</div></div>`).join('');
+  // gráfico por competência
+  const mm = eMes==null ? eMonths : [eMes];
+  const totals = mm.map(m => EXCECOES.filter(x=>x.comp===m && (eCC==null||x.cc===eCC)).reduce((s,x)=>s+x.valor,0));
+  const cols = mm.map(m => COL_MAP[m]||'#6e2cbf');
+  const grand = totals.reduce((a,b)=>a+b,0);
+  document.getElementById('e-loss-legend').innerHTML =
+    `<span class="legend-item" style="font-weight:500;color:var(--text)">${eMes==null?'Total no ano':'Total em '+MESNOME[eMes]}: ${BRL(grand)}</span>`;
+  const labelColor = matchMedia('(prefers-color-scheme: dark)').matches ? '#f1e8fb' : '#2b0a63';
+  const dl = {id:'edl',afterDatasetsDraw(ch){const{ctx}=ch;const m=ch.getDatasetMeta(0);ctx.save();ctx.font='500 11px system-ui, sans-serif';ctx.fillStyle=labelColor;ctx.textAlign='center';m.data.forEach((b,i)=>{if(totals[i]>0)ctx.fillText(BRLk(totals[i]),b.x,b.y-6);});ctx.restore();}};
+  mkChart('eChart',{type:'bar',data:{labels:mm.map(m=>MESAB[m]),datasets:[{data:totals,backgroundColor:cols,borderRadius:6,borderSkipped:false}]},
+    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:22}},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>BRL(c.parsed.y)}}},
+      scales:{y:{beginAtZero:true,ticks:{callback:v=>BRLk(v),font:{size:11}},grid:{color:'rgba(128,128,128,0.1)'}},x:{ticks:{font:{size:12},autoSkip:false},grid:{display:false}}}},plugins:[dl]});
+  // recorrentes (2ª exceção ou mais)
+  const byName = {};
+  list.forEach(x=>{ const o = byName[x.nome] || (byName[x.nome]={cc:x.cc,n:0,val:0,maxNum:0,risco:'Baixo risco'}); o.n++; o.val+=x.valor; if(x.num>o.maxNum){o.maxNum=x.num;o.risco=x.risco;} });
+  const rec = Object.entries(byName).filter(([,o])=>o.maxNum>=2).sort((a,b)=>b[1].maxNum-a[1].maxNum || b[1].n-a[1].n);
+  document.getElementById('e-risk-body').innerHTML = rec.length
+    ? rec.map(([nome,o])=>`<tr class="${o.maxNum>=3?'alert-row':''}"><td>${nome}</td><td>${ccBadge2(o.cc)}</td><td class="num">${o.n}</td><td class="num">${BRL(o.val)}</td><td>${riscoBadge(o.risco)}</td></tr>`).join('')
+    : '<tr><td colspan="5" style="color:var(--text-3);padding:14px 10px;">Nenhum colaborador com exceções recorrentes neste filtro.</td></tr>';
+  renderExcecoesTable();
+}
+
+function renderExcecoesTable(){
+  const fr = document.getElementById('e-f-risco').value;
+  const list = eFiltered().filter(x => !fr || x.risco===fr).slice().sort((a,b)=>pd(a.data)-pd(b.data));
+  const dm = s => pd(s).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit'});
+  let html = list.map(x=>`<tr class="${x.risco==='Limite atingido'?'alert-row':''}">
+     <td>${x.nome}</td>
+     <td>${ccBadge2(x.cc)}</td>
+     <td>${MESNOME[x.comp]}</td>
+     <td class="num">${BRL(x.valor)}</td>
+     <td>${dm(x.data)}</td>
+     <td>${numOrd(x.num)}</td>
+     <td>${riscoBadge(x.risco)}</td>
+   </tr>`).join('');
+  if(list.length){
+    const t = list.reduce((s,x)=>s+x.valor,0);
+    html += `<tr class="total-row"><td>Total</td><td></td><td></td><td class="num">${BRL(t)}</td><td></td><td></td><td></td></tr>`;
+  } else html = '<tr><td colspan="7" style="color:var(--text-3);padding:14px 10px;">Nenhuma exceção para este filtro.</td></tr>';
+  document.getElementById('e-table-body').innerHTML = html;
+}
+
+// ============================================================
+// TROCA DE ABAS
+// ============================================================
+window.switchTab = function(page){
+  document.querySelectorAll('.page').forEach(s=>{ s.hidden = (s.id !== 'page-'+page); });
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active', t.dataset.page===page));
+  const meta = {
+    ferias:  ['ti ti-beach',      'Gestão de Férias — Globo'],
+    viagens: ['ti ti-plane-tilt', 'Viagens — Globo'],
+    excecoes:['ti ti-receipt',    'Exceções de Ajuda de Custo — Globo'],
+  };
+  const [ic,ti] = meta[page];
+  const iconEl = document.getElementById('hdr-icon');
+  iconEl.className = ic; iconEl.style.color = '#E6449B';
+  document.getElementById('hdr-title').textContent = ti;
+  if(page==='viagens')  renderViagens();
+  if(page==='excecoes') renderExcecoes();
+  window.scrollTo({top:0});
+};
 </script>
 </body>
 </html>
