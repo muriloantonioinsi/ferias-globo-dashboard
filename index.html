@@ -448,15 +448,15 @@ const DATA = [
   { nome:'Sidney Rosa Alves da Rocha',            inicio:'2026-10-20', fim:'2026-11-08', dias:20, mes:10, abono:10, status:'Aprovado', confirm:'Sim', hv:295.16 },
   { nome:'Flavia Cezario de Barros',              inicio:'2026-11-03', fim:'2026-11-19', dias:17, mes:11, abono:0,  status:'Aprovado', confirm:'Não', hv:209.63 },
   { nome:'Gleidson Andre Duarte Ramos',           inicio:'2026-11-03', fim:'2026-11-17', dias:15, mes:11, abono:0,  status:'Aprovado', confirm:'Não', hv:158.33 },
+  { nome:'Igor Dias Rangel',                      inicio:'2026-11-05', fim:'2026-11-19', dias:15, mes:11, abono:0,  status:'Aprovado', confirm:'Não', hv:153.83 },
   { nome:'Ivana Mara Rodrigues Possidio',         inicio:'2026-12-21', fim:'2027-01-04', dias:15, mes:12, abono:0,  status:'Aprovado', confirm:'Não', hv:184.66 },
   // Vencendo — saldo a programar (sem datas de gozo definidas). dias = saldo a vencer. hv:null = hora-venda a confirmar.
-  { nome:'Igor Dias Rangel',                      inicio:null, fim:null, dias:15, mes:null, abono:0, status:'Vencendo', confirm:'Não', hv:153.83, limite:'2026-12-20' },
   { nome:'Yuri Dambroysk',                        inicio:null, fim:null, dias:30, mes:null, abono:0, status:'Vencendo', confirm:'Não', hv:128.75, limite:'2026-12-23' },
   { nome:'Paulo Sergio da Costa Moreira Filho',   inicio:null, fim:null, dias:30, mes:null, abono:0, status:'Vencendo', confirm:'Não', hv:139.29, limite:'2027-01-04' },
   { nome:'Jefferson Rafael Santana Moraes',       inicio:null, fim:null, dias:10, mes:null, abono:0, status:'Vencendo', confirm:'Não', hv:67.41,  limite:'2026-12-13' },
   { nome:'Ana Clara Paixão Cardoso',              inicio:null, fim:null, dias:30, mes:null, abono:0, status:'Vencendo', confirm:'Não', hv:164.80, limite:'2027-01-23' },
 ];
-const UPDATED = '2026-09-03';
+const UPDATED = '2026-09-07';
 const JORNADA = 8; // horas/dia
 // ============================================================
 
@@ -495,7 +495,7 @@ const CUSTOS = [
   { nome:'Jean Philip Silva',                c:{5:11066.69} },
   { nome:'Raquel Rente Peixoto',             c:{5:14517.23} },
   { nome:'Diego Mariano de Oliveira',        c:{5:23856.93} },
-  { nome:'Igor Dias Rangel',                 c:{6:14259.14} },
+  { nome:'Igor Dias Rangel',                 c:{6:14259.14, 11:14258.85} },
   { nome:'Ivana Mara Rodrigues Possidio',    c:{6:17836.73} },
   { nome:'Felipe dos Santos Machado',        c:{6:21434.00, 7:16858.00} },
   { nome:'Jefferson Rafael Santana Moraes',  c:{7:3549.72} },
@@ -518,6 +518,7 @@ const CUSTOS = [
   { nome:'Rosangela Silva de Castro',        c:{9:19388.09} },
   { nome:'Lindsay Fernandes de Souza Filho', c:{9:10563.68, 10:12133.51} },
   { nome:'Pedro Paulo Ferreira Corazza',     c:{9:22822.45, 10:19767.33} },
+  { nome:'Bruno Roberto da Silva',           c:{9:12484.17, 10:18120.44} },
   { nome:'Ivana Mara Rodrigues Possidio',    c:{10:20410.00} },
   { nome:'Sidney Rosa Alves da Rocha',       c:{10:36574.80, 11:40596.75} },
   { nome:'Flavia Cezario de Barros',         c:{11:19216.56} },
