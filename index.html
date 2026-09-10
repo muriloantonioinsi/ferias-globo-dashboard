@@ -445,6 +445,7 @@ const DATA = [
   { nome:'Lindsay Fernandes de Souza Filho',      inicio:'2026-09-23', fim:'2026-10-02', dias:10, mes:9,  abono:0,  status:'Aprovado', confirm:'Sim', hv:174.34 },
   { nome:'Pedro Paulo Ferreira Corazza',          inicio:'2026-09-28', fim:'2026-10-09', dias:12, mes:9,  abono:0,  status:'Aprovado', confirm:'Sim', hv:190.20 },
   { nome:'Ivana Mara Rodrigues Possidio',         inicio:'2026-10-05', fim:'2026-10-09', dias:5,  mes:10, abono:0,  status:'Aprovado', confirm:'Sim', hv:184.66 },
+  { nome:'Paulo Sergio da Costa Moreira Filho',   inicio:'2026-10-14', fim:'2026-10-27', dias:14, mes:10, abono:10, status:'Aprovado', confirm:'Sim', hv:139.29 },
   { nome:'Sidney Rosa Alves da Rocha',            inicio:'2026-10-20', fim:'2026-11-08', dias:20, mes:10, abono:10, status:'Aprovado', confirm:'Sim', hv:295.16 },
   { nome:'Flavia Cezario de Barros',              inicio:'2026-11-03', fim:'2026-11-19', dias:17, mes:11, abono:0,  status:'Aprovado', confirm:'Sim', hv:209.63 },
   { nome:'Gleidson Andre Duarte Ramos',           inicio:'2026-11-03', fim:'2026-11-17', dias:15, mes:11, abono:0,  status:'Aprovado', confirm:'Sim', hv:158.33 },
@@ -452,11 +453,10 @@ const DATA = [
   { nome:'Ivana Mara Rodrigues Possidio',         inicio:'2026-12-21', fim:'2027-01-04', dias:15, mes:12, abono:0,  status:'Aprovado', confirm:'Sim', hv:184.66 },
   // Vencendo — saldo a programar (sem datas de gozo definidas). dias = saldo a vencer. hv:null = hora-venda a confirmar.
   { nome:'Yuri Dambroysk',                        inicio:null, fim:null, dias:30, mes:null, abono:0, status:'Vencendo', confirm:'Não', hv:128.75, limite:'2026-12-23' },
-  { nome:'Paulo Sergio da Costa Moreira Filho',   inicio:null, fim:null, dias:30, mes:null, abono:0, status:'Vencendo', confirm:'Não', hv:139.29, limite:'2027-01-04' },
   { nome:'Jefferson Rafael Santana Moraes',       inicio:null, fim:null, dias:10, mes:null, abono:0, status:'Vencendo', confirm:'Não', hv:67.41,  limite:'2026-12-13' },
   { nome:'Ana Clara Paixão Cardoso',              inicio:null, fim:null, dias:30, mes:null, abono:0, status:'Vencendo', confirm:'Não', hv:164.80, limite:'2027-01-23' },
 ];
-const UPDATED = '2026-09-08';
+const UPDATED = '2026-09-10';
 const JORNADA = 8; // horas/dia
 // ============================================================
 
@@ -520,6 +520,7 @@ const CUSTOS = [
   { nome:'Pedro Paulo Ferreira Corazza',     c:{9:22822.45, 10:19767.33} },
   { nome:'Bruno Roberto da Silva',           c:{9:12484.17, 10:18120.44} },
   { nome:'Ivana Mara Rodrigues Possidio',    c:{10:20410.00} },
+  { nome:'Paulo Sergio da Costa Moreira Filho', c:{10:10237.35} },
   { nome:'Sidney Rosa Alves da Rocha',       c:{10:36574.80, 11:40596.75} },
   { nome:'Flavia Cezario de Barros',         c:{11:19216.56} },
   { nome:'Gleidson Andre Duarte Ramos',      c:{11:13042.76} },
@@ -903,7 +904,7 @@ renderAll();
 // ============================================================
 const VIAGENS = [
   { nome:'Raquel Rente Peixoto',      cc:'ED', motivo:'Set Expo',         orig:'Rio de Janeiro', dest:'São Paulo',      ida:'2026-08-17', volta:'2026-08-18', aereo:1189.43, hosp:782.46,  total:4024.45, modelo:'Nota Fiscal',    cobranca:'Sim',      solic:'Rodrigo Octavio',      mes:8 },
-  { nome:'Raquel Rente Peixoto',      cc:'ED', motivo:'Visita a cliente', orig:'Rio de Janeiro', dest:'Recife',         ida:'2026-09-08', volta:'2026-09-11', aereo:3186.16, hosp:1605.46, total:4791.62, modelo:'Nota Fiscal',    cobranca:'Não',      solic:'Rodrigo Octavio',      mes:9 },
+  { nome:'Raquel Rente Peixoto',      cc:'ED', motivo:'Visita a cliente', orig:'Rio de Janeiro', dest:'Recife',         ida:'2026-09-08', volta:'2026-09-11', aereo:null,    hosp:1898.63, total:1898.63, modelo:'Nota Fiscal',    cobranca:'Não',      solic:'Rodrigo Octavio',      mes:9, obs:'Profissional relatou que o banheiro do Hotel (Ibis) que havia sido reservado não atendia as condições de higiene, portanto tivemos que alterar a hospedagem para o hotel Hy Experience. Fez apenas o check-in no Ibis, sem pernoite — em negociação com a agência para não descontar o valor integral.' },
   { nome:'Raquel Rente Peixoto',      cc:'ED', motivo:'Visita a cliente', orig:'Rio de Janeiro', dest:'Brasília',       ida:'2026-09-15', volta:'2026-09-18', aereo:1865.70, hosp:2781.83, total:4647.53, modelo:'Nota Fiscal',    cobranca:'Não',      solic:'Rodrigo Octavio',      mes:9 },
   { nome:'Daniele Freitas',           cc:'SD', motivo:'Set Expo',         orig:'Rio de Janeiro', dest:'São Paulo',      ida:'2026-08-17', volta:'2026-08-20', aereo:3804.87, hosp:2039.09, total:7689.39, modelo:'Nota Fiscal',    cobranca:'Sim',      solic:'Marcela Dornellas',    mes:8 },
   { nome:'Diego Mariano De Oliveira', cc:'ED', motivo:'Visita a cliente', orig:'São Paulo',      dest:'Rio de Janeiro', ida:'2026-05-12', volta:'2026-05-15', aereo:1105.55, hosp:1811.28, total:2916.83, modelo:'—',              cobranca:'Pendente', solic:'Wilson Balbo',         mes:5 },
@@ -998,7 +999,7 @@ function renderViagensTable(){
   let html = list.map(t=>`<tr>
      <td>${t.nome}</td>
      <td>${ccBadge2(t.cc)}</td>
-     <td>${t.motivo}</td>
+     <td>${t.motivo}${t.obs?` <i class="ti ti-message-circle" title="${t.obs.replace(/"/g,'&quot;')}" style="color:var(--accent);cursor:help;vertical-align:-1px" aria-label="Observação"></i>`:''}</td>
      <td><span class="route">${t.orig} <i class="ti ti-arrow-narrow-right" aria-hidden="true"></i> ${t.dest}</span></td>
      <td>${dm(t.ida)}</td>
      <td>${dm(t.volta)}</td>
