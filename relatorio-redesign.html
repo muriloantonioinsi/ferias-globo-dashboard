@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Redesign do Painel — Operação Globo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  :root{
+    --ink:#14122b; --ink2:#5b5878; --ink3:#9a97b0;
+    --brand:#3a0e8c; --violet:#6d28d9; --mag:#d21b7c;
+    --line:#eceef3; --soft:#f4f5f8; --bg:#f9fafb;
+  }
+  body{font-family:Inter,system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--bg);color:var(--ink);
+       padding:28px 20px;-webkit-font-smoothing:antialiased}
+  .page{max-width:860px;margin:0 auto;background:#fff;border-radius:18px;overflow:hidden;
+        box-shadow:0 1px 2px rgba(20,18,43,.04),0 18px 50px -28px rgba(20,18,43,.28)}
+
+  /* ---------- topo ---------- */
+  .top{position:relative;overflow:hidden;padding:22px 34px 24px;
+       background:linear-gradient(135deg,#2a0a63 0%,#3a0e8c 48%,#6d28d9 100%);color:#fff}
+  .glow{position:absolute;right:-60px;top:-90px;width:280px;height:280px;border-radius:50%;
+        background:radial-gradient(circle,rgba(230,68,155,.42),transparent 66%);pointer-events:none}
+  .top .rel{position:relative}
+  .brand{font-size:20px;font-weight:700;letter-spacing:-.04em}
+  .brand span{color:#f472b6}
+  .top h1{font-size:23px;font-weight:600;letter-spacing:-.02em;margin-top:16px;line-height:1.2}
+  .top p{font-size:12.5px;color:rgba(255,255,255,.7);margin-top:8px;max-width:60ch;line-height:1.55}
+  .top .meta{font-size:11px;color:rgba(255,255,255,.55);margin-top:14px;letter-spacing:.02em}
+
+  /* ---------- corpo ---------- */
+  .body{padding:20px 34px 22px}
+  .eyebrow{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.11em;color:var(--ink3)}
+  .eyebrow+.grid,.eyebrow+.note,.eyebrow+.chips{margin-top:14px}
+  .eyebrow:not(:first-child){margin-top:19px}
+
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+  .chg{border:1px solid var(--line);border-radius:13px;padding:11px 14px;background:#fff}
+  .chg h3{font-size:12.5px;font-weight:600;letter-spacing:-.01em;display:flex;align-items:center;gap:7px}
+  .chg h3::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--violet);flex:0 0 auto}
+  .chg .was,.chg .now{font-size:11.5px;line-height:1.5;margin-top:7px;display:flex;gap:7px}
+  .chg .tag{flex:0 0 40px;font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;
+            padding-top:2px}
+  .chg .was .tag{color:var(--ink3)}
+  .chg .now .tag{color:var(--mag)}
+  .chg .was span:last-child{color:var(--ink3)}
+  .chg .now span:last-child{color:var(--ink);font-weight:500}
+
+  .note{border-left:2px solid var(--violet);background:var(--soft);border-radius:0 11px 11px 0;
+        padding:11px 15px;font-size:11.5px;line-height:1.55;color:var(--ink2)}
+  .note b{color:var(--ink);font-weight:600}
+  .note p+p{margin-top:8px}
+
+  .chips{display:flex;flex-wrap:wrap;gap:7px}
+  .chip{font-size:11px;font-weight:500;color:var(--ink2);background:var(--soft);
+        border-radius:999px;padding:5px 12px}
+
+  .foot{margin-top:16px;border-top:1px solid var(--line);padding-top:10px;
+        display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;font-size:11px;color:var(--ink3)}
+  .foot a{color:var(--brand);text-decoration:none;font-weight:500}
+
+  @media print{
+    body{background:#fff;padding:0}
+    .page{box-shadow:none;border-radius:0;max-width:100%}
+    @page{size:A4;margin:8mm}
+  }
+  @media (max-width:640px){ .grid{grid-template-columns:1fr} .top,.body{padding-left:22px;padding-right:22px} }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="top">
+    <div class="glow"></div>
+    <div class="rel">
+      <div class="brand">insi<span>.</span></div>
+      <h1>Redesign do painel de gestão</h1>
+      <p>O painel da Operação Globo ganhou uma interface nova: mais leve, com hierarquia clara
+         e menos repetição. Os dados, os cálculos e o link são exatamente os mesmos — mudou
+         a forma de ler a informação.</p>
+      <div class="meta">Operação Globo &middot; publicado em 04/out/2026 &middot; versão anterior arquivada</div>
+    </div>
+  </div>
+
+  <div class="body">
+
+    <p class="eyebrow">O que mudou</p>
+    <div class="grid">
+
+      <div class="chg">
+        <h3>Hierarquia dos indicadores</h3>
+        <div class="was"><span class="tag">Antes</span><span>Duas fileiras com 7 cards; desconto e quantidade de férias apareciam repetidos.</span></div>
+        <div class="now"><span class="tag">Agora</span><span>Uma linha assimétrica: um card principal com o número em 48&nbsp;px e três indicadores de apoio.</span></div>
+      </div>
+
+      <div class="chg">
+        <h3>Filtros</h3>
+        <div class="was"><span class="tag">Antes</span><span>Doze botões de mês quebrando em duas linhas, e o centro de custo numa terceira.</span></div>
+        <div class="now"><span class="tag">Agora</span><span>Faixa de meses deslizante com o centro de custo na mesma linha — cerca de 90&nbsp;px a menos no topo.</span></div>
+      </div>
+
+      <div class="chg">
+        <h3>Barra de navegação</h3>
+        <div class="was"><span class="tag">Antes</span><span>Bloco roxo sólido ocupando toda a largura.</span></div>
+        <div class="now"><span class="tag">Agora</span><span>Barra branca translúcida com desfoque; o roxo aparece só na aba ativa.</span></div>
+      </div>
+
+      <div class="chg">
+        <h3>Superfícies e cor</h3>
+        <div class="was"><span class="tag">Antes</span><span>Cards com fundos coloridos sólidos e bordas marcadas.</span></div>
+        <div class="now"><span class="tag">Agora</span><span>Fundo branco, cantos de 16&nbsp;px e sombra suave; roxo e magenta ficam para dados e alertas.</span></div>
+      </div>
+
+      <div class="chg">
+        <h3>Cor dos gráficos</h3>
+        <div class="was"><span class="tag">Antes</span><span>Uma cor diferente para cada mês — onze cores numa série só.</span></div>
+        <div class="now"><span class="tag">Agora</span><span>Uma única matiz para todas as barras; o magenta passa a significar risco.</span></div>
+      </div>
+
+      <div class="chg">
+        <h3>Rótulos do gráfico</h3>
+        <div class="was"><span class="tag">Antes</span><span>Um valor impresso em cima de cada uma das onze barras.</span></div>
+        <div class="now"><span class="tag">Agora</span><span>Só o mês de pico vem rotulado; os demais no tooltip e na tabela de detalhe.</span></div>
+      </div>
+
+    </div>
+
+    <p class="eyebrow">Por que essas duas últimas</p>
+    <div class="note">
+      <p><b>Colorir cada mês de um jeito diferente gastava o recurso mais valioso do gráfico.</b>
+         Quando existe uma só medida, a cor não precisa distinguir nada — o eixo já diz qual é o mês.
+         Com uma matiz única, a cor fica livre para o que realmente importa sinalizar: o risco.</p>
+      <p><b>Rótulo em toda barra vira ruído e deixa de ser lido.</b>
+         Destacando apenas o mês de pico, o olho encontra o que decide primeiro; os outros valores
+         continuam acessíveis ao passar o mouse e na tabela completa, sem nada ficar escondido.</p>
+    </div>
+
+    <p class="eyebrow">O que não mudou</p>
+    <div class="chips">
+      <span class="chip">Mesmo link do painel</span>
+      <span class="chip">Mesmos dados da planilha</span>
+      <span class="chip">Desconto = dias úteis &times; 8h &times; hora-venda</span>
+      <span class="chip">Abas Férias, Viagens e Ajuda de Custo</span>
+      <span class="chip">Filtro por mês e centro de custo</span>
+      <span class="chip">Relatórios gerenciais</span>
+      <span class="chip">Versão anterior preservada</span>
+    </div>
+
+    <div class="foot">
+      <span>Painel: <a href="https://muriloantonioinsi.github.io/ferias-globo-dashboard">muriloantonioinsi.github.io/ferias-globo-dashboard</a></span>
+      <span>Versão anterior: <a href="https://muriloantonioinsi.github.io/ferias-globo-dashboard/v1.html">/v1.html</a></span>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>

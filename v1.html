@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gestão de Férias — Globo</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f7f3fb;
+      --surface: #ffffff;
+      --surface-2: #f0e8f8;
+      --border: rgba(58,14,140,0.12);
+      --border-md: rgba(58,14,140,0.22);
+      --text: #2b0a63;
+      --text-2: #6a4e96;
+      --text-3: #9b85c0;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --deep: #3a0e8c;
+      --brand: #6e2cbf;
+      --brand-dark: #3a0e8c;
+      --accent: #d21b7c;
+      --green-bg: #EAF3DE; --green-text: #27500A;
+      --amber-bg: #FAEEDA; --amber-text: #633806;
+      --blue-bg:  #ede6fa; --blue-text:  #3a0e8c;
+      --gray-bg:  #f0e8f8; --gray-text:  #4b1197;
+      --red-bg:   #FCEBEB; --red-text:   #791F1F;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #180733;
+        --surface: #241048;
+        --surface-2: #30185c;
+        --border: rgba(206,155,240,0.14);
+        --border-md: rgba(206,155,240,0.24);
+        --text: #f1e8fb;
+        --text-2: #c3a9e8;
+        --text-3: #9b85c0;
+        --deep: #3a0e8c;
+        --brand: #b98ce8;
+        --brand-dark: #b98ce8;
+        --accent: #e6449b;
+        --green-bg: #173404; --green-text: #C0DD97;
+        --amber-bg: #412402; --amber-text: #FAC775;
+        --blue-bg:  #2a1466; --blue-text:  #cbb2f0;
+        --gray-bg:  #30185c; --gray-text:  #b98ce8;
+        --red-bg:   #501313; --red-text:   #F7C1C1;
+      }
+    }
+
+    body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    header { background: var(--deep); border-bottom: none; padding: 1rem 1.5rem; display: flex; align-items: center; justify-content: space-between; }
+    header h1 { font-size: 16px; font-weight: 500; color: #fff; }
+    header .updated { font-size: 12px; color: rgba(255,255,255,0.65) !important; }
+
+    main { max-width: 1100px; margin: 0 auto; padding: 1.5rem; }
+
+    .section-title { font-size: 11px; font-weight: 500; color: var(--text-3); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 10px; }
+    .section-title .hint { text-transform: none; letter-spacing: 0; color: var(--text-3); font-weight: 400; }
+
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 1.75rem; }
+    .card { background: var(--surface-2); border-radius: var(--radius-md); padding: 14px 16px; }
+    .card-label { font-size: 11px; color: var(--text-2); margin-bottom: 5px; }
+    .card-value { font-size: 24px; font-weight: 500; }
+    .card-sub   { font-size: 11px; color: var(--text-3); margin-top: 3px; }
+    .card.alert { background: var(--amber-bg); }
+    .card.alert .card-value { color: var(--amber-text); }
+
+    .month-filter { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 1.75rem; }
+    .mf-btn { font-size: 12px; font-weight: 500; padding: 6px 13px; border-radius: 999px; border: 0.5px solid var(--border-md); background: var(--surface); color: var(--text-2); cursor: pointer; transition: all .12s; }
+    .mf-btn:hover { border-color: var(--brand); color: var(--brand); }
+    .mf-btn.active { background: var(--deep); color: #fff; border-color: var(--deep); }
+
+    .hero { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 1.5rem; }
+    .hero-card { background: var(--deep); border-radius: var(--radius-lg); padding: 18px 20px; color: #fff; }
+    .hero-card.soft { background: var(--blue-bg); color: var(--blue-text); }
+    .hero-card.risk { background: var(--amber-bg); color: var(--amber-text); }
+    .hero-label { font-size: 12px; opacity: .85; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+    .hero-value { font-size: 30px; font-weight: 500; line-height: 1.1; }
+    .hero-sub   { font-size: 12px; opacity: .8; margin-top: 6px; }
+
+    .panel { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1.25rem; margin-bottom: 1.5rem; }
+
+    .rank-row { display: flex; align-items: center; gap: 10px; margin-bottom: 9px; }
+    .rank-name { font-size: 12px; width: 180px; min-width: 180px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .rank-track { flex: 1; background: var(--surface-2); border-radius: 4px; height: 18px; position: relative; overflow: hidden; }
+    .rank-fill { position: absolute; left: 0; top: 0; height: 100%; background: var(--brand); border-radius: 4px; }
+    .rank-val { font-size: 12px; font-weight: 500; width: 110px; min-width: 110px; text-align: right; font-variant-numeric: tabular-nums; }
+
+    .filters { display: flex; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap; }
+    .filters select {
+      font-size: 13px; padding: 6px 10px;
+      border-radius: var(--radius-md);
+      border: 0.5px solid var(--border-md);
+      background: var(--surface); color: var(--text);
+      cursor: pointer;
+    }
+
+    .tl-header { display: flex; margin-bottom: 4px; margin-left: 162px; }
+    .tl-month-label { font-size: 10px; font-weight: 500; color: var(--text-3); text-align: center; border-left: 0.5px solid var(--border); padding: 2px 0; }
+    .tl-row { display: flex; align-items: center; margin-bottom: 3px; }
+    .tl-name { font-size: 12px; width: 160px; min-width: 160px; padding-right: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text); }
+    .tl-grid { position: relative; flex: 1; height: 20px; }
+    .tl-bar  { position: absolute; height: 13px; top: 4px; border-radius: 3px; cursor: default; transition: opacity .15s; }
+    .tl-bar:hover { opacity: .75 !important; }
+    .tl-label { position: absolute; top: 3px; font-size: 10px; font-variant-numeric: tabular-nums; color: var(--text-2); white-space: nowrap; line-height: 15px; }
+
+    .badge { display: inline-flex; align-items: center; gap: 3px; font-size: 11px; padding: 2px 7px; border-radius: var(--radius-md); font-weight: 500; white-space: nowrap; }
+    .b-green { background: var(--green-bg); color: var(--green-text); }
+    .b-amber { background: var(--amber-bg); color: var(--amber-text); }
+    .b-gray  { background: var(--gray-bg);  color: var(--gray-text); }
+    .b-red   { background: var(--red-bg);   color: var(--red-text); }
+    .b-blue  { background: var(--blue-bg);  color: var(--blue-text); }
+
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 780px; }
+    th { font-size: 11px; font-weight: 500; color: var(--text-2); text-align: left; padding: 7px 10px; border-bottom: 0.5px solid var(--border); background: var(--surface-2); white-space: nowrap; }
+    td { padding: 8px 10px; border-bottom: 0.5px solid var(--border); vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: var(--surface-2); }
+    tr.alert-row td { background: color-mix(in srgb, var(--amber-bg) 40%, transparent); }
+    tr.total-row td { background: var(--surface-2); font-weight: 500; border-top: 1.5px solid var(--border-md); }
+    .num { font-variant-numeric: tabular-nums; text-align: right; }
+
+    .legend { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 12px; }
+    .legend-item { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--text-2); }
+    .legend-sq { width: 10px; height: 10px; border-radius: 2px; }
+
+    /* Abas de navegação */
+    .tabs { background: var(--deep); display: flex; gap: 2px; padding: 0 1.5rem; overflow-x: auto; position: sticky; top: 0; z-index: 20; }
+    .tab { font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.66); background: transparent; border: 0; border-bottom: 2.5px solid transparent; padding: 11px 15px; cursor: pointer; display: flex; align-items: center; gap: 6px; white-space: nowrap; transition: color .12s, border-color .12s; }
+    .tab:hover { color: #fff; }
+    .tab.active { color: #fff; border-bottom-color: #E6449B; }
+    .tab i { font-size: 16px; }
+
+    .route { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+    .route i { color: var(--text-3); font-size: 13px; }
+
+    footer { text-align: center; padding: 2rem 1rem 1rem; font-size: 11px; color: var(--text-3); }
+  </style>
+</head>
+<body>
+<div style="background:#fdf4e7;color:#8a5a10;font:500 12px/1.5 system-ui,sans-serif;padding:8px 16px;text-align:center;border-bottom:1px solid rgba(138,90,16,.18)">Versão arquivada (v1) &middot; o painel atual está em <a href="./index.html" style="color:#8d0f4f;font-weight:600">index.html</a></div>
+
+<header>
+  <div style="display:flex; align-items:center; gap:10px;">
+    <i id="hdr-icon" class="ti ti-beach" style="font-size:20px; color:#E6449B;" aria-hidden="true"></i>
+    <h1 id="hdr-title">Gestão de Férias — Globo</h1>
+  </div>
+  <span class="updated" id="updated-at"></span>
+</header>
+
+<nav class="tabs" role="tablist" aria-label="Seções do painel">
+  <button class="tab active" data-page="ferias"   role="tab" onclick="switchTab('ferias')"><i class="ti ti-beach" aria-hidden="true"></i> Férias</button>
+  <button class="tab"         data-page="viagens"  role="tab" onclick="switchTab('viagens')"><i class="ti ti-plane-tilt" aria-hidden="true"></i> Viagens</button>
+  <button class="tab"         data-page="excecoes" role="tab" onclick="switchTab('excecoes')"><i class="ti ti-receipt" aria-hidden="true"></i> Exceções de Ajuda de Custo</button>
+</nav>
+
+<main>
+
+  <section id="page-ferias" class="page">
+
+  <!-- FILTRO DE MÊS -->
+  <p class="section-title" style="margin-top:.5rem;">Filtrar por mês</p>
+  <div class="month-filter" id="month-filter"></div>
+
+  <p class="section-title">Filtrar por centro de custo</p>
+  <div class="month-filter" id="cc-filter"></div>
+
+  <!-- CARDS RESUMO -->
+  <p class="section-title">Resumo</p>
+  <div class="cards" id="summary-cards"></div>
+
+  <!-- PAINEL EXECUTIVO: IMPACTO NO FATURAMENTO -->
+  <p class="section-title">Desconto de Faturamento — revenue impact <span class="hint">· horas não faturadas (dias úteis seg–sex × 8h × hora-venda) · gestores da operação não são faturados ao cliente (Custo da Operação)</span></p>
+  <div class="hero" id="hero-cards"></div>
+
+  <div class="panel">
+    <p style="font-size:13px; font-weight:500; margin-bottom:12px;">Desconto de Faturamento por mês (R$)</p>
+    <div class="legend" id="loss-legend"></div>
+    <div style="position:relative; width:100%; height:230px;">
+      <canvas id="lossChart" role="img" aria-label="Faturamento perdido por mês de fevereiro a dezembro 2026">Faturamento perdido distribuído ao longo dos meses de 2026.</canvas>
+    </div>
+  </div>
+
+  <!-- POR CENTRO DE CUSTO -->
+  <p class="section-title">Por centro de custo <span class="hint">· gap de faturamento e custo de férias somados por CC (respeita o filtro de mês)</span></p>
+  <div class="panel" style="padding:0; overflow:hidden;">
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>Centro de custo</th>
+          <th class="num">Profissionais</th>
+          <th class="num">Gap de faturamento</th>
+          <th class="num">Custo de férias</th>
+        </tr></thead>
+        <tbody id="cc-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TIMELINE -->
+  <p class="section-title">Timeline — fevereiro a dezembro 2026</p>
+  <div class="panel">
+    <div class="tl-header" id="tl-header"></div>
+    <div id="tl-body"></div>
+    <div style="margin-top:10px; display:flex; gap:14px; flex-wrap:wrap;">
+      <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-3)"><span style="width:20px;height:8px;border-radius:2px;background:#7F77DD;display:inline-block;"></span>Fev–Mar</span>
+      <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-3)"><span style="width:20px;height:8px;border-radius:2px;background:#A864BB;display:inline-block;"></span>Abr–Mai</span>
+      <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-3)"><span style="width:20px;height:8px;border-radius:2px;background:#CC4D96;display:inline-block;"></span>Jun–Jul</span>
+      <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-3)"><span style="width:20px;height:8px;border-radius:2px;background:#DC6070;display:inline-block;"></span>Ago–Set</span>
+      <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-3)"><span style="width:20px;height:8px;border-radius:2px;background:#9B72CC;display:inline-block;"></span>Out–Dez</span>
+    </div>
+  </div>
+
+  <!-- TABELA DETALHAMENTO -->
+  <p class="section-title">Detalhamento por colaborador</p>
+  <div class="filters">
+    <select id="f-status" onchange="renderTable()">
+      <option value="">Todos os status</option>
+      <option value="Aprovado">Aprovado</option>
+      <option value="Vencendo">Vencendo</option>
+    </select>
+    <select id="f-confirm" onchange="renderTable()">
+      <option value="">Todas as confirmações</option>
+      <option value="Sim">Confirmado pelo cliente</option>
+      <option value="Não">Não confirmado</option>
+    </select>
+  </div>
+  <div class="panel" style="padding:0; overflow:hidden;">
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>Colaborador</th>
+          <th>Início</th>
+          <th>Fim</th>
+          <th>Dias</th>
+          <th>Abono</th>
+          <th>Status</th>
+          <th>Conf. cliente</th>
+          <th>Centro custo</th>
+          <th class="num">Hora-venda</th>
+          <th class="num">Desconto faturamento</th>
+        </tr></thead>
+        <tbody id="table-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  </section>
+
+  <!-- ===================== PÁGINA VIAGENS ===================== -->
+  <section id="page-viagens" class="page" hidden>
+
+    <p class="section-title" style="margin-top:.5rem;">Filtrar por mês <span class="hint">· mês da ida</span></p>
+    <div class="month-filter" id="v-month-filter"></div>
+
+    <p class="section-title">Filtrar por centro de custo</p>
+    <div class="month-filter" id="v-cc-filter"></div>
+
+    <p class="section-title">Resumo</p>
+    <div class="cards" id="v-summary-cards"></div>
+
+    <p class="section-title">Custo de viagens <span class="hint">· custo total = passagem + hospedagem + imposto + juros de financiamento (JF)</span></p>
+    <div class="hero" id="v-hero-cards"></div>
+
+    <div class="panel">
+      <p style="font-size:13px; font-weight:500; margin-bottom:12px;">Custo de viagens por mês (R$)</p>
+      <div class="legend" id="v-loss-legend"></div>
+      <div style="position:relative; width:100%; height:230px;">
+        <canvas id="vChart" role="img" aria-label="Custo de viagens por mês"></canvas>
+      </div>
+    </div>
+
+    <p class="section-title">Por centro de custo <span class="hint">· custo de viagens somado por CC (respeita o filtro de mês)</span></p>
+    <div class="panel" style="padding:0; overflow:hidden;">
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Centro de custo</th>
+            <th class="num">Viagens</th>
+            <th class="num">Custo total</th>
+            <th class="num">A cobrar</th>
+          </tr></thead>
+          <tbody id="v-cc-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <p class="section-title">Detalhamento de viagens</p>
+    <div class="filters">
+      <select id="v-f-cobranca" onchange="renderViagensTable()">
+        <option value="">Todas as cobranças</option>
+        <option value="Sim">Cobrado</option>
+        <option value="Não">A cobrar</option>
+        <option value="Pendente">Pendente</option>
+      </select>
+      <select id="v-f-motivo" onchange="renderViagensTable()">
+        <option value="">Todos os motivos</option>
+      </select>
+    </div>
+    <div class="panel" style="padding:0; overflow:hidden;">
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Colaborador</th>
+            <th>CC</th>
+            <th>Motivo</th>
+            <th>Trajeto</th>
+            <th>Ida</th>
+            <th>Volta</th>
+            <th class="num">Aéreo</th>
+            <th class="num">Hospedagem</th>
+            <th class="num">Custo total</th>
+            <th>Cobrança</th>
+            <th>Solicitante</th>
+          </tr></thead>
+          <tbody id="v-table-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ===================== PÁGINA EXCEÇÕES DE AJUDA DE CUSTO ===================== -->
+  <section id="page-excecoes" class="page" hidden>
+
+    <p class="section-title" style="margin-top:.5rem;">Filtrar por competência</p>
+    <div class="month-filter" id="e-month-filter"></div>
+
+    <p class="section-title">Filtrar por centro de custo</p>
+    <div class="month-filter" id="e-cc-filter"></div>
+
+    <p class="section-title">Resumo</p>
+    <div class="cards" id="e-summary-cards"></div>
+
+    <p class="section-title">Ajuda de custo — exceções <span class="hint">· cada colaborador tem um limite de exceções · 1ª = baixo · 2ª = médio · 3ª = limite atingido</span></p>
+    <div class="hero" id="e-hero-cards"></div>
+
+    <div class="panel">
+      <p style="font-size:13px; font-weight:500; margin-bottom:12px;">Valor reembolsado por competência (R$)</p>
+      <div class="legend" id="e-loss-legend"></div>
+      <div style="position:relative; width:100%; height:230px;">
+        <canvas id="eChart" role="img" aria-label="Valor reembolsado por competência"></canvas>
+      </div>
+    </div>
+
+    <p class="section-title">Atenção — colaboradores com exceções recorrentes <span class="hint">· 2ª exceção ou mais</span></p>
+    <div class="panel" style="padding:0; overflow:hidden;">
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Colaborador</th>
+            <th>CC</th>
+            <th class="num">Nº de exceções</th>
+            <th class="num">Valor acumulado</th>
+            <th>Situação</th>
+          </tr></thead>
+          <tbody id="e-risk-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <p class="section-title">Detalhamento de exceções</p>
+    <div class="filters">
+      <select id="e-f-risco" onchange="renderExcecoesTable()">
+        <option value="">Todas as situações</option>
+        <option value="Baixo risco">Baixo risco</option>
+        <option value="Médio risco">Médio risco</option>
+        <option value="Limite atingido">Limite atingido</option>
+      </select>
+    </div>
+    <div class="panel" style="padding:0; overflow:hidden;">
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Colaborador</th>
+            <th>CC</th>
+            <th>Competência</th>
+            <th class="num">Valor</th>
+            <th>Data da exceção</th>
+            <th>Nº</th>
+            <th>Situação</th>
+          </tr></thead>
+          <tbody id="e-table-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </section>
+
+</main>
+
+<footer>Atualizado via Claude Code · Fontes: Gestao_Ferias_Globo.xlsx (Planejamento + Hora Venda) · Viagens · Exceções de Ajuda de Custo (SharePoint)</footer>
+
+<script>
+// ============================================================
+// DADOS — gerados automaticamente pelo Claude Code
+// Fonte: Gestao_Ferias_Globo.xlsx (Planejamento de Férias + Hora Venda)
+// Última atualização: 2026-06-18
+// hv = valor hora-venda (R$). perda = dias × 8h × hv (calculado em JS)
+// ============================================================
+const DATA = [
+  { nome:'Rafaela de Orlando Nascimento',         inicio:'2026-02-23', fim:'2026-03-06', dias:12, mes:2,  abono:0,  status:'Aprovado', confirm:'Sim', hv:158.49 },
+  { nome:'Leonardo Santos Ferreira',              inicio:'2026-02-25', fim:'2026-03-06', dias:10, mes:2,  abono:0,  status:'Aprovado', confirm:'Sim', hv:190.19 },
+  { nome:'Fellipe Couto Marques Arruda',          inicio:'2026-03-16', fim:'2026-03-25', dias:10, mes:3,  abono:0,  status:'Aprovado', confirm:'Sim', hv:165.90 },
+  { nome:'Patricia de Araujo Rudas Paternina',    inicio:'2026-03-16', fim:'2026-03-30', dias:15, mes:3,  abono:0,  status:'Aprovado', confirm:'Sim', hv:169.27 },
+  { nome:'Eduardo Gabriel Delfito do Nascimento', inicio:'2026-03-23', fim:'2026-04-01', dias:10, mes:3,  abono:0,  status:'Aprovado', confirm:'Sim', hv:166.40 },
+  { nome:'Davi Alves de Sousa da Silva',          inicio:'2026-04-06', fim:'2026-04-14', dias:9,  mes:4,  abono:0,  status:'Aprovado', confirm:'Sim', hv:197.28 },
+  { nome:'Edvaldo Braz da Silva',                 inicio:'2026-04-06', fim:'2026-04-25', dias:20, mes:4,  abono:10, status:'Aprovado', confirm:'Sim', hv:131.36 },
+  { nome:'Paulo Eugenio da Silva dos Reis',       inicio:'2026-04-06', fim:'2026-04-25', dias:20, mes:4,  abono:10, status:'Aprovado', confirm:'Sim', hv:222.79 },
+  { nome:'Luciana dos Santos Dias',               inicio:'2026-04-13', fim:'2026-04-30', dias:18, mes:4,  abono:0,  status:'Aprovado', confirm:'Sim', hv:190.20 },
+  { nome:'Gleidson Andre Duarte Ramos',           inicio:'2026-05-04', fim:'2026-05-18', dias:15, mes:5,  abono:0,  status:'Aprovado', confirm:'Sim', hv:158.33 },
+  { nome:'Rosangela Silva de Castro',             inicio:'2026-05-04', fim:'2026-05-23', dias:20, mes:5,  abono:0,  status:'Aprovado', confirm:'Sim', hv:147.22 },
+  { nome:'Jean Philip Silva',                     inicio:'2026-05-04', fim:'2026-05-18', dias:15, mes:5,  abono:10, status:'Aprovado', confirm:'Sim', hv:127.54 },
+  { nome:'Raquel Rente Peixoto',                  inicio:'2026-05-06', fim:'2026-05-25', dias:20, mes:5,  abono:10, status:'Aprovado', confirm:'Sim', hv:172.49 },
+  { nome:'Diego Mariano de Oliveira',             inicio:'2026-05-11', fim:'2026-05-28', dias:18, mes:5,  abono:0,  status:'Aprovado', confirm:'Sim', hv:228.09 },
+  { nome:'Igor Dias Rangel',                      inicio:'2026-06-01', fim:'2026-06-15', dias:15, mes:6,  abono:0,  status:'Aprovado', confirm:'Sim', hv:153.83 },
+  { nome:'Ivana Mara Rodrigues Possidio',         inicio:'2026-06-15', fim:'2026-06-24', dias:10, mes:6,  abono:0,  status:'Aprovado', confirm:'Sim', hv:184.66 },
+  { nome:'Felipe dos Santos Machado',             inicio:'2026-06-29', fim:'2026-07-12', dias:14, mes:6,  abono:10, status:'Aprovado', confirm:'Sim', hv:169.26 },
+  { nome:'Aline Alvares Boyde',                   inicio:'2026-07-21', fim:'2026-07-31', dias:11, mes:7,  abono:0,  status:'Aprovado', confirm:'Sim', hv:173.71 },
+  { nome:'Guilherme da Costa Cardoso',            inicio:'2026-07-22', fim:'2026-08-05', dias:15, mes:7,  abono:0,  status:'Aprovado', confirm:'Sim', hv:127.53 },
+  { nome:'Jefferson Rafael Santana Moraes',       inicio:'2026-07-06', fim:'2026-07-20', dias:15, mes:7,  abono:5,  status:'Aprovado', confirm:'Sim', hv:67.41 },
+  { nome:'Roberto de Souza Batista',              inicio:'2026-07-20', fim:'2026-07-24', dias:5,  mes:7,  abono:10, status:'Aprovado', confirm:'Sim', hv:117.00 },
+  { nome:'Rachel Magalhães de Andrade',           inicio:'2026-07-20', fim:'2026-08-04', dias:16, mes:7,  abono:0,  status:'Aprovado', confirm:'Sim', hv:179.22 },
+  { nome:'Rodrigo Zisman Pereira',                inicio:'2026-07-27', fim:'2026-08-07', dias:12, mes:7,  abono:0,  status:'Aprovado', confirm:'Sim', hv:174.34 },
+  { nome:'Jean Philip Silva',                     inicio:'2026-08-03', fim:'2026-08-07', dias:5,  mes:8,  abono:0,  status:'Aprovado', confirm:'Sim', hv:127.54 },
+  { nome:'Leonardo Santos Ferreira',              inicio:'2026-08-03', fim:'2026-08-22', dias:20, mes:8,  abono:0,  status:'Aprovado', confirm:'Sim', hv:190.19 },
+  { nome:'Veronica Pereira Nogueira',             inicio:'2026-08-03', fim:'2026-08-20', dias:18, mes:8,  abono:0,  status:'Aprovado', confirm:'Sim', hv:66.92 },
+  { nome:'Felipe Gomes de Souza',                 inicio:'2026-08-03', fim:'2026-08-17', dias:15, mes:8,  abono:0,  status:'Aprovado', confirm:'Sim', hv:293.01 },
+  { nome:'Murilo Antonio da Silva',               inicio:'2026-08-03', fim:'2026-08-07', dias:5,  mes:8,  abono:0,  status:'Aprovado', confirm:'Sim', hv:null, gestor:true },
+  { nome:'Laryssa Fernanda Peter',                inicio:'2026-08-10', fim:'2026-08-19', dias:10, mes:8,  abono:0,  status:'Aprovado', confirm:'Sim', hv:122.68 },
+  { nome:'Vitor Manoel de Oliveira',              inicio:'2026-08-24', fim:'2026-08-29', dias:6,  mes:8,  abono:0,  status:'Aprovado', confirm:'Sim', hv:91.71 },
+  { nome:'Fernanda Bertola',                      inicio:'2026-08-24', fim:'2026-09-04', dias:12, mes:8,  abono:0,  status:'Aprovado', confirm:'Sim', hv:123.06 },
+  { nome:'Bruno Roberto da Silva',                inicio:'2026-09-14', fim:'2026-10-03', dias:20, mes:9,  abono:10, status:'Aprovado', confirm:'Sim', hv:153.86 },
+  { nome:'Lidia Vieira',                          inicio:'2026-09-08', fim:'2026-09-17', dias:10, mes:9,  abono:0,  status:'Aprovado', confirm:'Sim', hv:186.80 },
+  { nome:'Rafaela de Orlando Nascimento',         inicio:'2026-09-08', fim:'2026-09-25', dias:18, mes:9,  abono:0,  status:'Aprovado', confirm:'Sim', hv:158.49 },
+  { nome:'Flavia Cezario de Barros',              inicio:'2026-09-08', fim:'2026-09-20', dias:13, mes:9,  abono:0,  status:'Aprovado', confirm:'Sim', hv:209.63 },
+  { nome:'Rosangela Silva de Castro',             inicio:'2026-09-08', fim:'2026-09-17', dias:10, mes:9,  abono:0,  status:'Aprovado', confirm:'Sim', hv:147.22 },
+  { nome:'Lindsay Fernandes de Souza Filho',      inicio:'2026-09-23', fim:'2026-10-02', dias:10, mes:9,  abono:0,  status:'Aprovado', confirm:'Sim', hv:174.34 },
+  { nome:'Pedro Paulo Ferreira Corazza',          inicio:'2026-09-28', fim:'2026-10-09', dias:12, mes:9,  abono:0,  status:'Aprovado', confirm:'Sim', hv:190.20 },
+  { nome:'Ivana Mara Rodrigues Possidio',         inicio:'2026-10-05', fim:'2026-10-09', dias:5,  mes:10, abono:0,  status:'Aprovado', confirm:'Sim', hv:184.66 },
+  { nome:'Paulo Sergio da Costa Moreira Filho',   inicio:'2026-10-14', fim:'2026-10-27', dias:14, mes:10, abono:10, status:'Aprovado', confirm:'Sim', hv:139.29 },
+  { nome:'Sidney Rosa Alves da Rocha',            inicio:'2026-10-20', fim:'2026-11-08', dias:20, mes:10, abono:10, status:'Aprovado', confirm:'Sim', hv:295.16 },
+  { nome:'Flavia Cezario de Barros',              inicio:'2026-11-03', fim:'2026-11-19', dias:17, mes:11, abono:0,  status:'Aprovado', confirm:'Sim', hv:209.63 },
+  { nome:'Gleidson Andre Duarte Ramos',           inicio:'2026-11-03', fim:'2026-11-17', dias:15, mes:11, abono:0,  status:'Aprovado', confirm:'Sim', hv:158.33 },
+  { nome:'Igor Dias Rangel',                      inicio:'2026-11-05', fim:'2026-11-19', dias:15, mes:11, abono:0,  status:'Aprovado', confirm:'Sim', hv:153.83 },
+  { nome:'Ivana Mara Rodrigues Possidio',         inicio:'2026-12-21', fim:'2027-01-04', dias:15, mes:12, abono:0,  status:'Aprovado', confirm:'Sim', hv:184.66 },
+  // Vencendo — saldo a programar (sem datas de gozo definidas). dias = saldo a vencer. hv:null = hora-venda a confirmar.
+  { nome:'Yuri Dambroysk',                        inicio:null, fim:null, dias:30, mes:null, abono:0, status:'Vencendo', confirm:'Não', hv:128.75, limite:'2026-12-23' },
+  { nome:'Jefferson Rafael Santana Moraes',       inicio:null, fim:null, dias:10, mes:null, abono:0, status:'Vencendo', confirm:'Não', hv:67.41,  limite:'2026-12-13' },
+  { nome:'Ana Clara Paixão Cardoso',              inicio:null, fim:null, dias:30, mes:null, abono:0, status:'Vencendo', confirm:'Não', hv:164.80, limite:'2027-01-23' },
+];
+const UPDATED = '2026-09-10';
+const JORNADA = 8; // horas/dia
+// ============================================================
+
+const MONTHS = [
+  {label:'Fev', days:28, n:2}, {label:'Mar', days:31, n:3}, {label:'Abr', days:30, n:4},
+  {label:'Mai', days:31, n:5}, {label:'Jun', days:30, n:6}, {label:'Jul', days:31, n:7},
+  {label:'Ago', days:31, n:8}, {label:'Set', days:30, n:9}, {label:'Out', days:31, n:10},
+  {label:'Nov', days:30, n:11}, {label:'Dez', days:31, n:12},
+];
+const TOTAL_DAYS = 334;
+const RANGE_START = new Date(2026,1,1);
+const COL_MAP = {
+  2:'#4B1197', 3:'#5E17A0', 4:'#7420A2', 5:'#89229B',
+  6:'#9E2194', 7:'#B31F8A', 8:'#C51C81', 9:'#D21B7C',
+  10:'#A82AA6', 11:'#7E2FC0', 12:'#5E17A0'
+};
+
+const aprovadas = DATA.filter(d=>d.status==='Aprovado');
+const vencendo  = DATA.filter(d=>d.status==='Vencendo');
+// dias ÚTEIS (seg–sex) dentro do período — base do desconto de faturamento
+const diasUteis = (iniStr, fimStr) => {
+  let n = 0, cur = pd(iniStr); const end = pd(fimStr);
+  while (cur <= end) { const w = cur.getDay(); if (w!==0 && w!==6) n++; cur = new Date(cur.getFullYear(), cur.getMonth(), cur.getDate()+1); }
+  return n;
+};
+const diasCalc = d => d.inicio ? diasUteis(d.inicio, d.fim) : d.dias; // Vencendo usa saldo
+const horas = d => diasCalc(d) * JORNADA;
+const perda = d => horas(d) * d.hv;
+const BRL = v => v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const BRLk = v => 'R$ ' + (v/1000).toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0}) + 'k';
+
+// Custos de Férias (aba "Custos de Férias") — provisão de custo por período, distribuída nos meses de gozo
+const CUSTOS = [
+  { nome:'Gleidson Andre Duarte Ramos',      c:{5:12914.94} },
+  { nome:'Rosangela Silva de Castro',        c:{5:14136.57} },
+  { nome:'Jean Philip Silva',                c:{5:11066.69} },
+  { nome:'Raquel Rente Peixoto',             c:{5:14517.23} },
+  { nome:'Diego Mariano de Oliveira',        c:{5:23856.93} },
+  { nome:'Igor Dias Rangel',                 c:{6:14259.14, 11:14258.85} },
+  { nome:'Ivana Mara Rodrigues Possidio',    c:{6:17836.73} },
+  { nome:'Felipe dos Santos Machado',        c:{6:21434.00, 7:16858.00} },
+  { nome:'Jefferson Rafael Santana Moraes',  c:{7:3549.72} },
+  { nome:'Roberto de Souza Batista',         c:{7:12737.31} },
+  { nome:'Rachel Magalhães de Andrade',      c:{7:17318.37, 8:21165.87} },
+  { nome:'Aline Alvares Boyde',              c:{7:18396.20} },
+  { nome:'Guilherme da Costa Cardoso',       c:{7:14072.93, 8:15924.17} },
+  { nome:'Rodrigo Zisman Pereira',           c:{7:20524.09, 8:19565.50} },
+  { nome:'Jean Philip Silva',                c:{8:14363.08} },
+  { nome:'Leonardo Santos Ferreira',         c:{8:12399.40} },
+  { nome:'Veronica Pereira Nogueira',        c:{8:3856.62} },
+  { nome:'Felipe Gomes de Souza',            c:{8:31729.23} },
+  { nome:'Murilo Antonio da Silva',          c:{8:8946.00} },
+  { nome:'Laryssa Fernanda Peter',           c:{8:8864.00} },
+  { nome:'Fernanda Bertola',                 c:{8:15483.75, 9:17039.07} },
+  { nome:'Vitor Manoel de Oliveira',         c:{8:9285.92} },
+  { nome:'Lidia Vieira',                     c:{9:17467.04} },
+  { nome:'Rafaela de Orlando Nascimento',    c:{9:13388.50} },
+  { nome:'Flavia Cezario de Barros',         c:{9:21710.49} },
+  { nome:'Rosangela Silva de Castro',        c:{9:19388.09} },
+  { nome:'Lindsay Fernandes de Souza Filho', c:{9:10563.68, 10:12133.51} },
+  { nome:'Pedro Paulo Ferreira Corazza',     c:{9:22822.45, 10:19767.33} },
+  { nome:'Bruno Roberto da Silva',           c:{9:12484.17, 10:18120.44} },
+  { nome:'Ivana Mara Rodrigues Possidio',    c:{10:20410.00} },
+  { nome:'Paulo Sergio da Costa Moreira Filho', c:{10:10237.35} },
+  { nome:'Sidney Rosa Alves da Rocha',       c:{10:36574.80, 11:40596.75} },
+  { nome:'Flavia Cezario de Barros',         c:{11:19216.56} },
+  { nome:'Gleidson Andre Duarte Ramos',      c:{11:13042.76} },
+  { nome:'Ivana Mara Rodrigues Possidio',    c:{12:17550.21} },
+];
+const custoMes = {};
+CUSTOS.forEach(p => { for (const [m,v] of Object.entries(p.c)) custoMes[m] = (custoMes[m]||0)+v; });
+const custoTotal = Object.values(custoMes).reduce((a,b)=>a+b,0);
+const MESNOME = {2:'Fevereiro',3:'Março',4:'Abril',5:'Maio',6:'Junho',7:'Julho',8:'Agosto',9:'Setembro',10:'Outubro',11:'Novembro',12:'Dezembro'};
+const MESAB = {2:'Fev',3:'Mar',4:'Abr',5:'Mai',6:'Jun',7:'Jul',8:'Ago',9:'Set',10:'Out',11:'Nov',12:'Dez'};
+
+// ---- Centro de custo (aba Hora Venda) ----
+const CC = {
+  'Rafaela de Orlando Nascimento':'ED','Leonardo Santos Ferreira':'ED','Fellipe Couto Marques Arruda':'SD',
+  'Patricia de Araujo Rudas Paternina':'ED','Eduardo Gabriel Delfito do Nascimento':'SD','Davi Alves de Sousa da Silva':'SD',
+  'Edvaldo Braz da Silva':'SD','Paulo Eugenio da Silva dos Reis':'SD','Luciana dos Santos Dias':'ED',
+  'Gleidson Andre Duarte Ramos':'ED','Rosangela Silva de Castro':'ED','Jean Philip Silva':'SD',
+  'Raquel Rente Peixoto':'ED','Diego Mariano de Oliveira':'ED','Igor Dias Rangel':'SD',
+  'Ivana Mara Rodrigues Possidio':'ED','Felipe dos Santos Machado':'ED','Aline Alvares Boyde':'ED',
+  'Guilherme da Costa Cardoso':'SD','Jefferson Rafael Santana Moraes':'SD','Roberto de Souza Batista':'ED',
+  'Rachel Magalhães de Andrade':'ED','Rodrigo Zisman Pereira':'ED','Veronica Pereira Nogueira':'SD',
+  'Felipe Gomes de Souza':'SD','Laryssa Fernanda Peter':'ED','Vitor Manoel de Oliveira':'SD',
+  'Fernanda Bertola':'ED','Bruno Roberto da Silva':'SD','Lidia Vieira':'ED','Flavia Cezario de Barros':'ED',
+  'Pedro Paulo Ferreira Corazza':'ED','Lindsay Fernandes de Souza Filho':'ED','Sidney Rosa Alves da Rocha':'ED',
+  'Yuri Dambroysk':'ED','Paulo Sergio da Costa Moreira Filho':'ED','Ana Clara Paixão Cardoso':'ED',
+};
+const CC_FULL = 'GLOBO - ALOCAÇÃO DE PROFISSIONAIS';
+const ccDe = d => d.gestor ? '—' : (CC[d.nome] || '—');
+
+// ---- Filtros globais (mês + centro de custo) ----
+let filtroMes = null; // null = todos os meses
+let filtroCC = null;  // null | 'ED' | 'SD'
+const matchCC     = d => filtroCC==null || ccDe(d)===filtroCC;
+const apMes       = () => aprovadas.filter(d => (filtroMes==null || d.mes===filtroMes) && matchCC(d));
+const vencMes     = () => (filtroMes==null ? vencendo : []).filter(matchCC);
+const custosDoMes = () => (filtroMes==null ? CUSTOS : CUSTOS.filter(p=>p.c[filtroMes]!=null).map(p=>({nome:p.nome, c:{[filtroMes]:p.c[filtroMes]}})));
+const custoMesDe  = list => { const o={}; list.forEach(p=>{ for (const [m,v] of Object.entries(p.c)) o[m]=(o[m]||0)+v; }); return o; };
+const chartRefs = {};
+const mkChart = (id,cfg) => { if(chartRefs[id]) chartRefs[id].destroy(); chartRefs[id]=new Chart(document.getElementById(id),cfg); };
+
+// parse 'YYYY-MM-DD' como data LOCAL (evita deslocamento de 1 dia por fuso horário)
+const pd = s => { const [y,m,dd] = s.split('-').map(Number); return new Date(y, m-1, dd); };
+
+document.getElementById('updated-at').textContent = 'Atualizado em ' + pd(UPDATED).toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
+
+function pct(d) {
+  const diff = Math.round((d - RANGE_START) / 86400000);
+  return Math.max(0, Math.min(100, diff / TOTAL_DAYS * 100));
+}
+
+function renderSummary() {
+  const ap = apMes(), venc = vencMes();
+  const confirmados = ap.filter(d=>d.confirm==='Sim').length;
+  const sub1 = filtroMes==null ? 'aprovados · fev–dez 2026' : 'aprovados em '+MESNOME[filtroMes];
+  const cards = [
+    {label:'Períodos de férias', value:ap.length,   sub:sub1, cls:''},
+    {label:'Conf. cliente',      value:confirmados, sub:`${ap.length-confirmados} sem confirmação`, cls:''},
+    {label:'A vencer',           value:venc.length, sub: filtroMes==null?'saldos a programar':'sem mês de gozo', cls:venc.length>0?'alert':''},
+  ];
+  document.getElementById('summary-cards').innerHTML = cards.map(c=>
+    `<div class="card ${c.cls}"><div class="card-label">${c.label}</div><div class="card-value">${c.value}</div><div class="card-sub">${c.sub}</div></div>`
+  ).join('');
+}
+
+function renderHero() {
+  const ap = apMes(), venc = vencMes();
+  const totalPerda = ap.reduce((s,d)=>s+perda(d),0);
+  const totalHoras = ap.reduce((s,d)=>s+horas(d),0);
+  const riscoPerda = venc.reduce((s,d)=>s+perda(d),0);
+  const lbl = filtroMes==null ? 'Desconto de Faturamento (ano)' : 'Desconto de Faturamento ('+MESNOME[filtroMes]+')';
+  const cards = [
+    {cls:'',     label:'<i class="ti ti-currency-real" aria-hidden="true"></i> '+lbl, value:BRL(totalPerda), sub:`${ap.length} períodos de férias`},
+    {cls:'soft', label:'<i class="ti ti-clock" aria-hidden="true"></i> Horas não faturadas',                    value:totalHoras.toLocaleString('pt-BR')+' h', sub:`${ap.reduce((s,d)=>s+diasCalc(d),0)} dias úteis × ${JORNADA}h`},
+    {cls:'risk', label:'<i class="ti ti-alert-triangle" aria-hidden="true"></i> Desconto a vencer (risco)',     value:BRL(riscoPerda), sub:`${venc.length} saldos não programados`},
+  ];
+  document.getElementById('hero-cards').innerHTML = cards.map(c=>
+    `<div class="hero-card ${c.cls}"><div class="hero-label">${c.label}</div><div class="hero-value">${c.value}</div><div class="hero-sub">${c.sub}</div></div>`
+  ).join('');
+}
+
+function renderLossChart() {
+  const mm = filtroMes==null ? MONTHS : MONTHS.filter(m=>m.n===filtroMes);
+  const totals = mm.map(m => aprovadas.filter(d=>d.mes===m.n && matchCC(d)).reduce((s,d)=>s+perda(d),0));
+  const cols   = mm.map(m => COL_MAP[m.n]);
+  const grand  = totals.reduce((a,b)=>a+b,0);
+  document.getElementById('loss-legend').innerHTML =
+    `<span class="legend-item" style="font-weight:500;color:var(--text)">${filtroMes==null?'Desconto total no ano':'Desconto em '+MESNOME[filtroMes]}: ${BRL(grand)}</span>`;
+  const labelColor = matchMedia('(prefers-color-scheme: dark)').matches ? '#f1e8fb' : '#2b0a63';
+  const dataLabels = {
+    id:'dataLabels',
+    afterDatasetsDraw(chart){
+      const {ctx} = chart; const meta = chart.getDatasetMeta(0);
+      ctx.save(); ctx.font='500 11px system-ui, sans-serif'; ctx.fillStyle=labelColor; ctx.textAlign='center';
+      meta.data.forEach((bar,i)=>{ if(totals[i] <= 0) return; ctx.fillText(BRLk(totals[i]), bar.x, bar.y - 6); });
+      ctx.restore();
+    }
+  };
+  mkChart('lossChart',{
+    type:'bar',
+    data:{ labels:mm.map(m=>m.label), datasets:[{data:totals, backgroundColor:cols, borderRadius:6, borderSkipped:false}] },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      layout:{padding:{top:22}},
+      plugins:{ legend:{display:false}, tooltip:{callbacks:{label:ctx=>BRL(ctx.parsed.y)}} },
+      scales:{
+        y:{beginAtZero:true, ticks:{callback:v=>BRLk(v), font:{size:11}}, grid:{color:'rgba(128,128,128,0.1)'}},
+        x:{ticks:{font:{size:12}, autoSkip:false}, grid:{display:false}}
+      }
+    },
+    plugins:[dataLabels]
+  });
+}
+
+function renderRank() {
+  const byName = {};
+  aprovadas.forEach(d=>{ byName[d.nome] = (byName[d.nome]||0) + perda(d); });
+  const ranked = Object.entries(byName).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const max = ranked[0][1];
+  document.getElementById('rank-list').innerHTML = ranked.map(([nome,val])=>
+    `<div class="rank-row">
+      <div class="rank-name" title="${nome}">${nome}</div>
+      <div class="rank-track"><div class="rank-fill" style="width:${(val/max*100).toFixed(1)}%"></div></div>
+      <div class="rank-val">${BRL(val)}</div>
+    </div>`
+  ).join('');
+}
+
+function renderTimeline() {
+  document.getElementById('tl-header').innerHTML = MONTHS.map(m=>
+    `<div class="tl-month-label" style="width:${m.days/TOTAL_DAYS*100}%">${m.label}</div>`
+  ).join('');
+  const dm = s => pd(s).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});
+  const body = apMes();
+  document.getElementById('tl-body').innerHTML = body.length===0 ? '<p style="font-size:12px;color:var(--text-3);padding:6px 0;">Nenhuma férias aprovada neste mês.</p>' : body.map(d=>{
+    const ini = pd(d.inicio);
+    const s = pct(ini);
+    const fimD = pd(d.fim);
+    const fimNext = new Date(fimD.getFullYear(), fimD.getMonth(), fimD.getDate()+1);
+    const e = pct(fimNext);
+    const w = Math.max(0.8, e-s);
+    const col = COL_MAP[d.mes]||'#9B72CC';
+    const nome2 = d.nome.split(' ').slice(0,2).join(' ');
+    const periodo = `${dm(d.inicio)}–${dm(d.fim)}`;
+    // rótulo à direita da barra; se a barra terminar perto do fim, joga para a esquerda
+    const labelLeft = e > 80;
+    const labelStyle = labelLeft
+      ? `right:${(100-s).toFixed(1)}%; margin-right:6px; text-align:right;`
+      : `left:${e.toFixed(1)}%; margin-left:6px;`;
+    return `<div class="tl-row">
+      <div class="tl-name" title="${d.nome}">${nome2}</div>
+      <div class="tl-grid">
+        <div class="tl-bar" style="left:${s}%;width:${w}%;background:${col};"
+          title="${d.nome} · ${d.dias} dias (${diasCalc(d)} úteis) · ${BRL(perda(d))} de desconto"></div>
+        <span class="tl-label" style="${labelStyle}">${periodo}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function confBadge(val) {
+  return val==='Sim'
+    ? `<span class="badge b-green"><i class="ti ti-check" aria-hidden="true"></i>Confirmado</span>`
+    : `<span class="badge b-gray"><i class="ti ti-x" aria-hidden="true"></i>Não confirmado</span>`;
+}
+
+function renderTable() {
+  const fS = document.getElementById('f-status').value;
+  const fC = document.getElementById('f-confirm').value;
+  const rows = DATA.filter(d=>{
+    if(filtroMes!=null && d.mes!==filtroMes) return false;
+    if(filtroCC!=null && ccDe(d)!==filtroCC) return false;
+    if(fS && d.status!==fS) return false;
+    if(fC && d.confirm!==fC) return false;
+    return true;
+  });
+  const fmt = s => s ? pd(s).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}) : '—';
+  document.getElementById('table-body').innerHTML = rows.map(d=>{
+    const alerta = d.status==='Vencendo';
+    const statusBadge = d.status==='Aprovado'
+      ? `<span class="badge b-green">Aprovado</span>`
+      : `<span class="badge b-red"><i class="ti ti-alert-triangle" aria-hidden="true"></i>Vencendo</span>`;
+    return `<tr class="${alerta?'alert-row':''}">
+      <td>${d.nome}</td>
+      <td>${fmt(d.inicio)}</td>
+      <td>${fmt(d.fim)}</td>
+      <td>${d.dias}${d.inicio?` <span style="color:var(--text-3)">(${diasUteis(d.inicio,d.fim)} úteis)</span>`:' <span style="color:var(--text-3)">(saldo)</span>'}</td>
+      <td>${d.abono>0?d.abono+' d':'—'}</td>
+      <td>${statusBadge}</td>
+      <td>${confBadge(d.confirm)}</td>
+      <td>${ccBadge(d)}</td>
+      <td class="num">${d.gestor?'<span style="color:var(--text-3)">gestor</span>':(d.hv==null?'<span style="color:var(--text-3)">a confirmar</span>':BRL(d.hv))}</td>
+      <td class="num">${d.gestor?'<span class="badge b-blue">Custo da operação</span>':(d.hv==null?'<span style="color:var(--text-3)">a confirmar</span>':BRL(perda(d)))}</td>
+    </tr>`;
+  }).join('');
+}
+
+function ccBadge(d){
+  const c = ccDe(d);
+  if(c==='—') return '<span style="color:var(--text-3)">—</span>';
+  return `<span class="badge ${c==='ED'?'b-blue':'b-amber'}" title="${CC_FULL} ${c}">${c}</span>`;
+}
+
+function renderLossList() {
+  const fmtP = d => d.inicio
+    ? pd(d.inicio).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}) + ' – ' + pd(d.fim).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit'})
+    : 'A programar (limite '+pd(d.limite).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})+')';
+  const ap = apMes(), venc = vencMes();
+  const ordered = [...ap].sort((a,b)=>perda(b)-perda(a));
+  let html = ordered.map(d=>
+    `<tr>
+      <td>${d.nome}</td>
+      <td style="color:var(--text-2)">${fmtP(d)}</td>
+      <td class="num">${d.dias}</td>
+      <td class="num">${diasCalc(d)}</td>
+      <td class="num">${horas(d)} h</td>
+      <td class="num">${d.gestor?'<span style="color:var(--text-3)">gestor</span>':(d.hv==null?'<span style="color:var(--text-3)">a confirmar</span>':BRL(d.hv))}</td>
+      <td class="num">${d.gestor?'<span class="badge b-blue">Custo da operação</span>':(d.hv==null?'<span style="color:var(--text-3)">a confirmar</span>':BRL(perda(d)))}</td>
+    </tr>`
+  ).join('');
+  const totalDias = ap.reduce((s,d)=>s+d.dias,0);
+  const totalU    = ap.reduce((s,d)=>s+diasCalc(d),0);
+  const totalH    = ap.reduce((s,d)=>s+horas(d),0);
+  const totalP    = ap.reduce((s,d)=>s+perda(d),0);
+  html += `<tr class="total-row">
+      <td>Total aprovado</td><td></td>
+      <td class="num">${totalDias}</td>
+      <td class="num">${totalU}</td>
+      <td class="num">${totalH} h</td>
+      <td></td>
+      <td class="num">${BRL(totalP)}</td>
+    </tr>`;
+  // bloco a vencer
+  html += venc.map(d=>
+    `<tr class="alert-row">
+      <td>${d.nome} <span class="badge b-red" style="margin-left:4px"><i class="ti ti-alert-triangle" aria-hidden="true"></i>Vencendo</span></td>
+      <td style="color:var(--text-2)">${fmtP(d)}</td>
+      <td class="num">${d.dias}</td>
+      <td class="num">${diasCalc(d)}</td>
+      <td class="num">${horas(d)} h</td>
+      <td class="num">${d.gestor?'<span style="color:var(--text-3)">gestor</span>':(d.hv==null?'<span style="color:var(--text-3)">a confirmar</span>':BRL(d.hv))}</td>
+      <td class="num">${d.gestor?'<span class="badge b-blue">Custo da operação</span>':(d.hv==null?'<span style="color:var(--text-3)">a confirmar</span>':BRL(perda(d)))}</td>
+    </tr>`
+  ).join('');
+  if(venc.length){
+    const riscoP = venc.reduce((s,d)=>s+perda(d),0);
+    html += `<tr class="total-row">
+      <td>Total a vencer (risco)</td><td></td>
+      <td class="num">${venc.reduce((s,d)=>s+d.dias,0)}</td>
+      <td class="num">${venc.reduce((s,d)=>s+diasCalc(d),0)}</td>
+      <td class="num">${venc.reduce((s,d)=>s+horas(d),0)} h</td>
+      <td></td>
+      <td class="num">${BRL(riscoP)}</td>
+    </tr>`;
+  }
+  document.getElementById('loss-body').innerHTML = html;
+}
+
+function renderCustoHero(){
+  const list = custosDoMes();
+  const cMes = custoMesDe(list);
+  const total = Object.values(cMes).reduce((a,b)=>a+b,0);
+  const meses = Object.keys(cMes).map(Number).sort((a,b)=>a-b);
+  const maior = meses.length ? meses.reduce((a,b)=>cMes[b]>cMes[a]?b:a, meses[0]) : null;
+  const nomes = new Set(list.map(p=>p.nome)).size;
+  const subTotal = filtroMes==null ? 'provisão mai–dez 2026' : 'em '+MESNOME[filtroMes];
+  const cards = [
+    {cls:'',     label:'<i class="ti ti-cash" aria-hidden="true"></i> Custo total de férias',    value:BRL(total), sub:subTotal},
+    {cls:'soft', label:'<i class="ti ti-calendar-stats" aria-hidden="true"></i> Mês de maior custo', value:maior?MESNOME[maior]:'—', sub:maior?BRL(cMes[maior]):'sem custo'},
+    {cls:'soft', label:'<i class="ti ti-users" aria-hidden="true"></i> Colaboradores com custo',   value:nomes, sub:`${list.length} períodos`},
+  ];
+  document.getElementById('custo-hero').innerHTML = cards.map(c=>
+    `<div class="hero-card ${c.cls}"><div class="hero-label">${c.label}</div><div class="hero-value">${c.value}</div><div class="hero-sub">${c.sub}</div></div>`
+  ).join('');
+}
+
+function renderCustoChart(){
+  const meses = filtroMes==null ? [5,6,7,8,9,10,11,12] : [filtroMes];
+  const cMes = custoMesDe(custosDoMes());
+  const total = Object.values(cMes).reduce((a,b)=>a+b,0);
+  const totals=meses.map(m=>cMes[m]||0);
+  const cols=meses.map(m=>COL_MAP[m]);
+  document.getElementById('custo-legend').innerHTML =
+    `<span class="legend-item" style="font-weight:500;color:var(--text)">Custo total: ${BRL(total)}</span>`;
+  const labelColor = matchMedia('(prefers-color-scheme: dark)').matches ? '#f1e8fb' : '#2b0a63';
+  const dl={id:'custoDl',afterDatasetsDraw(ch){const{ctx}=ch;const m=ch.getDatasetMeta(0);ctx.save();ctx.font='500 11px system-ui, sans-serif';ctx.fillStyle=labelColor;ctx.textAlign='center';m.data.forEach((b,i)=>{if(totals[i]>0)ctx.fillText(BRLk(totals[i]),b.x,b.y-6);});ctx.restore();}};
+  mkChart('custoChart',{
+    type:'bar',
+    data:{labels:meses.map(m=>MESAB[m]),datasets:[{data:totals,backgroundColor:cols,borderRadius:6,borderSkipped:false}]},
+    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:22}},
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>BRL(ctx.parsed.y)}}},
+      scales:{y:{beginAtZero:true,ticks:{callback:v=>BRLk(v),font:{size:11}},grid:{color:'rgba(128,128,128,0.1)'}},x:{ticks:{font:{size:12},autoSkip:false},grid:{display:false}}}},
+    plugins:[dl]
+  });
+}
+
+function renderCustoRank(){
+  const byName={};
+  custosDoMes().forEach(p=>{const t=Object.values(p.c).reduce((a,b)=>a+b,0);byName[p.nome]=(byName[p.nome]||0)+t;});
+  const ranked=Object.entries(byName).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  if(!ranked.length){ document.getElementById('custo-rank').innerHTML='<p style="font-size:12px;color:var(--text-3)">Sem custo lançado neste mês.</p>'; return; }
+  const max=ranked[0][1];
+  document.getElementById('custo-rank').innerHTML=ranked.map(([nome,val])=>
+    `<div class="rank-row"><div class="rank-name" title="${nome}">${nome}</div><div class="rank-track"><div class="rank-fill" style="width:${(val/max*100).toFixed(1)}%"></div></div><div class="rank-val">${BRL(val)}</div></div>`
+  ).join('');
+}
+
+function renderCompare(){
+  const meses = filtroMes==null ? [2,3,4,5,6,7,8,9,10,11,12] : [filtroMes];
+  const cMes = custoMesDe(custosDoMes());
+  const descMes={};
+  apMes().forEach(d => { descMes[d.mes] = (descMes[d.mes]||0) + perda(d); });
+  const custoTot = Object.values(cMes).reduce((a,b)=>a+b,0);
+  const descTot  = Object.values(descMes).reduce((a,b)=>a+b,0);
+  const custo=meses.map(m=>cMes[m]||0);
+  const desc=meses.map(m=>descMes[m]||0);
+  const cCusto='#4B1197', cDesc='#D21B7C';
+  document.getElementById('cmp-legend').innerHTML =
+    `<span class="legend-item"><span class="legend-sq" style="background:${cCusto}"></span>Custo de férias · ${BRL(custoTot)}</span>`+
+    `<span class="legend-item"><span class="legend-sq" style="background:${cDesc}"></span>Desconto de faturamento · ${BRL(descTot)}</span>`;
+  mkChart('cmpChart',{
+    type:'bar',
+    data:{labels:meses.map(m=>MESAB[m]),datasets:[
+      {label:'Custo de férias',data:custo,backgroundColor:cCusto,borderRadius:4,borderSkipped:false},
+      {label:'Desconto de faturamento',data:desc,backgroundColor:cDesc,borderRadius:4,borderSkipped:false}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.dataset.label+': '+BRL(c.parsed.y)}}},
+      scales:{y:{beginAtZero:true,ticks:{callback:v=>BRLk(v),font:{size:11}},grid:{color:'rgba(128,128,128,0.1)'}},x:{ticks:{font:{size:12},autoSkip:false},grid:{display:false}}}}
+  });
+}
+
+function renderCC(){
+  const apList = filtroMes==null ? aprovadas : aprovadas.filter(d=>d.mes===filtroMes);
+  const agg = {};
+  const ensure = k => agg[k] || (agg[k] = {gap:0, custo:0, nomes:new Set()});
+  apList.forEach(d=>{ const k=ccDe(d); ensure(k).gap += perda(d); ensure(k).nomes.add(d.nome); });
+  custosDoMes().forEach(p=>{ const k=CC[p.nome]||'—'; ensure(k).custo += Object.values(p.c).reduce((a,b)=>a+b,0); });
+  const label = {'ED':'Alocação de Profissionais · ED','SD':'Alocação de Profissionais · SD','—':'Gestor / sem centro de custo'};
+  const order = ['ED','SD','—'].filter(k=>agg[k]);
+  let rows = order.map(k=>`<tr>
+      <td>${label[k]||k}</td>
+      <td class="num">${agg[k].nomes.size||'—'}</td>
+      <td class="num">${BRL(agg[k].gap)}</td>
+      <td class="num">${agg[k].custo?BRL(agg[k].custo):'—'}</td>
+    </tr>`).join('');
+  const allNames=new Set(); order.forEach(k=>agg[k].nomes.forEach(n=>allNames.add(n)));
+  const tGap=order.reduce((s,k)=>s+agg[k].gap,0);
+  const tCusto=order.reduce((s,k)=>s+agg[k].custo,0);
+  rows += `<tr class="total-row"><td>Total</td><td class="num">${allNames.size}</td><td class="num">${BRL(tGap)}</td><td class="num">${BRL(tCusto)}</td></tr>`;
+  document.getElementById('cc-body').innerHTML = rows;
+}
+
+function renderFilter(){
+  const meses=[2,3,4,5,6,7,8,9,10,11,12];
+  let html=`<button class="mf-btn ${filtroMes==null?'active':''}" onclick="setMes(null)">Todos</button>`;
+  meses.forEach(m=>{ html+=`<button class="mf-btn ${filtroMes===m?'active':''}" onclick="setMes(${m})">${MESNOME[m]}</button>`; });
+  document.getElementById('month-filter').innerHTML=html;
+}
+function renderCCfilter(){
+  const mk=(lbl,v)=>`<button class="mf-btn ${filtroCC===v?'active':''}" onclick="setCC(${v==null?'null':`'${v}'`})">${lbl}</button>`;
+  document.getElementById('cc-filter').innerHTML = mk('Todos',null)+mk('ED','ED')+mk('SD','SD');
+}
+window.setMes = function(m){ filtroMes = m; renderAll(); };
+window.setCC  = function(v){ filtroCC = v; renderAll(); };
+function renderAll(){
+  renderFilter();
+  renderCCfilter();
+  renderSummary();
+  renderHero();
+  renderLossChart();
+  renderCC();
+  renderTimeline();
+  renderTable();
+}
+renderAll();
+
+// ============================================================
+// ABA VIAGENS
+// Fonte: planilha Viagens (SharePoint) · custo total = passagem + hospedagem + imposto + JF (juros de financiamento)
+// Correções aplicadas: data de volta '18/08/206' -> 2026-08-18; cobrança em branco -> 'Pendente'; espaços removidos.
+// ============================================================
+const VIAGENS = [
+  { nome:'Raquel Rente Peixoto',      cc:'ED', motivo:'Set Expo',         orig:'Rio de Janeiro', dest:'São Paulo',      ida:'2026-08-17', volta:'2026-08-18', aereo:1189.43, hosp:782.46,  total:4024.45, modelo:'Nota Fiscal',    cobranca:'Sim',      solic:'Rodrigo Octavio',      mes:8 },
+  { nome:'Raquel Rente Peixoto',      cc:'ED', motivo:'Visita a cliente', orig:'Rio de Janeiro', dest:'Recife',         ida:'2026-09-08', volta:'2026-09-11', aereo:null,    hosp:1898.63, total:1898.63, modelo:'Nota Fiscal',    cobranca:'Não',      solic:'Rodrigo Octavio',      mes:9, obs:'Profissional relatou que o banheiro do Hotel (Ibis) que havia sido reservado não atendia as condições de higiene, portanto tivemos que alterar a hospedagem para o hotel Hy Experience. Fez apenas o check-in no Ibis, sem pernoite — em negociação com a agência para não descontar o valor integral.' },
+  { nome:'Raquel Rente Peixoto',      cc:'ED', motivo:'Visita a cliente', orig:'Rio de Janeiro', dest:'Brasília',       ida:'2026-09-15', volta:'2026-09-18', aereo:1865.70, hosp:2781.83, total:4647.53, modelo:'Nota Fiscal',    cobranca:'Não',      solic:'Rodrigo Octavio',      mes:9 },
+  { nome:'Daniele Freitas',           cc:'SD', motivo:'Set Expo',         orig:'Rio de Janeiro', dest:'São Paulo',      ida:'2026-08-17', volta:'2026-08-20', aereo:3804.87, hosp:2039.09, total:7689.39, modelo:'Nota Fiscal',    cobranca:'Sim',      solic:'Marcela Dornellas',    mes:8 },
+  { nome:'Diego Mariano De Oliveira', cc:'ED', motivo:'Visita a cliente', orig:'São Paulo',      dest:'Rio de Janeiro', ida:'2026-05-12', volta:'2026-05-15', aereo:1105.55, hosp:1811.28, total:2916.83, modelo:'—',              cobranca:'Pendente', solic:'Wilson Balbo',         mes:5 },
+  { nome:'Lindsay Fernandes',         cc:'ED', motivo:'Visita a cliente', orig:'São Paulo',      dest:'Rio de Janeiro', ida:'2026-05-24', volta:'2026-05-26', aereo:5239.52, hosp:419.76,  total:5659.28, modelo:'Nota de Débito', cobranca:'Pendente', solic:'Rafael Motta',         mes:5 },
+  { nome:'Marcelo Augusto',           cc:'ED', motivo:'Visita a cliente', orig:'São Paulo',      dest:'Rio de Janeiro', ida:'2026-08-25', volta:'2026-08-28', aereo:2188.46, hosp:1923.61, total:2956.00, modelo:'Nota Fiscal',    cobranca:'Pendente', solic:'Ana Paula de Miranda', mes:8, flag:true },
+  { nome:'Mustafa Ribeiro',           cc:'SD', motivo:'Rio Innovation',   orig:'Rio de Janeiro', dest:'Rio de Janeiro', ida:'2026-08-03', volta:'2026-08-08', aereo:null,    hosp:2005.50, total:3334.75, modelo:'Nota Fiscal',    cobranca:'Sim',      solic:'—',                    mes:8 },
+  { nome:'Veronica Pereira',          cc:'SD', motivo:'Rio Innovation',   orig:'Rio de Janeiro', dest:'Rio de Janeiro', ida:'2026-08-03', volta:'2026-08-07', aereo:null,    hosp:null,    total:960.00,  modelo:'Nota Fiscal',    cobranca:'Sim',      solic:'—',                    mes:8 },
+  { nome:'Daniele Freitas',           cc:'SD', motivo:'Rio Innovation',   orig:'Rio de Janeiro', dest:'Rio de Janeiro', ida:'2026-08-03', volta:'2026-08-07', aereo:null,    hosp:null,    total:880.00,  modelo:'Nota Fiscal',    cobranca:'Sim',      solic:'—',                    mes:8 },
+];
+let vMes = null, vCC = null;
+const vMonths = [...new Set(VIAGENS.map(t=>t.mes))].sort((a,b)=>a-b);
+const vFiltered = () => VIAGENS.filter(t => (vMes==null||t.mes===vMes) && (vCC==null||t.cc===vCC));
+const ccBadge2 = cc => `<span class="badge ${cc==='ED'?'b-blue':'b-amber'}" title="${CC_FULL} ${cc}">${cc}</span>`;
+const cobrancaBadge = c => c==='Sim'
+  ? '<span class="badge b-green"><i class="ti ti-check" aria-hidden="true"></i>Cobrado</span>'
+  : c==='Não'
+  ? '<span class="badge b-red"><i class="ti ti-alert-triangle" aria-hidden="true"></i>A cobrar</span>'
+  : '<span class="badge b-amber"><i class="ti ti-clock" aria-hidden="true"></i>Pendente</span>';
+const cardValStyle = v => `style="font-size:${typeof v==='string'&&v.length>9?'19px':'24px'}"`;
+
+function renderViagensFilters(){
+  let h = `<button class="mf-btn ${vMes==null?'active':''}" onclick="setVMes(null)">Todos</button>`;
+  vMonths.forEach(m=>{ h += `<button class="mf-btn ${vMes===m?'active':''}" onclick="setVMes(${m})">${MESNOME[m]}</button>`; });
+  document.getElementById('v-month-filter').innerHTML = h;
+  const mk = (l,v) => `<button class="mf-btn ${vCC===v?'active':''}" onclick="setVCC(${v==null?'null':`'${v}'`})">${l}</button>`;
+  document.getElementById('v-cc-filter').innerHTML = mk('Todos',null)+mk('ED','ED')+mk('SD','SD');
+}
+window.setVMes = function(m){ vMes = m; renderViagens(); };
+window.setVCC  = function(v){ vCC = v; renderViagens(); };
+
+function renderViagens(){
+  renderViagensFilters();
+  const list = vFiltered();
+  const total = list.reduce((s,t)=>s+t.total,0);
+  const aCobrarList = list.filter(t=>t.cobranca!=='Sim');
+  const aCobrar = aCobrarList.reduce((s,t)=>s+t.total,0);
+  const cobradoList = list.filter(t=>t.cobranca==='Sim');
+  const cobrado = cobradoList.reduce((s,t)=>s+t.total,0);
+  const nomes = new Set(list.map(t=>t.nome)).size;
+  const subP = vMes==null ? 'todas · 2026' : 'em '+MESNOME[vMes];
+  const cards = [
+    {label:'Viagens',      value:list.length, sub:subP, cls:''},
+    {label:'Custo total',  value:BRL(total),  sub:'passagem+hosp+imp.+JF', cls:''},
+    {label:'A cobrar',     value:BRL(aCobrar),sub:`${aCobrarList.length} viagem(ns)`, cls:aCobrarList.length?'alert':''},
+    {label:'Colaboradores',value:nomes,       sub:'em viagem', cls:''},
+  ];
+  document.getElementById('v-summary-cards').innerHTML = cards.map(c=>
+    `<div class="card ${c.cls}"><div class="card-label">${c.label}</div><div class="card-value" ${cardValStyle(c.value)}>${c.value}</div><div class="card-sub">${c.sub}</div></div>`).join('');
+  const hero = [
+    {cls:'',    label:'<i class="ti ti-plane-tilt" aria-hidden="true"></i> Custo total de viagens', value:BRL(total),   sub:`${list.length} viagens`},
+    {cls:'risk',label:'<i class="ti ti-cash" aria-hidden="true"></i> A cobrar do cliente',           value:BRL(aCobrar), sub:`${aCobrarList.length} pendente(s) de cobrança`},
+    {cls:'soft',label:'<i class="ti ti-circle-check" aria-hidden="true"></i> Já cobrado',            value:BRL(cobrado), sub:`${cobradoList.length} viagens faturadas`},
+  ];
+  document.getElementById('v-hero-cards').innerHTML = hero.map(c=>
+    `<div class="hero-card ${c.cls}"><div class="hero-label">${c.label}</div><div class="hero-value">${c.value}</div><div class="hero-sub">${c.sub}</div></div>`).join('');
+  // gráfico por mês
+  const mm = vMes==null ? vMonths : [vMes];
+  const totals = mm.map(m => VIAGENS.filter(t=>t.mes===m && (vCC==null||t.cc===vCC)).reduce((s,t)=>s+t.total,0));
+  const cols = mm.map(m => COL_MAP[m]||'#6e2cbf');
+  const grand = totals.reduce((a,b)=>a+b,0);
+  document.getElementById('v-loss-legend').innerHTML =
+    `<span class="legend-item" style="font-weight:500;color:var(--text)">${vMes==null?'Custo total no ano':'Custo em '+MESNOME[vMes]}: ${BRL(grand)}</span>`;
+  const labelColor = matchMedia('(prefers-color-scheme: dark)').matches ? '#f1e8fb' : '#2b0a63';
+  const dl = {id:'vdl',afterDatasetsDraw(ch){const{ctx}=ch;const m=ch.getDatasetMeta(0);ctx.save();ctx.font='500 11px system-ui, sans-serif';ctx.fillStyle=labelColor;ctx.textAlign='center';m.data.forEach((b,i)=>{if(totals[i]>0)ctx.fillText(BRLk(totals[i]),b.x,b.y-6);});ctx.restore();}};
+  mkChart('vChart',{type:'bar',data:{labels:mm.map(m=>MESAB[m]),datasets:[{data:totals,backgroundColor:cols,borderRadius:6,borderSkipped:false}]},
+    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:22}},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>BRL(c.parsed.y)}}},
+      scales:{y:{beginAtZero:true,ticks:{callback:v=>BRLk(v),font:{size:11}},grid:{color:'rgba(128,128,128,0.1)'}},x:{ticks:{font:{size:12},autoSkip:false},grid:{display:false}}}},plugins:[dl]});
+  // por centro de custo
+  const agg = {};
+  const ens = k => agg[k] || (agg[k]={n:0,total:0,cobrar:0});
+  list.forEach(t=>{ const a=ens(t.cc); a.n++; a.total+=t.total; if(t.cobranca!=='Sim') a.cobrar+=t.total; });
+  const lbl = {'ED':'Alocação de Profissionais · ED','SD':'Alocação de Profissionais · SD'};
+  const ord = ['ED','SD'].filter(k=>agg[k]);
+  let rows = ord.map(k=>`<tr><td>${lbl[k]||k}</td><td class="num">${agg[k].n}</td><td class="num">${BRL(agg[k].total)}</td><td class="num">${agg[k].cobrar?BRL(agg[k].cobrar):'—'}</td></tr>`).join('');
+  rows += `<tr class="total-row"><td>Total</td><td class="num">${list.length}</td><td class="num">${BRL(total)}</td><td class="num">${BRL(aCobrar)}</td></tr>`;
+  document.getElementById('v-cc-body').innerHTML = rows;
+  // opções do filtro de motivo
+  const sel = document.getElementById('v-f-motivo');
+  const cur = sel.value;
+  const motivos = [...new Set(VIAGENS.map(t=>t.motivo))];
+  sel.innerHTML = '<option value="">Todos os motivos</option>'+motivos.map(m=>`<option value="${m}">${m}</option>`).join('');
+  sel.value = cur;
+  renderViagensTable();
+}
+
+function renderViagensTable(){
+  const fc = document.getElementById('v-f-cobranca').value;
+  const fm = document.getElementById('v-f-motivo').value;
+  const list = vFiltered().filter(t => (!fc||t.cobranca===fc) && (!fm||t.motivo===fm));
+  const dm = s => pd(s).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});
+  const money = v => v==null ? '<span style="color:var(--text-3)">n/a</span>' : BRL(v);
+  let html = list.map(t=>`<tr>
+     <td>${t.nome}</td>
+     <td>${ccBadge2(t.cc)}</td>
+     <td>${t.motivo}${t.obs?` <i class="ti ti-message-circle" title="${t.obs.replace(/"/g,'&quot;')}" style="color:var(--accent);cursor:help;vertical-align:-1px" aria-label="Observação"></i>`:''}</td>
+     <td><span class="route">${t.orig} <i class="ti ti-arrow-narrow-right" aria-hidden="true"></i> ${t.dest}</span></td>
+     <td>${dm(t.ida)}</td>
+     <td>${dm(t.volta)}</td>
+     <td class="num">${money(t.aereo)}</td>
+     <td class="num">${money(t.hosp)}</td>
+     <td class="num">${BRL(t.total)}${t.flag?' <i class="ti ti-alert-triangle" title="Custo total menor que passagem + hospedagem — conferir na planilha" style="color:var(--amber-text)"></i>':''}</td>
+     <td>${cobrancaBadge(t.cobranca)}</td>
+     <td style="color:var(--text-2)">${t.solic}</td>
+   </tr>`).join('');
+  if(list.length){
+    const tA=list.reduce((s,t)=>s+(t.aereo||0),0), tH=list.reduce((s,t)=>s+(t.hosp||0),0), tT=list.reduce((s,t)=>s+t.total,0);
+    html += `<tr class="total-row"><td>Total</td><td></td><td></td><td></td><td></td><td></td><td class="num">${BRL(tA)}</td><td class="num">${BRL(tH)}</td><td class="num">${BRL(tT)}</td><td></td><td></td></tr>`;
+  } else html = '<tr><td colspan="11" style="color:var(--text-3);padding:14px 10px;">Nenhuma viagem para este filtro.</td></tr>';
+  document.getElementById('v-table-body').innerHTML = html;
+}
+
+// ============================================================
+// ABA EXCEÇÕES DE AJUDA DE CUSTO
+// Fonte: planilha Exceções de Ajuda de Custo (SharePoint)
+// Regra: nº da exceção define o risco -> 1ª = Baixo · 2ª = Médio · 3ª = Limite atingido
+// ============================================================
+const EXCECOES = [
+  { nome:'Lidia De Oliveira Vieira',          cc:'ED', comp:2, valor:1000, data:'2026-03-12', num:1, risco:'Baixo risco' },
+  { nome:'Danielle Arins',                    cc:'ED', comp:2, valor:500,  data:'2026-03-12', num:2, risco:'Médio risco' },
+  { nome:'Larissa Da Silva Leao Pacheco',     cc:'ED', comp:3, valor:500,  data:'2026-04-16', num:1, risco:'Baixo risco' },
+  { nome:'Luciana Dos Santos Dias',           cc:'ED', comp:3, valor:1000, data:'2026-05-06', num:1, risco:'Baixo risco' },
+  { nome:'Ana Clara Paixao Cardoso',          cc:'ED', comp:3, valor:500,  data:'2026-05-06', num:1, risco:'Baixo risco' },
+  { nome:'Lidia De Oliveira Vieira',          cc:'ED', comp:4, valor:1000, data:'2026-05-07', num:2, risco:'Médio risco' },
+  { nome:'Layssa Belfort Rizzi Ximenes',      cc:'ED', comp:3, valor:1000, data:'2026-05-12', num:1, risco:'Baixo risco' },
+  { nome:'Janaina Lamas Filgueiras',          cc:'ED', comp:3, valor:500,  data:'2026-05-14', num:1, risco:'Baixo risco' },
+  { nome:'Pedro Paulo Ferreira Corazza',      cc:'ED', comp:4, valor:1000, data:'2026-05-29', num:1, risco:'Baixo risco' },
+  { nome:'Rodrigo Zisman Pereira',            cc:'ED', comp:4, valor:2000, data:'2026-06-15', num:1, risco:'Baixo risco' },
+  { nome:'Mustafa Ribeiro De Almeida Neto',   cc:'SD', comp:6, valor:500,  data:'2026-07-13', num:1, risco:'Baixo risco' },
+  { nome:'Christopher Peters Ferraz',         cc:'ED', comp:6, valor:100,  data:'2026-07-15', num:1, risco:'Baixo risco' },
+  { nome:'Lucas Barbosa De Souza',            cc:'ED', comp:6, valor:500,  data:'2026-07-27', num:1, risco:'Baixo risco' },
+  { nome:'Danielle Arins',                    cc:'ED', comp:6, valor:500,  data:'2026-08-11', num:3, risco:'Limite atingido' },
+  { nome:'Edynilson De Oliveira Meirelles',   cc:'SD', comp:6, valor:500,  data:'2026-08-12', num:1, risco:'Baixo risco' },
+  { nome:'Lidia De Oliveira Vieira',          cc:'ED', comp:7, valor:1000, data:'2026-08-12', num:3, risco:'Limite atingido' },
+  { nome:'Luis Henrique Azevedo De Oliveira', cc:'ED', comp:7, valor:1000, data:'2026-09-03', num:1, risco:'Baixo risco' },
+];
+let eMes = null, eCC = null;
+const eMonths = [...new Set(EXCECOES.map(x=>x.comp))].sort((a,b)=>a-b);
+const eFiltered = () => EXCECOES.filter(x => (eMes==null||x.comp===eMes) && (eCC==null||x.cc===eCC));
+const numOrd = n => n+'ª';
+const riscoBadge = r => r==='Limite atingido'
+  ? '<span class="badge b-red"><i class="ti ti-alert-triangle" aria-hidden="true"></i>Limite atingido</span>'
+  : r==='Médio risco'
+  ? '<span class="badge b-amber"><i class="ti ti-alert-circle" aria-hidden="true"></i>Médio risco</span>'
+  : '<span class="badge b-green"><i class="ti ti-check" aria-hidden="true"></i>Baixo risco</span>';
+
+function renderExcecoesFilters(){
+  let h = `<button class="mf-btn ${eMes==null?'active':''}" onclick="setEMes(null)">Todas</button>`;
+  eMonths.forEach(m=>{ h += `<button class="mf-btn ${eMes===m?'active':''}" onclick="setEMes(${m})">${MESNOME[m]}</button>`; });
+  document.getElementById('e-month-filter').innerHTML = h;
+  const mk = (l,v) => `<button class="mf-btn ${eCC===v?'active':''}" onclick="setECC(${v==null?'null':`'${v}'`})">${l}</button>`;
+  document.getElementById('e-cc-filter').innerHTML = mk('Todos',null)+mk('ED','ED')+mk('SD','SD');
+}
+window.setEMes = function(m){ eMes = m; renderExcecoes(); };
+window.setECC  = function(v){ eCC = v; renderExcecoes(); };
+
+function renderExcecoes(){
+  renderExcecoesFilters();
+  const list = eFiltered();
+  const total = list.reduce((s,x)=>s+x.valor,0);
+  const nomes = new Set(list.map(x=>x.nome)).size;
+  const noLimite = new Set(list.filter(x=>x.risco==='Limite atingido').map(x=>x.nome)).size;
+  const medio = new Set(list.filter(x=>x.risco==='Médio risco').map(x=>x.nome)).size;
+  const subP = eMes==null ? 'todas · 2026' : 'competência '+MESNOME[eMes];
+  const cards = [
+    {label:'Exceções',     value:list.length, sub:subP, cls:''},
+    {label:'Valor total',  value:BRL(total),  sub:'reembolsado', cls:''},
+    {label:'No limite',    value:noLimite,    sub:'3ª exceção', cls:noLimite?'alert':''},
+    {label:'Colaboradores',value:nomes,       sub:'com exceção', cls:''},
+  ];
+  document.getElementById('e-summary-cards').innerHTML = cards.map(c=>
+    `<div class="card ${c.cls}"><div class="card-label">${c.label}</div><div class="card-value" ${cardValStyle(c.value)}>${c.value}</div><div class="card-sub">${c.sub}</div></div>`).join('');
+  const hero = [
+    {cls:'',    label:'<i class="ti ti-receipt" aria-hidden="true"></i> Valor total reembolsado', value:BRL(total), sub:`${list.length} exceções`},
+    {cls:'risk',label:'<i class="ti ti-alert-triangle" aria-hidden="true"></i> No limite de exceções', value:noLimite, sub:'atingiram a 3ª exceção'},
+    {cls:'soft',label:'<i class="ti ti-alert-circle" aria-hidden="true"></i> Em médio risco', value:medio, sub:'na 2ª exceção'},
+  ];
+  document.getElementById('e-hero-cards').innerHTML = hero.map(c=>
+    `<div class="hero-card ${c.cls}"><div class="hero-label">${c.label}</div><div class="hero-value">${c.value}</div><div class="hero-sub">${c.sub}</div></div>`).join('');
+  // gráfico por competência
+  const mm = eMes==null ? eMonths : [eMes];
+  const totals = mm.map(m => EXCECOES.filter(x=>x.comp===m && (eCC==null||x.cc===eCC)).reduce((s,x)=>s+x.valor,0));
+  const cols = mm.map(m => COL_MAP[m]||'#6e2cbf');
+  const grand = totals.reduce((a,b)=>a+b,0);
+  document.getElementById('e-loss-legend').innerHTML =
+    `<span class="legend-item" style="font-weight:500;color:var(--text)">${eMes==null?'Total no ano':'Total em '+MESNOME[eMes]}: ${BRL(grand)}</span>`;
+  const labelColor = matchMedia('(prefers-color-scheme: dark)').matches ? '#f1e8fb' : '#2b0a63';
+  const dl = {id:'edl',afterDatasetsDraw(ch){const{ctx}=ch;const m=ch.getDatasetMeta(0);ctx.save();ctx.font='500 11px system-ui, sans-serif';ctx.fillStyle=labelColor;ctx.textAlign='center';m.data.forEach((b,i)=>{if(totals[i]>0)ctx.fillText(BRLk(totals[i]),b.x,b.y-6);});ctx.restore();}};
+  mkChart('eChart',{type:'bar',data:{labels:mm.map(m=>MESAB[m]),datasets:[{data:totals,backgroundColor:cols,borderRadius:6,borderSkipped:false}]},
+    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:22}},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>BRL(c.parsed.y)}}},
+      scales:{y:{beginAtZero:true,ticks:{callback:v=>BRLk(v),font:{size:11}},grid:{color:'rgba(128,128,128,0.1)'}},x:{ticks:{font:{size:12},autoSkip:false},grid:{display:false}}}},plugins:[dl]});
+  // recorrentes (2ª exceção ou mais)
+  const byName = {};
+  list.forEach(x=>{ const o = byName[x.nome] || (byName[x.nome]={cc:x.cc,n:0,val:0,maxNum:0,risco:'Baixo risco'}); o.n++; o.val+=x.valor; if(x.num>o.maxNum){o.maxNum=x.num;o.risco=x.risco;} });
+  const rec = Object.entries(byName).filter(([,o])=>o.maxNum>=2).sort((a,b)=>b[1].maxNum-a[1].maxNum || b[1].n-a[1].n);
+  document.getElementById('e-risk-body').innerHTML = rec.length
+    ? rec.map(([nome,o])=>`<tr class="${o.maxNum>=3?'alert-row':''}"><td>${nome}</td><td>${ccBadge2(o.cc)}</td><td class="num">${o.n}</td><td class="num">${BRL(o.val)}</td><td>${riscoBadge(o.risco)}</td></tr>`).join('')
+    : '<tr><td colspan="5" style="color:var(--text-3);padding:14px 10px;">Nenhum colaborador com exceções recorrentes neste filtro.</td></tr>';
+  renderExcecoesTable();
+}
+
+function renderExcecoesTable(){
+  const fr = document.getElementById('e-f-risco').value;
+  const list = eFiltered().filter(x => !fr || x.risco===fr).slice().sort((a,b)=>pd(a.data)-pd(b.data));
+  const dm = s => pd(s).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit'});
+  let html = list.map(x=>`<tr class="${x.risco==='Limite atingido'?'alert-row':''}">
+     <td>${x.nome}</td>
+     <td>${ccBadge2(x.cc)}</td>
+     <td>${MESNOME[x.comp]}</td>
+     <td class="num">${BRL(x.valor)}</td>
+     <td>${dm(x.data)}</td>
+     <td>${numOrd(x.num)}</td>
+     <td>${riscoBadge(x.risco)}</td>
+   </tr>`).join('');
+  if(list.length){
+    const t = list.reduce((s,x)=>s+x.valor,0);
+    html += `<tr class="total-row"><td>Total</td><td></td><td></td><td class="num">${BRL(t)}</td><td></td><td></td><td></td></tr>`;
+  } else html = '<tr><td colspan="7" style="color:var(--text-3);padding:14px 10px;">Nenhuma exceção para este filtro.</td></tr>';
+  document.getElementById('e-table-body').innerHTML = html;
+}
+
+// ============================================================
+// TROCA DE ABAS
+// ============================================================
+window.switchTab = function(page){
+  document.querySelectorAll('.page').forEach(s=>{ s.hidden = (s.id !== 'page-'+page); });
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active', t.dataset.page===page));
+  const meta = {
+    ferias:  ['ti ti-beach',      'Gestão de Férias — Globo'],
+    viagens: ['ti ti-plane-tilt', 'Viagens — Globo'],
+    excecoes:['ti ti-receipt',    'Exceções de Ajuda de Custo — Globo'],
+  };
+  const [ic,ti] = meta[page];
+  const iconEl = document.getElementById('hdr-icon');
+  iconEl.className = ic; iconEl.style.color = '#E6449B';
+  document.getElementById('hdr-title').textContent = ti;
+  if(page==='viagens')  renderViagens();
+  if(page==='excecoes') renderExcecoes();
+  window.scrollTo({top:0});
+};
+</script>
+</body>
+</html>

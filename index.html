@@ -1,410 +1,325 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Gestão de Férias — Globo</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Gestão — Operação Globo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = { theme: { extend: {
+  colors: {
+    ink:   { DEFAULT:'#14122b', 2:'#5b5878', 3:'#9a97b0' },
+    brand: { 900:'#2a0a63', 700:'#3a0e8c', 600:'#4c1d95', 500:'#6d28d9', 400:'#8b5cf6', 100:'#e6ddfb', 50:'#f1ecfd' },
+    mag:   { DEFAULT:'#d21b7c', 700:'#8d0f4f', 600:'#a3125c', 400:'#e6449b', 50:'#fdeaf2' },
+    line:  { DEFAULT:'#eceef3', soft:'#f4f5f8' }
+  },
+  fontFamily: { sans:['Inter','ui-sans-serif','system-ui','-apple-system','Segoe UI','Roboto','sans-serif'] }
+} } }
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css" />
+<style type="text/tailwindcss">
+  @layer base {
+    body { @apply font-sans bg-[#f9fafb] text-ink antialiased; }
+    ::selection { background: #e6ddfb; }
+  }
+  @layer components {
+    /* ---------- superfícies ---------- */
+    .card { @apply bg-white rounded-2xl; box-shadow: 0 1px 2px rgba(20,18,43,.04), 0 10px 30px -18px rgba(20,18,43,.20); }
+    .lift { @apply transition-all duration-200 ease-out; }
+    .lift:hover { transform: translateY(-2px); box-shadow: 0 2px 5px rgba(20,18,43,.05), 0 20px 44px -22px rgba(20,18,43,.28); }
 
-    :root {
-      --bg: #f7f3fb;
-      --surface: #ffffff;
-      --surface-2: #f0e8f8;
-      --border: rgba(58,14,140,0.12);
-      --border-md: rgba(58,14,140,0.22);
-      --text: #2b0a63;
-      --text-2: #6a4e96;
-      --text-3: #9b85c0;
-      --radius-md: 8px;
-      --radius-lg: 12px;
-      --deep: #3a0e8c;
-      --brand: #6e2cbf;
-      --brand-dark: #3a0e8c;
-      --accent: #d21b7c;
-      --green-bg: #EAF3DE; --green-text: #27500A;
-      --amber-bg: #FAEEDA; --amber-text: #633806;
-      --blue-bg:  #ede6fa; --blue-text:  #3a0e8c;
-      --gray-bg:  #f0e8f8; --gray-text:  #4b1197;
-      --red-bg:   #FCEBEB; --red-text:   #791F1F;
-    }
+    /* ---------- rótulos / tipografia ---------- */
+    .eyebrow { @apply text-[10.5px] font-medium uppercase tracking-[.1em] text-ink-3; }
+    .sec-h   { @apply text-[13px] font-semibold text-ink; }
+    .sec-d   { @apply text-[12px] text-ink-3 mt-0.5; }
 
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg: #180733;
-        --surface: #241048;
-        --surface-2: #30185c;
-        --border: rgba(206,155,240,0.14);
-        --border-md: rgba(206,155,240,0.24);
-        --text: #f1e8fb;
-        --text-2: #c3a9e8;
-        --text-3: #9b85c0;
-        --deep: #3a0e8c;
-        --brand: #b98ce8;
-        --brand-dark: #b98ce8;
-        --accent: #e6449b;
-        --green-bg: #173404; --green-text: #C0DD97;
-        --amber-bg: #412402; --amber-text: #FAC775;
-        --blue-bg:  #2a1466; --blue-text:  #cbb2f0;
-        --gray-bg:  #30185c; --gray-text:  #b98ce8;
-        --red-bg:   #501313; --red-text:   #F7C1C1;
-      }
-    }
+    /* ---------- KPIs ---------- */
+    .stat      { @apply card lift p-5 flex flex-col justify-between min-h-[132px]; }
+    .stat-v    { @apply text-[26px] font-semibold leading-none tracking-[-.01em] mt-2; }
+    .stat-s    { @apply text-[11.5px] text-ink-3 mt-2 leading-snug; }
+    .hero-v    { @apply text-[48px] font-semibold leading-none tracking-[-.025em] text-white; }
 
-    body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+    /* ---------- filtros ---------- */
+    .chip { @apply shrink-0 rounded-lg px-2.5 py-1.5 text-[12.5px] font-medium text-ink-2 transition-colors duration-150 cursor-pointer; }
+    .chip:hover { @apply bg-line-soft text-ink; }
+    .chip-on { @apply bg-brand-50 text-brand-700 font-semibold; }
+    .chip-on:hover { @apply bg-brand-50 text-brand-700; }
 
-    header { background: var(--deep); border-bottom: none; padding: 1rem 1.5rem; display: flex; align-items: center; justify-content: space-between; }
-    header h1 { font-size: 16px; font-weight: 500; color: #fff; }
-    header .updated { font-size: 12px; color: rgba(255,255,255,0.65) !important; }
+    .seg     { @apply inline-flex shrink-0 rounded-lg bg-line-soft p-0.5; }
+    .seg-btn { @apply rounded-[6px] px-3 py-1 text-[12px] font-medium text-ink-2 transition-all duration-150 cursor-pointer; }
+    .seg-btn:hover { @apply text-ink; }
+    .seg-on  { @apply bg-white text-brand-700 font-semibold; box-shadow: 0 1px 2px rgba(20,18,43,.08); }
+    .seg-on:hover { @apply text-brand-700; }
 
-    main { max-width: 1100px; margin: 0 auto; padding: 1.5rem; }
+    /* ---------- abas ---------- */
+    .tab { @apply relative inline-flex items-center gap-2 px-1 py-3 text-[13.5px] font-medium text-ink-3 transition-colors duration-150 cursor-pointer; }
+    .tab:hover { @apply text-ink-2; }
+    .tab-on { @apply text-brand-700 font-semibold; }
+    .tab-on::after { content:''; @apply absolute left-0 right-0 -bottom-px h-[2px] rounded-full bg-mag; }
 
-    .section-title { font-size: 11px; font-weight: 500; color: var(--text-3); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 10px; }
-    .section-title .hint { text-transform: none; letter-spacing: 0; color: var(--text-3); font-weight: 400; }
+    /* ---------- chips de estado ---------- */
+    .pill      { @apply inline-flex items-center gap-1.5 rounded-md px-2 py-[3px] text-[11px] font-medium whitespace-nowrap; }
+    .pill-mute { @apply bg-line-soft text-ink-2; }
+    .pill-alert{ @apply bg-mag-50 text-mag-600; }
+    .pill-warn { @apply bg-[#fdf4e7] text-[#8a5a10]; }
+    .pill-cc   { @apply bg-brand-50 text-brand-700; }
+    .dot       { @apply inline-block h-1.5 w-1.5 rounded-full; }
 
-    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 1.75rem; }
-    .card { background: var(--surface-2); border-radius: var(--radius-md); padding: 14px 16px; }
-    .card-label { font-size: 11px; color: var(--text-2); margin-bottom: 5px; }
-    .card-value { font-size: 24px; font-weight: 500; }
-    .card-sub   { font-size: 11px; color: var(--text-3); margin-top: 3px; }
-    .card.alert { background: var(--amber-bg); }
-    .card.alert .card-value { color: var(--amber-text); }
+    /* ---------- tabelas ---------- */
+    .tbl      { @apply w-full text-[12.5px]; border-collapse: separate; border-spacing: 0; }
+    .tbl th   { @apply text-left font-medium text-ink-3 text-[10.5px] uppercase tracking-[.07em] px-4 py-2.5 whitespace-nowrap; }
+    .tbl td   { @apply px-4 py-3 align-middle border-t border-line-soft; }
+    .tbl tbody tr { @apply transition-colors duration-100; }
+    .tbl tbody tr:hover td { @apply bg-[#fbfbfc]; }
+    .tbl .r   { @apply text-right tabular-nums; }
+    .tbl .tot td { @apply bg-[#fafafb] font-semibold border-t border-line; }
+    .scrollx  { @apply overflow-x-auto; }
 
-    .month-filter { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 1.75rem; }
-    .mf-btn { font-size: 12px; font-weight: 500; padding: 6px 13px; border-radius: 999px; border: 0.5px solid var(--border-md); background: var(--surface); color: var(--text-2); cursor: pointer; transition: all .12s; }
-    .mf-btn:hover { border-color: var(--brand); color: var(--brand); }
-    .mf-btn.active { background: var(--deep); color: #fff; border-color: var(--deep); }
+    /* ---------- meters ---------- */
+    .track { @apply h-1.5 w-full rounded-full bg-brand-50 overflow-hidden; }
+    .fill  { @apply h-full rounded-full; }
 
-    .hero { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 1.5rem; }
-    .hero-card { background: var(--deep); border-radius: var(--radius-lg); padding: 18px 20px; color: #fff; }
-    .hero-card.soft { background: var(--blue-bg); color: var(--blue-text); }
-    .hero-card.risk { background: var(--amber-bg); color: var(--amber-text); }
-    .hero-label { font-size: 12px; opacity: .85; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
-    .hero-value { font-size: 30px; font-weight: 500; line-height: 1.1; }
-    .hero-sub   { font-size: 12px; opacity: .8; margin-top: 6px; }
-
-    .panel { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1.25rem; margin-bottom: 1.5rem; }
-
-    .rank-row { display: flex; align-items: center; gap: 10px; margin-bottom: 9px; }
-    .rank-name { font-size: 12px; width: 180px; min-width: 180px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .rank-track { flex: 1; background: var(--surface-2); border-radius: 4px; height: 18px; position: relative; overflow: hidden; }
-    .rank-fill { position: absolute; left: 0; top: 0; height: 100%; background: var(--brand); border-radius: 4px; }
-    .rank-val { font-size: 12px; font-weight: 500; width: 110px; min-width: 110px; text-align: right; font-variant-numeric: tabular-nums; }
-
-    .filters { display: flex; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap; }
-    .filters select {
-      font-size: 13px; padding: 6px 10px;
-      border-radius: var(--radius-md);
-      border: 0.5px solid var(--border-md);
-      background: var(--surface); color: var(--text);
-      cursor: pointer;
-    }
-
-    .tl-header { display: flex; margin-bottom: 4px; margin-left: 162px; }
-    .tl-month-label { font-size: 10px; font-weight: 500; color: var(--text-3); text-align: center; border-left: 0.5px solid var(--border); padding: 2px 0; }
-    .tl-row { display: flex; align-items: center; margin-bottom: 3px; }
-    .tl-name { font-size: 12px; width: 160px; min-width: 160px; padding-right: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text); }
-    .tl-grid { position: relative; flex: 1; height: 20px; }
-    .tl-bar  { position: absolute; height: 13px; top: 4px; border-radius: 3px; cursor: default; transition: opacity .15s; }
-    .tl-bar:hover { opacity: .75 !important; }
-    .tl-label { position: absolute; top: 3px; font-size: 10px; font-variant-numeric: tabular-nums; color: var(--text-2); white-space: nowrap; line-height: 15px; }
-
-    .badge { display: inline-flex; align-items: center; gap: 3px; font-size: 11px; padding: 2px 7px; border-radius: var(--radius-md); font-weight: 500; white-space: nowrap; }
-    .b-green { background: var(--green-bg); color: var(--green-text); }
-    .b-amber { background: var(--amber-bg); color: var(--amber-text); }
-    .b-gray  { background: var(--gray-bg);  color: var(--gray-text); }
-    .b-red   { background: var(--red-bg);   color: var(--red-text); }
-    .b-blue  { background: var(--blue-bg);  color: var(--blue-text); }
-
-    .table-wrap { overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 780px; }
-    th { font-size: 11px; font-weight: 500; color: var(--text-2); text-align: left; padding: 7px 10px; border-bottom: 0.5px solid var(--border); background: var(--surface-2); white-space: nowrap; }
-    td { padding: 8px 10px; border-bottom: 0.5px solid var(--border); vertical-align: middle; }
-    tr:last-child td { border-bottom: none; }
-    tr:hover td { background: var(--surface-2); }
-    tr.alert-row td { background: color-mix(in srgb, var(--amber-bg) 40%, transparent); }
-    tr.total-row td { background: var(--surface-2); font-weight: 500; border-top: 1.5px solid var(--border-md); }
-    .num { font-variant-numeric: tabular-nums; text-align: right; }
-
-    .legend { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 12px; }
-    .legend-item { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--text-2); }
-    .legend-sq { width: 10px; height: 10px; border-radius: 2px; }
-
-    /* Abas de navegação */
-    .tabs { background: var(--deep); display: flex; gap: 2px; padding: 0 1.5rem; overflow-x: auto; position: sticky; top: 0; z-index: 20; }
-    .tab { font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.66); background: transparent; border: 0; border-bottom: 2.5px solid transparent; padding: 11px 15px; cursor: pointer; display: flex; align-items: center; gap: 6px; white-space: nowrap; transition: color .12s, border-color .12s; }
-    .tab:hover { color: #fff; }
-    .tab.active { color: #fff; border-bottom-color: #E6449B; }
-    .tab i { font-size: 16px; }
-
-    .route { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
-    .route i { color: var(--text-3); font-size: 13px; }
-
-    footer { text-align: center; padding: 2rem 1rem 1rem; font-size: 11px; color: var(--text-3); }
-  </style>
+    /* ---------- utilidades ---------- */
+    .no-sb { scrollbar-width: none; -ms-overflow-style: none; }
+    .no-sb::-webkit-scrollbar { display: none; }
+    select.mini { @apply rounded-lg bg-line-soft px-3 py-1.5 text-[12px] font-medium text-ink-2 cursor-pointer; border:0; outline:0; }
+  }
+</style>
 </head>
 <body>
 
-<header>
-  <div style="display:flex; align-items:center; gap:10px;">
-    <i id="hdr-icon" class="ti ti-beach" style="font-size:20px; color:#E6449B;" aria-hidden="true"></i>
-    <h1 id="hdr-title">Gestão de Férias — Globo</h1>
+<!-- ================= NAVBAR ================= -->
+<header class="sticky top-0 z-30 bg-white/75 backdrop-blur-md border-b border-line">
+  <div class="mx-auto max-w-[1180px] px-6">
+    <div class="flex items-center justify-between pt-4">
+      <div class="flex items-baseline gap-3">
+        <span class="text-[21px] font-bold tracking-[-.04em] text-brand-700">insi<span class="text-mag">.</span></span>
+        <span class="h-4 w-px bg-line"></span>
+        <h1 id="hdr-title" class="text-[14px] font-medium text-ink-2">Gestão de Férias · Operação Globo</h1>
+      </div>
+      <span id="updated-at" class="hidden sm:block text-[11.5px] text-ink-3"></span>
+    </div>
+    <nav class="flex items-center gap-7" role="tablist" aria-label="Seções">
+      <button class="tab tab-on" data-page="ferias"   onclick="switchTab('ferias')"><i class="ti ti-beach text-[15px]"></i>Férias</button>
+      <button class="tab"        data-page="viagens"  onclick="switchTab('viagens')"><i class="ti ti-plane-tilt text-[15px]"></i>Viagens</button>
+      <button class="tab"        data-page="excecoes" onclick="switchTab('excecoes')"><i class="ti ti-receipt text-[15px]"></i>Ajuda de Custo</button>
+    </nav>
   </div>
-  <span class="updated" id="updated-at"></span>
 </header>
 
-<nav class="tabs" role="tablist" aria-label="Seções do painel">
-  <button class="tab active" data-page="ferias"   role="tab" onclick="switchTab('ferias')"><i class="ti ti-beach" aria-hidden="true"></i> Férias</button>
-  <button class="tab"         data-page="viagens"  role="tab" onclick="switchTab('viagens')"><i class="ti ti-plane-tilt" aria-hidden="true"></i> Viagens</button>
-  <button class="tab"         data-page="excecoes" role="tab" onclick="switchTab('excecoes')"><i class="ti ti-receipt" aria-hidden="true"></i> Exceções de Ajuda de Custo</button>
-</nav>
+<main class="mx-auto max-w-[1180px] px-6 pb-16">
 
-<main>
+<!-- ============================================================ FÉRIAS -->
+<section id="page-ferias">
 
-  <section id="page-ferias" class="page">
+  <!-- filtro: meses + centro de custo na MESMA linha -->
+  <div class="flex items-center gap-3 py-5">
+    <div class="flex min-w-0 flex-1 items-center gap-0.5 overflow-x-auto no-sb" id="month-filter"></div>
+    <span class="hidden h-5 w-px shrink-0 bg-line sm:block"></span>
+    <div class="seg" id="cc-filter"></div>
+  </div>
 
-  <!-- FILTRO DE MÊS -->
-  <p class="section-title" style="margin-top:.5rem;">Filtrar por mês</p>
-  <div class="month-filter" id="month-filter"></div>
+  <!-- KPIs unificados, assimétricos -->
+  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5" id="kpi-row"></div>
 
-  <p class="section-title">Filtrar por centro de custo</p>
-  <div class="month-filter" id="cc-filter"></div>
+  <!-- gráfico principal (2/3) + centro de custo (1/3) -->
+  <div class="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
+    <div class="card relative overflow-hidden p-5 lg:col-span-2">
+      <div class="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full"
+           style="background:radial-gradient(circle,rgba(109,40,217,.07),transparent 65%)"></div>
+      <div class="relative flex items-start justify-between">
+        <div>
+          <p class="sec-h">Desconto de faturamento por mês</p>
+          <p class="sec-d">Horas não faturadas × hora-venda · o mês de pico vem rotulado; passe o mouse para os demais</p>
+        </div>
+        <p id="loss-total" class="shrink-0 pl-4 text-[13px] font-semibold tabular-nums text-ink"></p>
+      </div>
+      <div class="relative mt-5 h-[248px] w-full">
+        <canvas id="lossChart" role="img" aria-label="Desconto de faturamento por mês"></canvas>
+      </div>
+    </div>
 
-  <!-- CARDS RESUMO -->
-  <p class="section-title">Resumo</p>
-  <div class="cards" id="summary-cards"></div>
-
-  <!-- PAINEL EXECUTIVO: IMPACTO NO FATURAMENTO -->
-  <p class="section-title">Desconto de Faturamento — revenue impact <span class="hint">· horas não faturadas (dias úteis seg–sex × 8h × hora-venda) · gestores da operação não são faturados ao cliente (Custo da Operação)</span></p>
-  <div class="hero" id="hero-cards"></div>
-
-  <div class="panel">
-    <p style="font-size:13px; font-weight:500; margin-bottom:12px;">Desconto de Faturamento por mês (R$)</p>
-    <div class="legend" id="loss-legend"></div>
-    <div style="position:relative; width:100%; height:230px;">
-      <canvas id="lossChart" role="img" aria-label="Faturamento perdido por mês de fevereiro a dezembro 2026">Faturamento perdido distribuído ao longo dos meses de 2026.</canvas>
+    <div class="card p-5">
+      <p class="sec-h">Por centro de custo</p>
+      <p class="sec-d">Gap × custo somados por CC</p>
+      <div class="mt-5" id="cc-meters"></div>
     </div>
   </div>
 
-  <!-- POR CENTRO DE CUSTO -->
-  <p class="section-title">Por centro de custo <span class="hint">· gap de faturamento e custo de férias somados por CC (respeita o filtro de mês)</span></p>
-  <div class="panel" style="padding:0; overflow:hidden;">
-    <div class="table-wrap">
-      <table>
+  <!-- timeline -->
+  <div class="card mt-4 p-5">
+    <p class="sec-h">Quem sai quando</p>
+    <p class="sec-d">Períodos de gozo ao longo de 2026</p>
+    <div class="mt-5">
+      <div class="flex pl-[150px]" id="tl-header"></div>
+      <div class="mt-1" id="tl-body"></div>
+    </div>
+  </div>
+
+  <!-- detalhamento -->
+  <div class="card mt-4 overflow-hidden">
+    <div class="flex flex-wrap items-center justify-between gap-3 p-5 pb-4">
+      <div>
+        <p class="sec-h">Detalhamento por colaborador</p>
+        <p class="sec-d">Gestores da operação entram como custo da operação, sem gap</p>
+      </div>
+      <div class="flex gap-2">
+        <select id="f-status" class="mini" onchange="renderTable()">
+          <option value="">Todos os status</option>
+          <option value="Aprovado">Aprovado</option>
+          <option value="Vencendo">Vencendo</option>
+        </select>
+        <select id="f-confirm" class="mini" onchange="renderTable()">
+          <option value="">Todas as confirmações</option>
+          <option value="Sim">Confirmado</option>
+          <option value="Não">Não confirmado</option>
+        </select>
+      </div>
+    </div>
+    <div class="scrollx">
+      <table class="tbl min-w-[880px]">
         <thead><tr>
-          <th>Centro de custo</th>
-          <th class="num">Profissionais</th>
-          <th class="num">Gap de faturamento</th>
-          <th class="num">Custo de férias</th>
-        </tr></thead>
-        <tbody id="cc-body"></tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- TIMELINE -->
-  <p class="section-title">Timeline — fevereiro a dezembro 2026</p>
-  <div class="panel">
-    <div class="tl-header" id="tl-header"></div>
-    <div id="tl-body"></div>
-    <div style="margin-top:10px; display:flex; gap:14px; flex-wrap:wrap;">
-      <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-3)"><span style="width:20px;height:8px;border-radius:2px;background:#7F77DD;display:inline-block;"></span>Fev–Mar</span>
-      <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-3)"><span style="width:20px;height:8px;border-radius:2px;background:#A864BB;display:inline-block;"></span>Abr–Mai</span>
-      <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-3)"><span style="width:20px;height:8px;border-radius:2px;background:#CC4D96;display:inline-block;"></span>Jun–Jul</span>
-      <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-3)"><span style="width:20px;height:8px;border-radius:2px;background:#DC6070;display:inline-block;"></span>Ago–Set</span>
-      <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-3)"><span style="width:20px;height:8px;border-radius:2px;background:#9B72CC;display:inline-block;"></span>Out–Dez</span>
-    </div>
-  </div>
-
-  <!-- TABELA DETALHAMENTO -->
-  <p class="section-title">Detalhamento por colaborador</p>
-  <div class="filters">
-    <select id="f-status" onchange="renderTable()">
-      <option value="">Todos os status</option>
-      <option value="Aprovado">Aprovado</option>
-      <option value="Vencendo">Vencendo</option>
-    </select>
-    <select id="f-confirm" onchange="renderTable()">
-      <option value="">Todas as confirmações</option>
-      <option value="Sim">Confirmado pelo cliente</option>
-      <option value="Não">Não confirmado</option>
-    </select>
-  </div>
-  <div class="panel" style="padding:0; overflow:hidden;">
-    <div class="table-wrap">
-      <table>
-        <thead><tr>
-          <th>Colaborador</th>
-          <th>Início</th>
-          <th>Fim</th>
-          <th>Dias</th>
-          <th>Abono</th>
-          <th>Status</th>
-          <th>Conf. cliente</th>
-          <th>Centro custo</th>
-          <th class="num">Hora-venda</th>
-          <th class="num">Desconto faturamento</th>
+          <th>Colaborador</th><th>Início</th><th>Fim</th><th>Dias</th><th>Abono</th>
+          <th>Status</th><th>Conf. cliente</th><th>CC</th>
+          <th class="r">Hora-venda</th><th class="r">Desconto</th>
         </tr></thead>
         <tbody id="table-body"></tbody>
       </table>
     </div>
   </div>
+</section>
 
-  </section>
+<!-- ============================================================ VIAGENS -->
+<section id="page-viagens" hidden>
+  <div class="flex items-center gap-3 py-5">
+    <div class="flex min-w-0 flex-1 items-center gap-0.5 overflow-x-auto no-sb" id="v-month-filter"></div>
+    <span class="hidden h-5 w-px shrink-0 bg-line sm:block"></span>
+    <div class="seg" id="v-cc-filter"></div>
+  </div>
 
-  <!-- ===================== PÁGINA VIAGENS ===================== -->
-  <section id="page-viagens" class="page" hidden>
+  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5" id="v-kpi-row"></div>
 
-    <p class="section-title" style="margin-top:.5rem;">Filtrar por mês <span class="hint">· mês da ida</span></p>
-    <div class="month-filter" id="v-month-filter"></div>
-
-    <p class="section-title">Filtrar por centro de custo</p>
-    <div class="month-filter" id="v-cc-filter"></div>
-
-    <p class="section-title">Resumo</p>
-    <div class="cards" id="v-summary-cards"></div>
-
-    <p class="section-title">Custo de viagens <span class="hint">· custo total = passagem + hospedagem + imposto + juros de financiamento (JF)</span></p>
-    <div class="hero" id="v-hero-cards"></div>
-
-    <div class="panel">
-      <p style="font-size:13px; font-weight:500; margin-bottom:12px;">Custo de viagens por mês (R$)</p>
-      <div class="legend" id="v-loss-legend"></div>
-      <div style="position:relative; width:100%; height:230px;">
+  <div class="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
+    <div class="card relative overflow-hidden p-5 lg:col-span-2">
+      <div class="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full"
+           style="background:radial-gradient(circle,rgba(109,40,217,.07),transparent 65%)"></div>
+      <div class="relative flex items-start justify-between">
+        <div>
+          <p class="sec-h">Custo de viagens por mês</p>
+          <p class="sec-d">Custo total = passagem + hospedagem + imposto + juros de financiamento (JF)</p>
+        </div>
+        <p id="v-total" class="shrink-0 pl-4 text-[13px] font-semibold tabular-nums text-ink"></p>
+      </div>
+      <div class="relative mt-5 h-[248px] w-full">
         <canvas id="vChart" role="img" aria-label="Custo de viagens por mês"></canvas>
       </div>
     </div>
+    <div class="card p-5">
+      <p class="sec-h">Por centro de custo</p>
+      <p class="sec-d">Custo e valor a cobrar por CC</p>
+      <div class="mt-5" id="v-cc-meters"></div>
+    </div>
+  </div>
 
-    <p class="section-title">Por centro de custo <span class="hint">· custo de viagens somado por CC (respeita o filtro de mês)</span></p>
-    <div class="panel" style="padding:0; overflow:hidden;">
-      <div class="table-wrap">
-        <table>
-          <thead><tr>
-            <th>Centro de custo</th>
-            <th class="num">Viagens</th>
-            <th class="num">Custo total</th>
-            <th class="num">A cobrar</th>
-          </tr></thead>
-          <tbody id="v-cc-body"></tbody>
-        </table>
+  <div class="card mt-4 overflow-hidden">
+    <div class="flex flex-wrap items-center justify-between gap-3 p-5 pb-4">
+      <div>
+        <p class="sec-h">Detalhamento de viagens</p>
+        <p class="sec-d">O ícone ao lado do motivo traz a observação do lançamento</p>
+      </div>
+      <div class="flex gap-2">
+        <select id="v-f-cobranca" class="mini" onchange="renderViagensTable()">
+          <option value="">Todas as cobranças</option>
+          <option value="Sim">Cobrado</option>
+          <option value="Não">A cobrar</option>
+          <option value="Pendente">Pendente</option>
+        </select>
+        <select id="v-f-motivo" class="mini" onchange="renderViagensTable()">
+          <option value="">Todos os motivos</option>
+        </select>
       </div>
     </div>
-
-    <p class="section-title">Detalhamento de viagens</p>
-    <div class="filters">
-      <select id="v-f-cobranca" onchange="renderViagensTable()">
-        <option value="">Todas as cobranças</option>
-        <option value="Sim">Cobrado</option>
-        <option value="Não">A cobrar</option>
-        <option value="Pendente">Pendente</option>
-      </select>
-      <select id="v-f-motivo" onchange="renderViagensTable()">
-        <option value="">Todos os motivos</option>
-      </select>
+    <div class="scrollx">
+      <table class="tbl min-w-[980px]">
+        <thead><tr>
+          <th>Colaborador</th><th>CC</th><th>Motivo</th><th>Trajeto</th><th>Ida</th><th>Volta</th>
+          <th class="r">Aéreo</th><th class="r">Hospedagem</th><th class="r">Custo total</th>
+          <th>Cobrança</th><th>Solicitante</th>
+        </tr></thead>
+        <tbody id="v-table-body"></tbody>
+      </table>
     </div>
-    <div class="panel" style="padding:0; overflow:hidden;">
-      <div class="table-wrap">
-        <table>
-          <thead><tr>
-            <th>Colaborador</th>
-            <th>CC</th>
-            <th>Motivo</th>
-            <th>Trajeto</th>
-            <th>Ida</th>
-            <th>Volta</th>
-            <th class="num">Aéreo</th>
-            <th class="num">Hospedagem</th>
-            <th class="num">Custo total</th>
-            <th>Cobrança</th>
-            <th>Solicitante</th>
-          </tr></thead>
-          <tbody id="v-table-body"></tbody>
-        </table>
+  </div>
+</section>
+
+<!-- ============================================================ EXCEÇÕES -->
+<section id="page-excecoes" hidden>
+  <div class="flex items-center gap-3 py-5">
+    <div class="flex min-w-0 flex-1 items-center gap-0.5 overflow-x-auto no-sb" id="e-month-filter"></div>
+    <span class="hidden h-5 w-px shrink-0 bg-line sm:block"></span>
+    <div class="seg" id="e-cc-filter"></div>
+  </div>
+
+  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5" id="e-kpi-row"></div>
+
+  <div class="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
+    <div class="card relative overflow-hidden p-5 lg:col-span-2">
+      <div class="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full"
+           style="background:radial-gradient(circle,rgba(109,40,217,.07),transparent 65%)"></div>
+      <div class="relative flex items-start justify-between">
+        <div>
+          <p class="sec-h">Valor reembolsado por competência</p>
+          <p class="sec-d">1ª exceção = baixo · 2ª = médio · 3ª = limite atingido</p>
+        </div>
+        <p id="e-total" class="shrink-0 pl-4 text-[13px] font-semibold tabular-nums text-ink"></p>
       </div>
-    </div>
-
-  </section>
-
-  <!-- ===================== PÁGINA EXCEÇÕES DE AJUDA DE CUSTO ===================== -->
-  <section id="page-excecoes" class="page" hidden>
-
-    <p class="section-title" style="margin-top:.5rem;">Filtrar por competência</p>
-    <div class="month-filter" id="e-month-filter"></div>
-
-    <p class="section-title">Filtrar por centro de custo</p>
-    <div class="month-filter" id="e-cc-filter"></div>
-
-    <p class="section-title">Resumo</p>
-    <div class="cards" id="e-summary-cards"></div>
-
-    <p class="section-title">Ajuda de custo — exceções <span class="hint">· cada colaborador tem um limite de exceções · 1ª = baixo · 2ª = médio · 3ª = limite atingido</span></p>
-    <div class="hero" id="e-hero-cards"></div>
-
-    <div class="panel">
-      <p style="font-size:13px; font-weight:500; margin-bottom:12px;">Valor reembolsado por competência (R$)</p>
-      <div class="legend" id="e-loss-legend"></div>
-      <div style="position:relative; width:100%; height:230px;">
+      <div class="relative mt-5 h-[248px] w-full">
         <canvas id="eChart" role="img" aria-label="Valor reembolsado por competência"></canvas>
       </div>
     </div>
-
-    <p class="section-title">Atenção — colaboradores com exceções recorrentes <span class="hint">· 2ª exceção ou mais</span></p>
-    <div class="panel" style="padding:0; overflow:hidden;">
-      <div class="table-wrap">
-        <table>
-          <thead><tr>
-            <th>Colaborador</th>
-            <th>CC</th>
-            <th class="num">Nº de exceções</th>
-            <th class="num">Valor acumulado</th>
-            <th>Situação</th>
-          </tr></thead>
-          <tbody id="e-risk-body"></tbody>
-        </table>
-      </div>
+    <div class="card p-5">
+      <p class="sec-h">Exceções recorrentes</p>
+      <p class="sec-d">Colaboradores na 2ª exceção ou mais</p>
+      <div class="mt-5" id="e-risk"></div>
     </div>
+  </div>
 
-    <p class="section-title">Detalhamento de exceções</p>
-    <div class="filters">
-      <select id="e-f-risco" onchange="renderExcecoesTable()">
+  <div class="card mt-4 overflow-hidden">
+    <div class="flex flex-wrap items-center justify-between gap-3 p-5 pb-4">
+      <div>
+        <p class="sec-h">Detalhamento de exceções</p>
+        <p class="sec-d">Ordenado pela data do lançamento</p>
+      </div>
+      <select id="e-f-risco" class="mini" onchange="renderExcecoesTable()">
         <option value="">Todas as situações</option>
         <option value="Baixo risco">Baixo risco</option>
         <option value="Médio risco">Médio risco</option>
         <option value="Limite atingido">Limite atingido</option>
       </select>
     </div>
-    <div class="panel" style="padding:0; overflow:hidden;">
-      <div class="table-wrap">
-        <table>
-          <thead><tr>
-            <th>Colaborador</th>
-            <th>CC</th>
-            <th>Competência</th>
-            <th class="num">Valor</th>
-            <th>Data da exceção</th>
-            <th>Nº</th>
-            <th>Situação</th>
-          </tr></thead>
-          <tbody id="e-table-body"></tbody>
-        </table>
-      </div>
+    <div class="scrollx">
+      <table class="tbl min-w-[760px]">
+        <thead><tr>
+          <th>Colaborador</th><th>CC</th><th>Competência</th><th class="r">Valor</th>
+          <th>Data</th><th>Nº</th><th>Situação</th>
+        </tr></thead>
+        <tbody id="e-table-body"></tbody>
+      </table>
     </div>
-
-  </section>
+  </div>
+</section>
 
 </main>
 
-<footer>Atualizado via Claude Code · Fontes: Gestao_Ferias_Globo.xlsx (Planejamento + Hora Venda) · Viagens · Exceções de Ajuda de Custo (SharePoint)</footer>
+<footer class="mx-auto max-w-[1180px] px-6 pb-10 text-[11px] text-ink-3">
+  Fontes: Gestao_Ferias_Globo.xlsx (Planejamento + Hora Venda) · Viagens · Exceções de Ajuda de Custo — SharePoint
+</footer>
 
 <script>
-// ============================================================
-// DADOS — gerados automaticamente pelo Claude Code
-// Fonte: Gestao_Ferias_Globo.xlsx (Planejamento de Férias + Hora Venda)
-// Última atualização: 2026-06-18
-// hv = valor hora-venda (R$). perda = dias × 8h × hv (calculado em JS)
-// ============================================================
 const DATA = [
   { nome:'Rafaela de Orlando Nascimento',         inicio:'2026-02-23', fim:'2026-03-06', dias:12, mes:2,  abono:0,  status:'Aprovado', confirm:'Sim', hv:158.49 },
   { nome:'Leonardo Santos Ferreira',              inicio:'2026-02-25', fim:'2026-03-06', dias:10, mes:2,  abono:0,  status:'Aprovado', confirm:'Sim', hv:190.19 },
@@ -456,39 +371,9 @@ const DATA = [
   { nome:'Jefferson Rafael Santana Moraes',       inicio:null, fim:null, dias:10, mes:null, abono:0, status:'Vencendo', confirm:'Não', hv:67.41,  limite:'2026-12-13' },
   { nome:'Ana Clara Paixão Cardoso',              inicio:null, fim:null, dias:30, mes:null, abono:0, status:'Vencendo', confirm:'Não', hv:164.80, limite:'2027-01-23' },
 ];
-const UPDATED = '2026-09-10';
-const JORNADA = 8; // horas/dia
-// ============================================================
 
-const MONTHS = [
-  {label:'Fev', days:28, n:2}, {label:'Mar', days:31, n:3}, {label:'Abr', days:30, n:4},
-  {label:'Mai', days:31, n:5}, {label:'Jun', days:30, n:6}, {label:'Jul', days:31, n:7},
-  {label:'Ago', days:31, n:8}, {label:'Set', days:30, n:9}, {label:'Out', days:31, n:10},
-  {label:'Nov', days:30, n:11}, {label:'Dez', days:31, n:12},
-];
-const TOTAL_DAYS = 334;
-const RANGE_START = new Date(2026,1,1);
-const COL_MAP = {
-  2:'#4B1197', 3:'#5E17A0', 4:'#7420A2', 5:'#89229B',
-  6:'#9E2194', 7:'#B31F8A', 8:'#C51C81', 9:'#D21B7C',
-  10:'#A82AA6', 11:'#7E2FC0', 12:'#5E17A0'
-};
+const UPDATED = '2026-10-04';
 
-const aprovadas = DATA.filter(d=>d.status==='Aprovado');
-const vencendo  = DATA.filter(d=>d.status==='Vencendo');
-// dias ÚTEIS (seg–sex) dentro do período — base do desconto de faturamento
-const diasUteis = (iniStr, fimStr) => {
-  let n = 0, cur = pd(iniStr); const end = pd(fimStr);
-  while (cur <= end) { const w = cur.getDay(); if (w!==0 && w!==6) n++; cur = new Date(cur.getFullYear(), cur.getMonth(), cur.getDate()+1); }
-  return n;
-};
-const diasCalc = d => d.inicio ? diasUteis(d.inicio, d.fim) : d.dias; // Vencendo usa saldo
-const horas = d => diasCalc(d) * JORNADA;
-const perda = d => horas(d) * d.hv;
-const BRL = v => v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
-const BRLk = v => 'R$ ' + (v/1000).toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0}) + 'k';
-
-// Custos de Férias (aba "Custos de Férias") — provisão de custo por período, distribuída nos meses de gozo
 const CUSTOS = [
   { nome:'Gleidson Andre Duarte Ramos',      c:{5:12914.94} },
   { nome:'Rosangela Silva de Castro',        c:{5:14136.57} },
@@ -526,13 +411,7 @@ const CUSTOS = [
   { nome:'Gleidson Andre Duarte Ramos',      c:{11:13042.76} },
   { nome:'Ivana Mara Rodrigues Possidio',    c:{12:17550.21} },
 ];
-const custoMes = {};
-CUSTOS.forEach(p => { for (const [m,v] of Object.entries(p.c)) custoMes[m] = (custoMes[m]||0)+v; });
-const custoTotal = Object.values(custoMes).reduce((a,b)=>a+b,0);
-const MESNOME = {2:'Fevereiro',3:'Março',4:'Abril',5:'Maio',6:'Junho',7:'Julho',8:'Agosto',9:'Setembro',10:'Outubro',11:'Novembro',12:'Dezembro'};
-const MESAB = {2:'Fev',3:'Mar',4:'Abr',5:'Mai',6:'Jun',7:'Jul',8:'Ago',9:'Set',10:'Out',11:'Nov',12:'Dez'};
 
-// ---- Centro de custo (aba Hora Venda) ----
 const CC = {
   'Rafaela de Orlando Nascimento':'ED','Leonardo Santos Ferreira':'ED','Fellipe Couto Marques Arruda':'SD',
   'Patricia de Araujo Rudas Paternina':'ED','Eduardo Gabriel Delfito do Nascimento':'SD','Davi Alves de Sousa da Silva':'SD',
@@ -547,361 +426,9 @@ const CC = {
   'Pedro Paulo Ferreira Corazza':'ED','Lindsay Fernandes de Souza Filho':'ED','Sidney Rosa Alves da Rocha':'ED',
   'Yuri Dambroysk':'ED','Paulo Sergio da Costa Moreira Filho':'ED','Ana Clara Paixão Cardoso':'ED',
 };
+
 const CC_FULL = 'GLOBO - ALOCAÇÃO DE PROFISSIONAIS';
-const ccDe = d => d.gestor ? '—' : (CC[d.nome] || '—');
 
-// ---- Filtros globais (mês + centro de custo) ----
-let filtroMes = null; // null = todos os meses
-let filtroCC = null;  // null | 'ED' | 'SD'
-const matchCC     = d => filtroCC==null || ccDe(d)===filtroCC;
-const apMes       = () => aprovadas.filter(d => (filtroMes==null || d.mes===filtroMes) && matchCC(d));
-const vencMes     = () => (filtroMes==null ? vencendo : []).filter(matchCC);
-const custosDoMes = () => (filtroMes==null ? CUSTOS : CUSTOS.filter(p=>p.c[filtroMes]!=null).map(p=>({nome:p.nome, c:{[filtroMes]:p.c[filtroMes]}})));
-const custoMesDe  = list => { const o={}; list.forEach(p=>{ for (const [m,v] of Object.entries(p.c)) o[m]=(o[m]||0)+v; }); return o; };
-const chartRefs = {};
-const mkChart = (id,cfg) => { if(chartRefs[id]) chartRefs[id].destroy(); chartRefs[id]=new Chart(document.getElementById(id),cfg); };
-
-// parse 'YYYY-MM-DD' como data LOCAL (evita deslocamento de 1 dia por fuso horário)
-const pd = s => { const [y,m,dd] = s.split('-').map(Number); return new Date(y, m-1, dd); };
-
-document.getElementById('updated-at').textContent = 'Atualizado em ' + pd(UPDATED).toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
-
-function pct(d) {
-  const diff = Math.round((d - RANGE_START) / 86400000);
-  return Math.max(0, Math.min(100, diff / TOTAL_DAYS * 100));
-}
-
-function renderSummary() {
-  const ap = apMes(), venc = vencMes();
-  const confirmados = ap.filter(d=>d.confirm==='Sim').length;
-  const sub1 = filtroMes==null ? 'aprovados · fev–dez 2026' : 'aprovados em '+MESNOME[filtroMes];
-  const cards = [
-    {label:'Períodos de férias', value:ap.length,   sub:sub1, cls:''},
-    {label:'Conf. cliente',      value:confirmados, sub:`${ap.length-confirmados} sem confirmação`, cls:''},
-    {label:'A vencer',           value:venc.length, sub: filtroMes==null?'saldos a programar':'sem mês de gozo', cls:venc.length>0?'alert':''},
-  ];
-  document.getElementById('summary-cards').innerHTML = cards.map(c=>
-    `<div class="card ${c.cls}"><div class="card-label">${c.label}</div><div class="card-value">${c.value}</div><div class="card-sub">${c.sub}</div></div>`
-  ).join('');
-}
-
-function renderHero() {
-  const ap = apMes(), venc = vencMes();
-  const totalPerda = ap.reduce((s,d)=>s+perda(d),0);
-  const totalHoras = ap.reduce((s,d)=>s+horas(d),0);
-  const riscoPerda = venc.reduce((s,d)=>s+perda(d),0);
-  const lbl = filtroMes==null ? 'Desconto de Faturamento (ano)' : 'Desconto de Faturamento ('+MESNOME[filtroMes]+')';
-  const cards = [
-    {cls:'',     label:'<i class="ti ti-currency-real" aria-hidden="true"></i> '+lbl, value:BRL(totalPerda), sub:`${ap.length} períodos de férias`},
-    {cls:'soft', label:'<i class="ti ti-clock" aria-hidden="true"></i> Horas não faturadas',                    value:totalHoras.toLocaleString('pt-BR')+' h', sub:`${ap.reduce((s,d)=>s+diasCalc(d),0)} dias úteis × ${JORNADA}h`},
-    {cls:'risk', label:'<i class="ti ti-alert-triangle" aria-hidden="true"></i> Desconto a vencer (risco)',     value:BRL(riscoPerda), sub:`${venc.length} saldos não programados`},
-  ];
-  document.getElementById('hero-cards').innerHTML = cards.map(c=>
-    `<div class="hero-card ${c.cls}"><div class="hero-label">${c.label}</div><div class="hero-value">${c.value}</div><div class="hero-sub">${c.sub}</div></div>`
-  ).join('');
-}
-
-function renderLossChart() {
-  const mm = filtroMes==null ? MONTHS : MONTHS.filter(m=>m.n===filtroMes);
-  const totals = mm.map(m => aprovadas.filter(d=>d.mes===m.n && matchCC(d)).reduce((s,d)=>s+perda(d),0));
-  const cols   = mm.map(m => COL_MAP[m.n]);
-  const grand  = totals.reduce((a,b)=>a+b,0);
-  document.getElementById('loss-legend').innerHTML =
-    `<span class="legend-item" style="font-weight:500;color:var(--text)">${filtroMes==null?'Desconto total no ano':'Desconto em '+MESNOME[filtroMes]}: ${BRL(grand)}</span>`;
-  const labelColor = matchMedia('(prefers-color-scheme: dark)').matches ? '#f1e8fb' : '#2b0a63';
-  const dataLabels = {
-    id:'dataLabels',
-    afterDatasetsDraw(chart){
-      const {ctx} = chart; const meta = chart.getDatasetMeta(0);
-      ctx.save(); ctx.font='500 11px system-ui, sans-serif'; ctx.fillStyle=labelColor; ctx.textAlign='center';
-      meta.data.forEach((bar,i)=>{ if(totals[i] <= 0) return; ctx.fillText(BRLk(totals[i]), bar.x, bar.y - 6); });
-      ctx.restore();
-    }
-  };
-  mkChart('lossChart',{
-    type:'bar',
-    data:{ labels:mm.map(m=>m.label), datasets:[{data:totals, backgroundColor:cols, borderRadius:6, borderSkipped:false}] },
-    options:{
-      responsive:true, maintainAspectRatio:false,
-      layout:{padding:{top:22}},
-      plugins:{ legend:{display:false}, tooltip:{callbacks:{label:ctx=>BRL(ctx.parsed.y)}} },
-      scales:{
-        y:{beginAtZero:true, ticks:{callback:v=>BRLk(v), font:{size:11}}, grid:{color:'rgba(128,128,128,0.1)'}},
-        x:{ticks:{font:{size:12}, autoSkip:false}, grid:{display:false}}
-      }
-    },
-    plugins:[dataLabels]
-  });
-}
-
-function renderRank() {
-  const byName = {};
-  aprovadas.forEach(d=>{ byName[d.nome] = (byName[d.nome]||0) + perda(d); });
-  const ranked = Object.entries(byName).sort((a,b)=>b[1]-a[1]).slice(0,8);
-  const max = ranked[0][1];
-  document.getElementById('rank-list').innerHTML = ranked.map(([nome,val])=>
-    `<div class="rank-row">
-      <div class="rank-name" title="${nome}">${nome}</div>
-      <div class="rank-track"><div class="rank-fill" style="width:${(val/max*100).toFixed(1)}%"></div></div>
-      <div class="rank-val">${BRL(val)}</div>
-    </div>`
-  ).join('');
-}
-
-function renderTimeline() {
-  document.getElementById('tl-header').innerHTML = MONTHS.map(m=>
-    `<div class="tl-month-label" style="width:${m.days/TOTAL_DAYS*100}%">${m.label}</div>`
-  ).join('');
-  const dm = s => pd(s).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});
-  const body = apMes();
-  document.getElementById('tl-body').innerHTML = body.length===0 ? '<p style="font-size:12px;color:var(--text-3);padding:6px 0;">Nenhuma férias aprovada neste mês.</p>' : body.map(d=>{
-    const ini = pd(d.inicio);
-    const s = pct(ini);
-    const fimD = pd(d.fim);
-    const fimNext = new Date(fimD.getFullYear(), fimD.getMonth(), fimD.getDate()+1);
-    const e = pct(fimNext);
-    const w = Math.max(0.8, e-s);
-    const col = COL_MAP[d.mes]||'#9B72CC';
-    const nome2 = d.nome.split(' ').slice(0,2).join(' ');
-    const periodo = `${dm(d.inicio)}–${dm(d.fim)}`;
-    // rótulo à direita da barra; se a barra terminar perto do fim, joga para a esquerda
-    const labelLeft = e > 80;
-    const labelStyle = labelLeft
-      ? `right:${(100-s).toFixed(1)}%; margin-right:6px; text-align:right;`
-      : `left:${e.toFixed(1)}%; margin-left:6px;`;
-    return `<div class="tl-row">
-      <div class="tl-name" title="${d.nome}">${nome2}</div>
-      <div class="tl-grid">
-        <div class="tl-bar" style="left:${s}%;width:${w}%;background:${col};"
-          title="${d.nome} · ${d.dias} dias (${diasCalc(d)} úteis) · ${BRL(perda(d))} de desconto"></div>
-        <span class="tl-label" style="${labelStyle}">${periodo}</span>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function confBadge(val) {
-  return val==='Sim'
-    ? `<span class="badge b-green"><i class="ti ti-check" aria-hidden="true"></i>Confirmado</span>`
-    : `<span class="badge b-gray"><i class="ti ti-x" aria-hidden="true"></i>Não confirmado</span>`;
-}
-
-function renderTable() {
-  const fS = document.getElementById('f-status').value;
-  const fC = document.getElementById('f-confirm').value;
-  const rows = DATA.filter(d=>{
-    if(filtroMes!=null && d.mes!==filtroMes) return false;
-    if(filtroCC!=null && ccDe(d)!==filtroCC) return false;
-    if(fS && d.status!==fS) return false;
-    if(fC && d.confirm!==fC) return false;
-    return true;
-  });
-  const fmt = s => s ? pd(s).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}) : '—';
-  document.getElementById('table-body').innerHTML = rows.map(d=>{
-    const alerta = d.status==='Vencendo';
-    const statusBadge = d.status==='Aprovado'
-      ? `<span class="badge b-green">Aprovado</span>`
-      : `<span class="badge b-red"><i class="ti ti-alert-triangle" aria-hidden="true"></i>Vencendo</span>`;
-    return `<tr class="${alerta?'alert-row':''}">
-      <td>${d.nome}</td>
-      <td>${fmt(d.inicio)}</td>
-      <td>${fmt(d.fim)}</td>
-      <td>${d.dias}${d.inicio?` <span style="color:var(--text-3)">(${diasUteis(d.inicio,d.fim)} úteis)</span>`:' <span style="color:var(--text-3)">(saldo)</span>'}</td>
-      <td>${d.abono>0?d.abono+' d':'—'}</td>
-      <td>${statusBadge}</td>
-      <td>${confBadge(d.confirm)}</td>
-      <td>${ccBadge(d)}</td>
-      <td class="num">${d.gestor?'<span style="color:var(--text-3)">gestor</span>':(d.hv==null?'<span style="color:var(--text-3)">a confirmar</span>':BRL(d.hv))}</td>
-      <td class="num">${d.gestor?'<span class="badge b-blue">Custo da operação</span>':(d.hv==null?'<span style="color:var(--text-3)">a confirmar</span>':BRL(perda(d)))}</td>
-    </tr>`;
-  }).join('');
-}
-
-function ccBadge(d){
-  const c = ccDe(d);
-  if(c==='—') return '<span style="color:var(--text-3)">—</span>';
-  return `<span class="badge ${c==='ED'?'b-blue':'b-amber'}" title="${CC_FULL} ${c}">${c}</span>`;
-}
-
-function renderLossList() {
-  const fmtP = d => d.inicio
-    ? pd(d.inicio).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}) + ' – ' + pd(d.fim).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit'})
-    : 'A programar (limite '+pd(d.limite).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})+')';
-  const ap = apMes(), venc = vencMes();
-  const ordered = [...ap].sort((a,b)=>perda(b)-perda(a));
-  let html = ordered.map(d=>
-    `<tr>
-      <td>${d.nome}</td>
-      <td style="color:var(--text-2)">${fmtP(d)}</td>
-      <td class="num">${d.dias}</td>
-      <td class="num">${diasCalc(d)}</td>
-      <td class="num">${horas(d)} h</td>
-      <td class="num">${d.gestor?'<span style="color:var(--text-3)">gestor</span>':(d.hv==null?'<span style="color:var(--text-3)">a confirmar</span>':BRL(d.hv))}</td>
-      <td class="num">${d.gestor?'<span class="badge b-blue">Custo da operação</span>':(d.hv==null?'<span style="color:var(--text-3)">a confirmar</span>':BRL(perda(d)))}</td>
-    </tr>`
-  ).join('');
-  const totalDias = ap.reduce((s,d)=>s+d.dias,0);
-  const totalU    = ap.reduce((s,d)=>s+diasCalc(d),0);
-  const totalH    = ap.reduce((s,d)=>s+horas(d),0);
-  const totalP    = ap.reduce((s,d)=>s+perda(d),0);
-  html += `<tr class="total-row">
-      <td>Total aprovado</td><td></td>
-      <td class="num">${totalDias}</td>
-      <td class="num">${totalU}</td>
-      <td class="num">${totalH} h</td>
-      <td></td>
-      <td class="num">${BRL(totalP)}</td>
-    </tr>`;
-  // bloco a vencer
-  html += venc.map(d=>
-    `<tr class="alert-row">
-      <td>${d.nome} <span class="badge b-red" style="margin-left:4px"><i class="ti ti-alert-triangle" aria-hidden="true"></i>Vencendo</span></td>
-      <td style="color:var(--text-2)">${fmtP(d)}</td>
-      <td class="num">${d.dias}</td>
-      <td class="num">${diasCalc(d)}</td>
-      <td class="num">${horas(d)} h</td>
-      <td class="num">${d.gestor?'<span style="color:var(--text-3)">gestor</span>':(d.hv==null?'<span style="color:var(--text-3)">a confirmar</span>':BRL(d.hv))}</td>
-      <td class="num">${d.gestor?'<span class="badge b-blue">Custo da operação</span>':(d.hv==null?'<span style="color:var(--text-3)">a confirmar</span>':BRL(perda(d)))}</td>
-    </tr>`
-  ).join('');
-  if(venc.length){
-    const riscoP = venc.reduce((s,d)=>s+perda(d),0);
-    html += `<tr class="total-row">
-      <td>Total a vencer (risco)</td><td></td>
-      <td class="num">${venc.reduce((s,d)=>s+d.dias,0)}</td>
-      <td class="num">${venc.reduce((s,d)=>s+diasCalc(d),0)}</td>
-      <td class="num">${venc.reduce((s,d)=>s+horas(d),0)} h</td>
-      <td></td>
-      <td class="num">${BRL(riscoP)}</td>
-    </tr>`;
-  }
-  document.getElementById('loss-body').innerHTML = html;
-}
-
-function renderCustoHero(){
-  const list = custosDoMes();
-  const cMes = custoMesDe(list);
-  const total = Object.values(cMes).reduce((a,b)=>a+b,0);
-  const meses = Object.keys(cMes).map(Number).sort((a,b)=>a-b);
-  const maior = meses.length ? meses.reduce((a,b)=>cMes[b]>cMes[a]?b:a, meses[0]) : null;
-  const nomes = new Set(list.map(p=>p.nome)).size;
-  const subTotal = filtroMes==null ? 'provisão mai–dez 2026' : 'em '+MESNOME[filtroMes];
-  const cards = [
-    {cls:'',     label:'<i class="ti ti-cash" aria-hidden="true"></i> Custo total de férias',    value:BRL(total), sub:subTotal},
-    {cls:'soft', label:'<i class="ti ti-calendar-stats" aria-hidden="true"></i> Mês de maior custo', value:maior?MESNOME[maior]:'—', sub:maior?BRL(cMes[maior]):'sem custo'},
-    {cls:'soft', label:'<i class="ti ti-users" aria-hidden="true"></i> Colaboradores com custo',   value:nomes, sub:`${list.length} períodos`},
-  ];
-  document.getElementById('custo-hero').innerHTML = cards.map(c=>
-    `<div class="hero-card ${c.cls}"><div class="hero-label">${c.label}</div><div class="hero-value">${c.value}</div><div class="hero-sub">${c.sub}</div></div>`
-  ).join('');
-}
-
-function renderCustoChart(){
-  const meses = filtroMes==null ? [5,6,7,8,9,10,11,12] : [filtroMes];
-  const cMes = custoMesDe(custosDoMes());
-  const total = Object.values(cMes).reduce((a,b)=>a+b,0);
-  const totals=meses.map(m=>cMes[m]||0);
-  const cols=meses.map(m=>COL_MAP[m]);
-  document.getElementById('custo-legend').innerHTML =
-    `<span class="legend-item" style="font-weight:500;color:var(--text)">Custo total: ${BRL(total)}</span>`;
-  const labelColor = matchMedia('(prefers-color-scheme: dark)').matches ? '#f1e8fb' : '#2b0a63';
-  const dl={id:'custoDl',afterDatasetsDraw(ch){const{ctx}=ch;const m=ch.getDatasetMeta(0);ctx.save();ctx.font='500 11px system-ui, sans-serif';ctx.fillStyle=labelColor;ctx.textAlign='center';m.data.forEach((b,i)=>{if(totals[i]>0)ctx.fillText(BRLk(totals[i]),b.x,b.y-6);});ctx.restore();}};
-  mkChart('custoChart',{
-    type:'bar',
-    data:{labels:meses.map(m=>MESAB[m]),datasets:[{data:totals,backgroundColor:cols,borderRadius:6,borderSkipped:false}]},
-    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:22}},
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>BRL(ctx.parsed.y)}}},
-      scales:{y:{beginAtZero:true,ticks:{callback:v=>BRLk(v),font:{size:11}},grid:{color:'rgba(128,128,128,0.1)'}},x:{ticks:{font:{size:12},autoSkip:false},grid:{display:false}}}},
-    plugins:[dl]
-  });
-}
-
-function renderCustoRank(){
-  const byName={};
-  custosDoMes().forEach(p=>{const t=Object.values(p.c).reduce((a,b)=>a+b,0);byName[p.nome]=(byName[p.nome]||0)+t;});
-  const ranked=Object.entries(byName).sort((a,b)=>b[1]-a[1]).slice(0,8);
-  if(!ranked.length){ document.getElementById('custo-rank').innerHTML='<p style="font-size:12px;color:var(--text-3)">Sem custo lançado neste mês.</p>'; return; }
-  const max=ranked[0][1];
-  document.getElementById('custo-rank').innerHTML=ranked.map(([nome,val])=>
-    `<div class="rank-row"><div class="rank-name" title="${nome}">${nome}</div><div class="rank-track"><div class="rank-fill" style="width:${(val/max*100).toFixed(1)}%"></div></div><div class="rank-val">${BRL(val)}</div></div>`
-  ).join('');
-}
-
-function renderCompare(){
-  const meses = filtroMes==null ? [2,3,4,5,6,7,8,9,10,11,12] : [filtroMes];
-  const cMes = custoMesDe(custosDoMes());
-  const descMes={};
-  apMes().forEach(d => { descMes[d.mes] = (descMes[d.mes]||0) + perda(d); });
-  const custoTot = Object.values(cMes).reduce((a,b)=>a+b,0);
-  const descTot  = Object.values(descMes).reduce((a,b)=>a+b,0);
-  const custo=meses.map(m=>cMes[m]||0);
-  const desc=meses.map(m=>descMes[m]||0);
-  const cCusto='#4B1197', cDesc='#D21B7C';
-  document.getElementById('cmp-legend').innerHTML =
-    `<span class="legend-item"><span class="legend-sq" style="background:${cCusto}"></span>Custo de férias · ${BRL(custoTot)}</span>`+
-    `<span class="legend-item"><span class="legend-sq" style="background:${cDesc}"></span>Desconto de faturamento · ${BRL(descTot)}</span>`;
-  mkChart('cmpChart',{
-    type:'bar',
-    data:{labels:meses.map(m=>MESAB[m]),datasets:[
-      {label:'Custo de férias',data:custo,backgroundColor:cCusto,borderRadius:4,borderSkipped:false},
-      {label:'Desconto de faturamento',data:desc,backgroundColor:cDesc,borderRadius:4,borderSkipped:false}
-    ]},
-    options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.dataset.label+': '+BRL(c.parsed.y)}}},
-      scales:{y:{beginAtZero:true,ticks:{callback:v=>BRLk(v),font:{size:11}},grid:{color:'rgba(128,128,128,0.1)'}},x:{ticks:{font:{size:12},autoSkip:false},grid:{display:false}}}}
-  });
-}
-
-function renderCC(){
-  const apList = filtroMes==null ? aprovadas : aprovadas.filter(d=>d.mes===filtroMes);
-  const agg = {};
-  const ensure = k => agg[k] || (agg[k] = {gap:0, custo:0, nomes:new Set()});
-  apList.forEach(d=>{ const k=ccDe(d); ensure(k).gap += perda(d); ensure(k).nomes.add(d.nome); });
-  custosDoMes().forEach(p=>{ const k=CC[p.nome]||'—'; ensure(k).custo += Object.values(p.c).reduce((a,b)=>a+b,0); });
-  const label = {'ED':'Alocação de Profissionais · ED','SD':'Alocação de Profissionais · SD','—':'Gestor / sem centro de custo'};
-  const order = ['ED','SD','—'].filter(k=>agg[k]);
-  let rows = order.map(k=>`<tr>
-      <td>${label[k]||k}</td>
-      <td class="num">${agg[k].nomes.size||'—'}</td>
-      <td class="num">${BRL(agg[k].gap)}</td>
-      <td class="num">${agg[k].custo?BRL(agg[k].custo):'—'}</td>
-    </tr>`).join('');
-  const allNames=new Set(); order.forEach(k=>agg[k].nomes.forEach(n=>allNames.add(n)));
-  const tGap=order.reduce((s,k)=>s+agg[k].gap,0);
-  const tCusto=order.reduce((s,k)=>s+agg[k].custo,0);
-  rows += `<tr class="total-row"><td>Total</td><td class="num">${allNames.size}</td><td class="num">${BRL(tGap)}</td><td class="num">${BRL(tCusto)}</td></tr>`;
-  document.getElementById('cc-body').innerHTML = rows;
-}
-
-function renderFilter(){
-  const meses=[2,3,4,5,6,7,8,9,10,11,12];
-  let html=`<button class="mf-btn ${filtroMes==null?'active':''}" onclick="setMes(null)">Todos</button>`;
-  meses.forEach(m=>{ html+=`<button class="mf-btn ${filtroMes===m?'active':''}" onclick="setMes(${m})">${MESNOME[m]}</button>`; });
-  document.getElementById('month-filter').innerHTML=html;
-}
-function renderCCfilter(){
-  const mk=(lbl,v)=>`<button class="mf-btn ${filtroCC===v?'active':''}" onclick="setCC(${v==null?'null':`'${v}'`})">${lbl}</button>`;
-  document.getElementById('cc-filter').innerHTML = mk('Todos',null)+mk('ED','ED')+mk('SD','SD');
-}
-window.setMes = function(m){ filtroMes = m; renderAll(); };
-window.setCC  = function(v){ filtroCC = v; renderAll(); };
-function renderAll(){
-  renderFilter();
-  renderCCfilter();
-  renderSummary();
-  renderHero();
-  renderLossChart();
-  renderCC();
-  renderTimeline();
-  renderTable();
-}
-renderAll();
-
-// ============================================================
-// ABA VIAGENS
-// Fonte: planilha Viagens (SharePoint) · custo total = passagem + hospedagem + imposto + JF (juros de financiamento)
-// Correções aplicadas: data de volta '18/08/206' -> 2026-08-18; cobrança em branco -> 'Pendente'; espaços removidos.
-// ============================================================
 const VIAGENS = [
   { nome:'Raquel Rente Peixoto',      cc:'ED', motivo:'Set Expo',         orig:'Rio de Janeiro', dest:'São Paulo',      ida:'2026-08-17', volta:'2026-08-18', aereo:1189.43, hosp:782.46,  total:4024.45, modelo:'Nota Fiscal',    cobranca:'Sim',      solic:'Rodrigo Octavio',      mes:8 },
   { nome:'Raquel Rente Peixoto',      cc:'ED', motivo:'Visita a cliente', orig:'Rio de Janeiro', dest:'Recife',         ida:'2026-09-08', volta:'2026-09-11', aereo:null,    hosp:1898.63, total:1898.63, modelo:'Nota Fiscal',    cobranca:'Não',      solic:'Rodrigo Octavio',      mes:9, obs:'Profissional relatou que o banheiro do Hotel (Ibis) que havia sido reservado não atendia as condições de higiene, portanto tivemos que alterar a hospedagem para o hotel Hy Experience. Fez apenas o check-in no Ibis, sem pernoite — em negociação com a agência para não descontar o valor integral.' },
@@ -914,113 +441,7 @@ const VIAGENS = [
   { nome:'Veronica Pereira',          cc:'SD', motivo:'Rio Innovation',   orig:'Rio de Janeiro', dest:'Rio de Janeiro', ida:'2026-08-03', volta:'2026-08-07', aereo:null,    hosp:null,    total:960.00,  modelo:'Nota Fiscal',    cobranca:'Sim',      solic:'—',                    mes:8 },
   { nome:'Daniele Freitas',           cc:'SD', motivo:'Rio Innovation',   orig:'Rio de Janeiro', dest:'Rio de Janeiro', ida:'2026-08-03', volta:'2026-08-07', aereo:null,    hosp:null,    total:880.00,  modelo:'Nota Fiscal',    cobranca:'Sim',      solic:'—',                    mes:8 },
 ];
-let vMes = null, vCC = null;
-const vMonths = [...new Set(VIAGENS.map(t=>t.mes))].sort((a,b)=>a-b);
-const vFiltered = () => VIAGENS.filter(t => (vMes==null||t.mes===vMes) && (vCC==null||t.cc===vCC));
-const ccBadge2 = cc => `<span class="badge ${cc==='ED'?'b-blue':'b-amber'}" title="${CC_FULL} ${cc}">${cc}</span>`;
-const cobrancaBadge = c => c==='Sim'
-  ? '<span class="badge b-green"><i class="ti ti-check" aria-hidden="true"></i>Cobrado</span>'
-  : c==='Não'
-  ? '<span class="badge b-red"><i class="ti ti-alert-triangle" aria-hidden="true"></i>A cobrar</span>'
-  : '<span class="badge b-amber"><i class="ti ti-clock" aria-hidden="true"></i>Pendente</span>';
-const cardValStyle = v => `style="font-size:${typeof v==='string'&&v.length>9?'19px':'24px'}"`;
 
-function renderViagensFilters(){
-  let h = `<button class="mf-btn ${vMes==null?'active':''}" onclick="setVMes(null)">Todos</button>`;
-  vMonths.forEach(m=>{ h += `<button class="mf-btn ${vMes===m?'active':''}" onclick="setVMes(${m})">${MESNOME[m]}</button>`; });
-  document.getElementById('v-month-filter').innerHTML = h;
-  const mk = (l,v) => `<button class="mf-btn ${vCC===v?'active':''}" onclick="setVCC(${v==null?'null':`'${v}'`})">${l}</button>`;
-  document.getElementById('v-cc-filter').innerHTML = mk('Todos',null)+mk('ED','ED')+mk('SD','SD');
-}
-window.setVMes = function(m){ vMes = m; renderViagens(); };
-window.setVCC  = function(v){ vCC = v; renderViagens(); };
-
-function renderViagens(){
-  renderViagensFilters();
-  const list = vFiltered();
-  const total = list.reduce((s,t)=>s+t.total,0);
-  const aCobrarList = list.filter(t=>t.cobranca!=='Sim');
-  const aCobrar = aCobrarList.reduce((s,t)=>s+t.total,0);
-  const cobradoList = list.filter(t=>t.cobranca==='Sim');
-  const cobrado = cobradoList.reduce((s,t)=>s+t.total,0);
-  const nomes = new Set(list.map(t=>t.nome)).size;
-  const subP = vMes==null ? 'todas · 2026' : 'em '+MESNOME[vMes];
-  const cards = [
-    {label:'Viagens',      value:list.length, sub:subP, cls:''},
-    {label:'Custo total',  value:BRL(total),  sub:'passagem+hosp+imp.+JF', cls:''},
-    {label:'A cobrar',     value:BRL(aCobrar),sub:`${aCobrarList.length} viagem(ns)`, cls:aCobrarList.length?'alert':''},
-    {label:'Colaboradores',value:nomes,       sub:'em viagem', cls:''},
-  ];
-  document.getElementById('v-summary-cards').innerHTML = cards.map(c=>
-    `<div class="card ${c.cls}"><div class="card-label">${c.label}</div><div class="card-value" ${cardValStyle(c.value)}>${c.value}</div><div class="card-sub">${c.sub}</div></div>`).join('');
-  const hero = [
-    {cls:'',    label:'<i class="ti ti-plane-tilt" aria-hidden="true"></i> Custo total de viagens', value:BRL(total),   sub:`${list.length} viagens`},
-    {cls:'risk',label:'<i class="ti ti-cash" aria-hidden="true"></i> A cobrar do cliente',           value:BRL(aCobrar), sub:`${aCobrarList.length} pendente(s) de cobrança`},
-    {cls:'soft',label:'<i class="ti ti-circle-check" aria-hidden="true"></i> Já cobrado',            value:BRL(cobrado), sub:`${cobradoList.length} viagens faturadas`},
-  ];
-  document.getElementById('v-hero-cards').innerHTML = hero.map(c=>
-    `<div class="hero-card ${c.cls}"><div class="hero-label">${c.label}</div><div class="hero-value">${c.value}</div><div class="hero-sub">${c.sub}</div></div>`).join('');
-  // gráfico por mês
-  const mm = vMes==null ? vMonths : [vMes];
-  const totals = mm.map(m => VIAGENS.filter(t=>t.mes===m && (vCC==null||t.cc===vCC)).reduce((s,t)=>s+t.total,0));
-  const cols = mm.map(m => COL_MAP[m]||'#6e2cbf');
-  const grand = totals.reduce((a,b)=>a+b,0);
-  document.getElementById('v-loss-legend').innerHTML =
-    `<span class="legend-item" style="font-weight:500;color:var(--text)">${vMes==null?'Custo total no ano':'Custo em '+MESNOME[vMes]}: ${BRL(grand)}</span>`;
-  const labelColor = matchMedia('(prefers-color-scheme: dark)').matches ? '#f1e8fb' : '#2b0a63';
-  const dl = {id:'vdl',afterDatasetsDraw(ch){const{ctx}=ch;const m=ch.getDatasetMeta(0);ctx.save();ctx.font='500 11px system-ui, sans-serif';ctx.fillStyle=labelColor;ctx.textAlign='center';m.data.forEach((b,i)=>{if(totals[i]>0)ctx.fillText(BRLk(totals[i]),b.x,b.y-6);});ctx.restore();}};
-  mkChart('vChart',{type:'bar',data:{labels:mm.map(m=>MESAB[m]),datasets:[{data:totals,backgroundColor:cols,borderRadius:6,borderSkipped:false}]},
-    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:22}},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>BRL(c.parsed.y)}}},
-      scales:{y:{beginAtZero:true,ticks:{callback:v=>BRLk(v),font:{size:11}},grid:{color:'rgba(128,128,128,0.1)'}},x:{ticks:{font:{size:12},autoSkip:false},grid:{display:false}}}},plugins:[dl]});
-  // por centro de custo
-  const agg = {};
-  const ens = k => agg[k] || (agg[k]={n:0,total:0,cobrar:0});
-  list.forEach(t=>{ const a=ens(t.cc); a.n++; a.total+=t.total; if(t.cobranca!=='Sim') a.cobrar+=t.total; });
-  const lbl = {'ED':'Alocação de Profissionais · ED','SD':'Alocação de Profissionais · SD'};
-  const ord = ['ED','SD'].filter(k=>agg[k]);
-  let rows = ord.map(k=>`<tr><td>${lbl[k]||k}</td><td class="num">${agg[k].n}</td><td class="num">${BRL(agg[k].total)}</td><td class="num">${agg[k].cobrar?BRL(agg[k].cobrar):'—'}</td></tr>`).join('');
-  rows += `<tr class="total-row"><td>Total</td><td class="num">${list.length}</td><td class="num">${BRL(total)}</td><td class="num">${BRL(aCobrar)}</td></tr>`;
-  document.getElementById('v-cc-body').innerHTML = rows;
-  // opções do filtro de motivo
-  const sel = document.getElementById('v-f-motivo');
-  const cur = sel.value;
-  const motivos = [...new Set(VIAGENS.map(t=>t.motivo))];
-  sel.innerHTML = '<option value="">Todos os motivos</option>'+motivos.map(m=>`<option value="${m}">${m}</option>`).join('');
-  sel.value = cur;
-  renderViagensTable();
-}
-
-function renderViagensTable(){
-  const fc = document.getElementById('v-f-cobranca').value;
-  const fm = document.getElementById('v-f-motivo').value;
-  const list = vFiltered().filter(t => (!fc||t.cobranca===fc) && (!fm||t.motivo===fm));
-  const dm = s => pd(s).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});
-  const money = v => v==null ? '<span style="color:var(--text-3)">n/a</span>' : BRL(v);
-  let html = list.map(t=>`<tr>
-     <td>${t.nome}</td>
-     <td>${ccBadge2(t.cc)}</td>
-     <td>${t.motivo}${t.obs?` <i class="ti ti-message-circle" title="${t.obs.replace(/"/g,'&quot;')}" style="color:var(--accent);cursor:help;vertical-align:-1px" aria-label="Observação"></i>`:''}</td>
-     <td><span class="route">${t.orig} <i class="ti ti-arrow-narrow-right" aria-hidden="true"></i> ${t.dest}</span></td>
-     <td>${dm(t.ida)}</td>
-     <td>${dm(t.volta)}</td>
-     <td class="num">${money(t.aereo)}</td>
-     <td class="num">${money(t.hosp)}</td>
-     <td class="num">${BRL(t.total)}${t.flag?' <i class="ti ti-alert-triangle" title="Custo total menor que passagem + hospedagem — conferir na planilha" style="color:var(--amber-text)"></i>':''}</td>
-     <td>${cobrancaBadge(t.cobranca)}</td>
-     <td style="color:var(--text-2)">${t.solic}</td>
-   </tr>`).join('');
-  if(list.length){
-    const tA=list.reduce((s,t)=>s+(t.aereo||0),0), tH=list.reduce((s,t)=>s+(t.hosp||0),0), tT=list.reduce((s,t)=>s+t.total,0);
-    html += `<tr class="total-row"><td>Total</td><td></td><td></td><td></td><td></td><td></td><td class="num">${BRL(tA)}</td><td class="num">${BRL(tH)}</td><td class="num">${BRL(tT)}</td><td></td><td></td></tr>`;
-  } else html = '<tr><td colspan="11" style="color:var(--text-3);padding:14px 10px;">Nenhuma viagem para este filtro.</td></tr>';
-  document.getElementById('v-table-body').innerHTML = html;
-}
-
-// ============================================================
-// ABA EXCEÇÕES DE AJUDA DE CUSTO
-// Fonte: planilha Exceções de Ajuda de Custo (SharePoint)
-// Regra: nº da exceção define o risco -> 1ª = Baixo · 2ª = Médio · 3ª = Limite atingido
-// ============================================================
 const EXCECOES = [
   { nome:'Lidia De Oliveira Vieira',          cc:'ED', comp:2, valor:1000, data:'2026-03-12', num:1, risco:'Baixo risco' },
   { nome:'Danielle Arins',                    cc:'ED', comp:2, valor:500,  data:'2026-03-12', num:2, risco:'Médio risco' },
@@ -1040,68 +461,412 @@ const EXCECOES = [
   { nome:'Lidia De Oliveira Vieira',          cc:'ED', comp:7, valor:1000, data:'2026-08-12', num:3, risco:'Limite atingido' },
   { nome:'Luis Henrique Azevedo De Oliveira', cc:'ED', comp:7, valor:1000, data:'2026-09-03', num:1, risco:'Baixo risco' },
 ];
-let eMes = null, eCC = null;
-const eMonths = [...new Set(EXCECOES.map(x=>x.comp))].sort((a,b)=>a-b);
-const eFiltered = () => EXCECOES.filter(x => (eMes==null||x.comp===eMes) && (eCC==null||x.cc===eCC));
-const numOrd = n => n+'ª';
-const riscoBadge = r => r==='Limite atingido'
-  ? '<span class="badge b-red"><i class="ti ti-alert-triangle" aria-hidden="true"></i>Limite atingido</span>'
-  : r==='Médio risco'
-  ? '<span class="badge b-amber"><i class="ti ti-alert-circle" aria-hidden="true"></i>Médio risco</span>'
-  : '<span class="badge b-green"><i class="ti ti-check" aria-hidden="true"></i>Baixo risco</span>';
 
-function renderExcecoesFilters(){
-  let h = `<button class="mf-btn ${eMes==null?'active':''}" onclick="setEMes(null)">Todas</button>`;
-  eMonths.forEach(m=>{ h += `<button class="mf-btn ${eMes===m?'active':''}" onclick="setEMes(${m})">${MESNOME[m]}</button>`; });
-  document.getElementById('e-month-filter').innerHTML = h;
-  const mk = (l,v) => `<button class="mf-btn ${eCC===v?'active':''}" onclick="setECC(${v==null?'null':`'${v}'`})">${l}</button>`;
-  document.getElementById('e-cc-filter').innerHTML = mk('Todos',null)+mk('ED','ED')+mk('SD','SD');
+// ============================================================
+// BASE
+// ============================================================
+const JORNADA = 8;
+const pd = s => { const [y,m,dd] = s.split('-').map(Number); return new Date(y, m-1, dd); };
+
+const MONTHS = [
+  {label:'Fev', days:28, n:2}, {label:'Mar', days:31, n:3}, {label:'Abr', days:30, n:4},
+  {label:'Mai', days:31, n:5}, {label:'Jun', days:30, n:6}, {label:'Jul', days:31, n:7},
+  {label:'Ago', days:31, n:8}, {label:'Set', days:30, n:9}, {label:'Out', days:31, n:10},
+  {label:'Nov', days:30, n:11}, {label:'Dez', days:31, n:12},
+];
+const TOTAL_DAYS  = 334;
+const RANGE_START = new Date(2026,1,1);
+const MESNOME = {2:'Fevereiro',3:'Março',4:'Abril',5:'Maio',6:'Junho',7:'Julho',8:'Agosto',9:'Setembro',10:'Outubro',11:'Novembro',12:'Dezembro'};
+const MESAB   = {2:'Fev',3:'Mar',4:'Abr',5:'Mai',6:'Jun',7:'Jul',8:'Ago',9:'Set',10:'Out',11:'Nov',12:'Dez'};
+
+const aprovadas = DATA.filter(d=>d.status==='Aprovado');
+const vencendo  = DATA.filter(d=>d.status==='Vencendo');
+
+const diasUteis = (iniStr, fimStr) => {
+  let n = 0, cur = pd(iniStr); const end = pd(fimStr);
+  while (cur <= end) { const w = cur.getDay(); if (w!==0 && w!==6) n++; cur = new Date(cur.getFullYear(), cur.getMonth(), cur.getDate()+1); }
+  return n;
+};
+const diasCalc = d => d.inicio ? diasUteis(d.inicio, d.fim) : d.dias;
+const horas    = d => diasCalc(d) * JORNADA;
+const perda    = d => horas(d) * d.hv;
+
+const BRL  = v => v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const BRLk = v => 'R$ ' + (v/1000).toLocaleString('pt-BR',{maximumFractionDigits:0}) + 'k';
+const NUM  = v => v.toLocaleString('pt-BR');
+// compacto para a hero figure (figuras proporcionais, sem tabular-nums)
+const BRLc = v => Math.abs(v) >= 1e6
+  ? 'R$ ' + (v/1e6).toLocaleString('pt-BR',{maximumFractionDigits:1}) + ' mi'
+  : Math.abs(v) >= 1000
+    ? 'R$ ' + (v/1000).toLocaleString('pt-BR',{maximumFractionDigits:1}) + ' mil'
+    : BRL(v);
+// valor de stat tile: abrevia só o que é grande, preserva o centavo do que é pequeno
+const BRLs = v => Math.abs(v) >= 10000 ? BRLk(v) : BRL(v);
+// nome curto ignorando preposições (evita "Rafaela de")
+const shortName = (n, k=2) => n.split(' ').filter(w=>!/^(de|da|do|dos|das|e)$/i.test(w)).slice(0,k).join(' ');
+const plural = (n, s, p) => `${NUM(n)} ${n===1?s:p}`;
+
+const custoMes = {};
+CUSTOS.forEach(p => { for (const [m,v] of Object.entries(p.c)) custoMes[m] = (custoMes[m]||0)+v; });
+
+const ccDe = d => d.gestor ? '—' : (CC[d.nome] || '—');
+
+// ---- filtros globais ----
+let filtroMes = null, filtroCC = null;
+const matchCC     = d => filtroCC==null || ccDe(d)===filtroCC;
+const apMes       = () => aprovadas.filter(d => (filtroMes==null || d.mes===filtroMes) && matchCC(d));
+const vencMes     = () => (filtroMes==null ? vencendo : []).filter(matchCC);
+const custosDoMes = () => (filtroMes==null ? CUSTOS : CUSTOS.filter(p=>p.c[filtroMes]!=null).map(p=>({nome:p.nome, c:{[filtroMes]:p.c[filtroMes]}})));
+
+// ============================================================
+// GRÁFICOS — série única, uma só cor (hue violeta, claro→escuro)
+// ============================================================
+const chartRefs = {};
+const mkChart = (id,cfg) => { if(chartRefs[id]) chartRefs[id].destroy(); chartRefs[id] = new Chart(document.getElementById(id), cfg); };
+
+const barFill = ctx => {
+  const { chart } = ctx; const { ctx:c, chartArea } = chart;
+  if (!chartArea) return '#6d28d9';
+  const g = c.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+  g.addColorStop(0, '#8b5cf6'); g.addColorStop(1, '#5b21b6');
+  return g;
+};
+// rótulo direto SÓ no pico (nunca um número em cada barra)
+const peakLabel = totals => ({ id:'peak', afterDatasetsDraw(ch){
+  const max = Math.max(...totals); if (!(max > 0)) return;
+  const i = totals.indexOf(max); const bar = ch.getDatasetMeta(0).data[i]; if (!bar) return;
+  const { ctx } = ch; ctx.save();
+  ctx.font = '600 11px Inter, ui-sans-serif, system-ui, sans-serif';
+  ctx.fillStyle = '#14122b'; ctx.textAlign = 'center';
+  ctx.fillText(BRLk(max), bar.x, bar.y - 9); ctx.restore();
+}});
+
+const barOpts = () => ({
+  responsive:true, maintainAspectRatio:false,
+  layout:{ padding:{ top:26 } },
+  plugins:{
+    legend:{ display:false },
+    tooltip:{
+      backgroundColor:'#14122b', padding:10, cornerRadius:8, displayColors:false,
+      titleColor:'#ffffff', bodyColor:'#ffffff',
+      titleFont:{ size:11, weight:'500', family:'Inter' },
+      bodyFont:{ size:13, weight:'600', family:'Inter' },
+      callbacks:{ label: c => BRL(c.parsed.y) }
+    }
+  },
+  scales:{
+    y:{ beginAtZero:true, border:{ display:false },
+        grid:{ color:'#f4f5f8', drawTicks:false },
+        ticks:{ color:'#9a97b0', font:{ size:11, family:'Inter' }, padding:8, maxTicksLimit:4, callback:v=>BRLk(v) } },
+    x:{ border:{ display:false }, grid:{ display:false },
+        ticks:{ color:'#9a97b0', font:{ size:11, family:'Inter' } } }
+  }
+});
+const barData = (labels, totals) => ({ labels, datasets:[{
+  data: totals, backgroundColor: barFill, hoverBackgroundColor: barFill,
+  maxBarThickness: 22, borderRadius:{ topLeft:4, topRight:4 }, borderSkipped:'bottom'
+}]});
+
+// sparkline da hero (12 pontos, tendência em branco, pico em magenta claro)
+function sparkline(vals, ringColor){
+  const w=280, h=38, max=Math.max(...vals,1);
+  const pts = vals.map((v,i)=>[ i/(vals.length-1)*w, h-2-(v/max)*(h-8) ]);
+  const d = pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');
+  const pi = vals.indexOf(max), pk = pts[pi];
+  return `<svg viewBox="0 0 ${w} ${h}" class="h-[38px] w-full" preserveAspectRatio="none" aria-hidden="true">
+    <path d="${d}" fill="none" stroke="rgba(255,255,255,.42)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>
+    <circle cx="${pk[0].toFixed(1)}" cy="${pk[1].toFixed(1)}" r="4" fill="#f9a8d4" stroke="${ringColor}" stroke-width="2"/>
+  </svg>`;
 }
-window.setEMes = function(m){ eMes = m; renderExcecoes(); };
-window.setECC  = function(v){ eCC = v; renderExcecoes(); };
+
+// blocos de KPI reutilizáveis
+const heroCard = ({label, big, exact, sub, spark}) => `
+  <div class="lift relative col-span-1 overflow-hidden rounded-2xl p-6 sm:col-span-2 lg:col-span-2"
+       style="background:linear-gradient(135deg,#2a0a63 0%,#3a0e8c 48%,#6d28d9 100%)">
+    <div class="pointer-events-none absolute -right-12 -top-20 h-60 w-60 rounded-full"
+         style="background:radial-gradient(circle,rgba(230,68,155,.42),transparent 66%)"></div>
+    <div class="relative flex h-full flex-col justify-between">
+      <div>
+        <p class="text-[10.5px] font-medium uppercase tracking-[.1em] text-white/55">${label}</p>
+        <p class="hero-v mt-3">${big}</p>
+        <p class="mt-2.5 text-[12.5px] text-white/65">${exact}${sub?` · ${sub}`:''}</p>
+      </div>
+      ${spark ? `<div class="mt-5">${spark}</div>` : ''}
+    </div>
+  </div>`;
+
+const statCard = ({label, value, sub, tone}) => `
+  <div class="stat">
+    <p class="eyebrow flex items-center gap-1.5">${tone==='alert'?'<span class="dot bg-mag"></span>':tone==='warn'?'<span class="dot bg-[#e0a33a]"></span>':''}${label}</p>
+    <div>
+      <p class="stat-v">${value}</p>
+      <p class="stat-s">${sub}</p>
+    </div>
+  </div>`;
+
+const meter = ({name, value, sub, pct, tone}) => `
+  <div class="mb-4 last:mb-0">
+    <div class="flex items-baseline justify-between gap-3">
+      <span class="text-[12.5px] font-medium">${name}</span>
+      <span class="text-[12.5px] font-semibold tabular-nums text-ink">${value}</span>
+    </div>
+    <div class="track mt-2"><div class="fill" style="width:${pct.toFixed(1)}%;background:${tone==='alert'?'#d21b7c':'#6d28d9'}"></div></div>
+    <p class="mt-1.5 text-[11px] text-ink-3">${sub}</p>
+  </div>`;
+
+// ============================================================
+// FILTROS (meses + CC na mesma linha)
+// ============================================================
+function filterRow(elMes, elCC, months, cur, setM, curCC, setC, allLabel){
+  let h = `<button class="chip ${cur==null?'chip-on':''}" onclick="${setM}(null)">${allLabel}</button>`;
+  months.forEach(n => { h += `<button class="chip ${cur===n?'chip-on':''}" onclick="${setM}(${n})">${MESAB[n]}</button>`; });
+  document.getElementById(elMes).innerHTML = h;
+  const seg = (l,v) => `<button class="seg-btn ${curCC===v?'seg-on':''}" onclick="${setC}(${v==null?'null':`'${v}'`})">${l}</button>`;
+  document.getElementById(elCC).innerHTML = seg('Todos',null)+seg('ED','ED')+seg('SD','SD');
+}
+
+// ============================================================
+// FÉRIAS
+// ============================================================
+function renderKpis(){
+  const ap = apMes(), venc = vencMes();
+  const gap    = ap.reduce((s,d)=>s+perda(d),0);
+  const hrs    = ap.reduce((s,d)=>s+horas(d),0);
+  const uteis  = ap.reduce((s,d)=>s+diasCalc(d),0);
+  const risco  = venc.reduce((s,d)=>s+perda(d),0);
+  const conf   = ap.filter(d=>d.confirm==='Sim').length;
+  const escopo = filtroMes==null ? 'fev–dez 2026' : MESNOME[filtroMes];
+  const spark  = MONTHS.map(m => aprovadas.filter(d=>d.mes===m.n && matchCC(d)).reduce((s,d)=>s+perda(d),0));
+
+  document.getElementById('kpi-row').innerHTML =
+    heroCard({ label:'Desconto de faturamento', big:BRLc(gap), exact:BRL(gap),
+               sub:`${ap.length} períodos · ${escopo}`,
+               spark: filtroMes==null ? sparkline(spark,'#3a0e8c') : '' }) +
+    statCard({ label:'Horas não faturadas', value:`${NUM(hrs)} h`, sub:`${NUM(uteis)} dias úteis × ${JORNADA}h` }) +
+    statCard({ label:'Saldos a vencer', value:NUM(venc.length), tone:'alert',
+               sub: venc.length ? `${BRL(risco)} de gap em risco` : 'nenhum saldo em aberto' }) +
+    statCard({ label:'Confirmação do cliente', value:`${conf}/${ap.length}`,
+               sub: ap.length-conf ? `${ap.length-conf} sem confirmação` : 'todas comunicadas' });
+}
+
+function renderLossChart(){
+  const mm = filtroMes==null ? MONTHS : MONTHS.filter(m=>m.n===filtroMes);
+  const totals = mm.map(m => aprovadas.filter(d=>d.mes===m.n && matchCC(d)).reduce((s,d)=>s+perda(d),0));
+  document.getElementById('loss-total').textContent = BRL(totals.reduce((a,b)=>a+b,0));
+  mkChart('lossChart', { type:'bar', data:barData(mm.map(m=>m.label), totals), options:barOpts(), plugins:[peakLabel(totals)] });
+}
+
+function renderCCmeters(){
+  const list = filtroMes==null ? aprovadas : aprovadas.filter(d=>d.mes===filtroMes);
+  const agg = {}; const ens = k => agg[k] || (agg[k]={gap:0,custo:0,nomes:new Set()});
+  list.forEach(d => { const k=ccDe(d); ens(k).gap += perda(d); ens(k).nomes.add(d.nome); });
+  custosDoMes().forEach(p => { const k = CC[p.nome]||'—'; ens(k).custo += Object.values(p.c).reduce((a,b)=>a+b,0); });
+  const order = ['ED','SD','—'].filter(k=>agg[k]);
+  const nome  = { ED:'Alocação · ED', SD:'Alocação · SD', '—':'Gestor / sem CC' };
+  const max   = Math.max(...order.map(k=>agg[k].gap), 1);
+  document.getElementById('cc-meters').innerHTML =
+    order.map(k => meter({
+      name: nome[k]||k, value: agg[k].gap>0?BRLk(agg[k].gap):'—', pct: agg[k].gap/max*100,
+      sub: `${plural(agg[k].nomes.size,'profissional','profissionais')} · custo ${agg[k].custo?BRLk(agg[k].custo):'—'}`
+    })).join('') +
+    `<p class="mt-5 border-t border-line-soft pt-3 text-[11px] text-ink-3">Compara sempre os dois CCs, mesmo com o filtro de CC ativo.</p>`;
+}
+
+const pctPos = d => { const diff = Math.round((d - RANGE_START)/86400000); return Math.max(0, Math.min(100, diff/TOTAL_DAYS*100)); };
+
+function renderTimeline(){
+  document.getElementById('tl-header').innerHTML = MONTHS.map(m =>
+    `<div class="border-l border-line-soft py-1 text-center text-[10px] font-medium text-ink-3" style="width:${m.days/TOTAL_DAYS*100}%">${m.label}</div>`).join('');
+  const dm = s => pd(s).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});
+  const rows = apMes();
+  document.getElementById('tl-body').innerHTML = rows.length===0
+    ? '<p class="py-3 text-[12px] text-ink-3">Nenhuma férias neste recorte.</p>'
+    : rows.map(d => {
+        const s = pctPos(pd(d.inicio));
+        const f = pd(d.fim); const e = pctPos(new Date(f.getFullYear(), f.getMonth(), f.getDate()+1));
+        const w = Math.max(0.8, e-s);
+        const right = e > 78;
+        const lbl = right ? `right:${(100-s).toFixed(1)}%;margin-right:8px;text-align:right` : `left:${e.toFixed(1)}%;margin-left:8px`;
+        return `<div class="flex items-center py-[3px]">
+          <div class="w-[150px] shrink-0 truncate pr-3 text-[12px] text-ink-2" title="${d.nome}">${shortName(d.nome)}</div>
+          <div class="relative h-[20px] flex-1">
+            <div class="absolute top-[5px] h-[10px] rounded-[3px] bg-brand-500 transition-opacity duration-150 hover:opacity-70"
+                 style="left:${s}%;width:${w}%" title="${d.nome} · ${d.dias} dias (${diasCalc(d)} úteis) · ${BRL(perda(d))}"></div>
+            <span class="absolute top-[3px] whitespace-nowrap text-[10px] leading-[15px] tabular-nums text-ink-3" style="${lbl}">${dm(d.inicio)}–${dm(d.fim)}</span>
+          </div>
+        </div>`;
+      }).join('');
+}
+
+const ccPill  = c => c==='—' ? '<span class="text-ink-3">—</span>' : `<span class="pill pill-cc" title="${CC_FULL} ${c}">${c}</span>`;
+const confPill = v => v==='Sim'
+  ? '<span class="pill pill-mute"><i class="ti ti-check"></i>Confirmado</span>'
+  : '<span class="pill pill-warn"><i class="ti ti-clock"></i>Pendente</span>';
+
+function renderTable(){
+  const fS = document.getElementById('f-status').value;
+  const fC = document.getElementById('f-confirm').value;
+  const rows = DATA.filter(d => {
+    if (filtroMes!=null && d.mes!==filtroMes) return false;
+    if (filtroCC!=null && ccDe(d)!==filtroCC) return false;
+    if (fS && d.status!==fS) return false;
+    if (fC && d.confirm!==fC) return false;
+    return true;
+  });
+  const fmt = s => s ? pd(s).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}) : '—';
+  document.getElementById('table-body').innerHTML = rows.length ? rows.map(d => `
+    <tr>
+      <td class="font-medium">${d.nome}</td>
+      <td class="tabular-nums text-ink-2">${fmt(d.inicio)}</td>
+      <td class="tabular-nums text-ink-2">${fmt(d.fim)}</td>
+      <td class="tabular-nums">${d.dias}${d.inicio?` <span class="text-ink-3">(${diasCalc(d)} úteis)</span>`:' <span class="text-ink-3">(saldo)</span>'}</td>
+      <td class="tabular-nums text-ink-2">${d.abono>0?d.abono+' d':'—'}</td>
+      <td>${d.status==='Aprovado'?'<span class="pill pill-mute">Aprovado</span>':'<span class="pill pill-alert"><i class="ti ti-alert-triangle"></i>Vencendo</span>'}</td>
+      <td>${confPill(d.confirm)}</td>
+      <td>${ccPill(ccDe(d))}</td>
+      <td class="r text-ink-2">${d.gestor?'<span class="text-ink-3">gestor</span>':(d.hv==null?'<span class="text-ink-3">a confirmar</span>':BRL(d.hv))}</td>
+      <td class="r font-semibold">${d.gestor?'<span class="pill pill-mute">Custo da operação</span>':(d.hv==null?'<span class="text-ink-3">a confirmar</span>':BRL(perda(d)))}</td>
+    </tr>`).join('')
+    : '<tr><td colspan="10" class="py-6 text-center text-[12px] text-ink-3">Nenhum registro para este recorte.</td></tr>';
+}
+
+window.setMes = m => { filtroMes = m; renderFerias(); };
+window.setCC  = v => { filtroCC  = v; renderFerias(); };
+function renderFerias(){
+  filterRow('month-filter','cc-filter', MONTHS.map(m=>m.n), filtroMes, 'setMes', filtroCC, 'setCC', 'Ano');
+  renderKpis(); renderLossChart(); renderCCmeters(); renderTimeline(); renderTable();
+}
+
+// ============================================================
+// VIAGENS
+// ============================================================
+let vMes = null, vCC = null;
+const vMonths   = [...new Set(VIAGENS.map(t=>t.mes))].sort((a,b)=>a-b);
+const vFiltered = () => VIAGENS.filter(t => (vMes==null||t.mes===vMes) && (vCC==null||t.cc===vCC));
+const cobrPill  = c => c==='Sim'
+  ? '<span class="pill pill-mute"><i class="ti ti-check"></i>Cobrado</span>'
+  : c==='Não'
+    ? '<span class="pill pill-alert"><i class="ti ti-alert-triangle"></i>A cobrar</span>'
+    : '<span class="pill pill-warn"><i class="ti ti-clock"></i>Pendente</span>';
+
+window.setVMes = m => { vMes = m; renderViagens(); };
+window.setVCC  = v => { vCC  = v; renderViagens(); };
+
+function renderViagens(){
+  filterRow('v-month-filter','v-cc-filter', vMonths, vMes, 'setVMes', vCC, 'setVCC', 'Todas');
+  const list   = vFiltered();
+  const total  = list.reduce((s,t)=>s+t.total,0);
+  const pend   = list.filter(t=>t.cobranca!=='Sim');
+  const cobrar = pend.reduce((s,t)=>s+t.total,0);
+  const feitas = list.filter(t=>t.cobranca==='Sim');
+  const cobrado= feitas.reduce((s,t)=>s+t.total,0);
+  const nomes  = new Set(list.map(t=>t.nome)).size;
+  const escopo = vMes==null ? '2026' : MESNOME[vMes];
+  const spark  = vMonths.map(m => VIAGENS.filter(t=>t.mes===m && (vCC==null||t.cc===vCC)).reduce((s,t)=>s+t.total,0));
+
+  document.getElementById('v-kpi-row').innerHTML =
+    heroCard({ label:'Custo total de viagens', big:BRLc(total), exact:BRL(total),
+               sub:`${list.length} viagens · ${nomes} colaboradores · ${escopo}`,
+               spark: vMes==null && spark.length>1 ? sparkline(spark,'#3a0e8c') : '' }) +
+    statCard({ label:'A cobrar do cliente', value:BRLs(cobrar), tone:'alert',
+               sub: pend.length ? `${plural(pend.length,'viagem pendente','viagens pendentes')} · ${BRL(cobrar)}` : 'tudo cobrado' }) +
+    statCard({ label:'Já cobrado', value:BRLs(cobrado), sub:plural(feitas.length,'viagem faturada','viagens faturadas') }) +
+    statCard({ label:'Ticket médio', value: list.length?BRLs(total/list.length):'—', sub:'custo médio por viagem' });
+
+  const totals = (vMes==null ? vMonths : [vMes]).map(m => VIAGENS.filter(t=>t.mes===m && (vCC==null||t.cc===vCC)).reduce((s,t)=>s+t.total,0));
+  document.getElementById('v-total').textContent = BRL(totals.reduce((a,b)=>a+b,0));
+  mkChart('vChart', { type:'bar', data:barData((vMes==null?vMonths:[vMes]).map(m=>MESAB[m]), totals), options:barOpts(), plugins:[peakLabel(totals)] });
+
+  const agg = {}; const ens = k => agg[k] || (agg[k]={n:0,total:0,cobrar:0});
+  list.forEach(t => { const a=ens(t.cc); a.n++; a.total+=t.total; if(t.cobranca!=='Sim') a.cobrar+=t.total; });
+  const order = ['ED','SD'].filter(k=>agg[k]);
+  const max = Math.max(...order.map(k=>agg[k].total), 1);
+  document.getElementById('v-cc-meters').innerHTML = order.length
+    ? order.map(k => meter({ name:`Alocação · ${k}`, value:BRLk(agg[k].total), pct:agg[k].total/max*100,
+        sub:`${plural(agg[k].n,'viagem','viagens')} · a cobrar ${agg[k].cobrar?BRLs(agg[k].cobrar):'—'}` })).join('')
+    : '<p class="text-[12px] text-ink-3">Sem viagens neste recorte.</p>';
+
+  const sel = document.getElementById('v-f-motivo'), cur = sel.value;
+  sel.innerHTML = '<option value="">Todos os motivos</option>' + [...new Set(VIAGENS.map(t=>t.motivo))].map(m=>`<option value="${m}">${m}</option>`).join('');
+  sel.value = cur;
+  renderViagensTable();
+}
+
+function renderViagensTable(){
+  const fc = document.getElementById('v-f-cobranca').value;
+  const fm = document.getElementById('v-f-motivo').value;
+  const list = vFiltered().filter(t => (!fc||t.cobranca===fc) && (!fm||t.motivo===fm));
+  const dm = s => pd(s).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});
+  const money = v => v==null ? '<span class="text-ink-3">n/a</span>' : BRL(v);
+  let html = list.map(t => `
+    <tr>
+      <td class="font-medium">${t.nome}</td>
+      <td>${ccPill(t.cc)}</td>
+      <td>${t.motivo}${t.obs?` <i class="ti ti-message-circle text-mag align-[-1px] cursor-help" title="${t.obs.replace(/"/g,'&quot;')}" aria-label="Observação"></i>`:''}</td>
+      <td class="whitespace-nowrap text-ink-2">${t.orig} <i class="ti ti-arrow-narrow-right text-ink-3"></i> ${t.dest}</td>
+      <td class="tabular-nums text-ink-2">${dm(t.ida)}</td>
+      <td class="tabular-nums text-ink-2">${dm(t.volta)}</td>
+      <td class="r text-ink-2">${money(t.aereo)}</td>
+      <td class="r text-ink-2">${money(t.hosp)}</td>
+      <td class="r font-semibold">${BRL(t.total)}${t.flag?' <i class="ti ti-alert-triangle text-[#b07a10]" title="Custo total menor que passagem + hospedagem — conferir na planilha"></i>':''}</td>
+      <td>${cobrPill(t.cobranca)}</td>
+      <td class="text-ink-2">${t.solic}</td>
+    </tr>`).join('');
+  if (list.length){
+    const tA=list.reduce((s,t)=>s+(t.aereo||0),0), tH=list.reduce((s,t)=>s+(t.hosp||0),0), tT=list.reduce((s,t)=>s+t.total,0);
+    html += `<tr class="tot"><td>Total</td><td></td><td></td><td></td><td></td><td></td>
+      <td class="r">${BRL(tA)}</td><td class="r">${BRL(tH)}</td><td class="r">${BRL(tT)}</td><td></td><td></td></tr>`;
+  } else html = '<tr><td colspan="11" class="py-6 text-center text-[12px] text-ink-3">Nenhuma viagem para este recorte.</td></tr>';
+  document.getElementById('v-table-body').innerHTML = html;
+}
+
+// ============================================================
+// EXCEÇÕES DE AJUDA DE CUSTO
+// ============================================================
+let eMes = null, eCC = null;
+const eMonths   = [...new Set(EXCECOES.map(x=>x.comp))].sort((a,b)=>a-b);
+const eFiltered = () => EXCECOES.filter(x => (eMes==null||x.comp===eMes) && (eCC==null||x.cc===eCC));
+const riscoPill = r => r==='Limite atingido'
+  ? '<span class="pill pill-alert"><i class="ti ti-alert-triangle"></i>Limite atingido</span>'
+  : r==='Médio risco'
+    ? '<span class="pill pill-warn"><i class="ti ti-alert-circle"></i>Médio risco</span>'
+    : '<span class="pill pill-mute"><i class="ti ti-check"></i>Baixo risco</span>';
+
+window.setEMes = m => { eMes = m; renderExcecoes(); };
+window.setECC  = v => { eCC  = v; renderExcecoes(); };
 
 function renderExcecoes(){
-  renderExcecoesFilters();
-  const list = eFiltered();
+  filterRow('e-month-filter','e-cc-filter', eMonths, eMes, 'setEMes', eCC, 'setECC', 'Todas');
+  const list  = eFiltered();
   const total = list.reduce((s,x)=>s+x.valor,0);
   const nomes = new Set(list.map(x=>x.nome)).size;
-  const noLimite = new Set(list.filter(x=>x.risco==='Limite atingido').map(x=>x.nome)).size;
-  const medio = new Set(list.filter(x=>x.risco==='Médio risco').map(x=>x.nome)).size;
-  const subP = eMes==null ? 'todas · 2026' : 'competência '+MESNOME[eMes];
-  const cards = [
-    {label:'Exceções',     value:list.length, sub:subP, cls:''},
-    {label:'Valor total',  value:BRL(total),  sub:'reembolsado', cls:''},
-    {label:'No limite',    value:noLimite,    sub:'3ª exceção', cls:noLimite?'alert':''},
-    {label:'Colaboradores',value:nomes,       sub:'com exceção', cls:''},
-  ];
-  document.getElementById('e-summary-cards').innerHTML = cards.map(c=>
-    `<div class="card ${c.cls}"><div class="card-label">${c.label}</div><div class="card-value" ${cardValStyle(c.value)}>${c.value}</div><div class="card-sub">${c.sub}</div></div>`).join('');
-  const hero = [
-    {cls:'',    label:'<i class="ti ti-receipt" aria-hidden="true"></i> Valor total reembolsado', value:BRL(total), sub:`${list.length} exceções`},
-    {cls:'risk',label:'<i class="ti ti-alert-triangle" aria-hidden="true"></i> No limite de exceções', value:noLimite, sub:'atingiram a 3ª exceção'},
-    {cls:'soft',label:'<i class="ti ti-alert-circle" aria-hidden="true"></i> Em médio risco', value:medio, sub:'na 2ª exceção'},
-  ];
-  document.getElementById('e-hero-cards').innerHTML = hero.map(c=>
-    `<div class="hero-card ${c.cls}"><div class="hero-label">${c.label}</div><div class="hero-value">${c.value}</div><div class="hero-sub">${c.sub}</div></div>`).join('');
-  // gráfico por competência
-  const mm = eMes==null ? eMonths : [eMes];
-  const totals = mm.map(m => EXCECOES.filter(x=>x.comp===m && (eCC==null||x.cc===eCC)).reduce((s,x)=>s+x.valor,0));
-  const cols = mm.map(m => COL_MAP[m]||'#6e2cbf');
-  const grand = totals.reduce((a,b)=>a+b,0);
-  document.getElementById('e-loss-legend').innerHTML =
-    `<span class="legend-item" style="font-weight:500;color:var(--text)">${eMes==null?'Total no ano':'Total em '+MESNOME[eMes]}: ${BRL(grand)}</span>`;
-  const labelColor = matchMedia('(prefers-color-scheme: dark)').matches ? '#f1e8fb' : '#2b0a63';
-  const dl = {id:'edl',afterDatasetsDraw(ch){const{ctx}=ch;const m=ch.getDatasetMeta(0);ctx.save();ctx.font='500 11px system-ui, sans-serif';ctx.fillStyle=labelColor;ctx.textAlign='center';m.data.forEach((b,i)=>{if(totals[i]>0)ctx.fillText(BRLk(totals[i]),b.x,b.y-6);});ctx.restore();}};
-  mkChart('eChart',{type:'bar',data:{labels:mm.map(m=>MESAB[m]),datasets:[{data:totals,backgroundColor:cols,borderRadius:6,borderSkipped:false}]},
-    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:22}},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>BRL(c.parsed.y)}}},
-      scales:{y:{beginAtZero:true,ticks:{callback:v=>BRLk(v),font:{size:11}},grid:{color:'rgba(128,128,128,0.1)'}},x:{ticks:{font:{size:12},autoSkip:false},grid:{display:false}}}},plugins:[dl]});
-  // recorrentes (2ª exceção ou mais)
-  const byName = {};
-  list.forEach(x=>{ const o = byName[x.nome] || (byName[x.nome]={cc:x.cc,n:0,val:0,maxNum:0,risco:'Baixo risco'}); o.n++; o.val+=x.valor; if(x.num>o.maxNum){o.maxNum=x.num;o.risco=x.risco;} });
-  const rec = Object.entries(byName).filter(([,o])=>o.maxNum>=2).sort((a,b)=>b[1].maxNum-a[1].maxNum || b[1].n-a[1].n);
-  document.getElementById('e-risk-body').innerHTML = rec.length
-    ? rec.map(([nome,o])=>`<tr class="${o.maxNum>=3?'alert-row':''}"><td>${nome}</td><td>${ccBadge2(o.cc)}</td><td class="num">${o.n}</td><td class="num">${BRL(o.val)}</td><td>${riscoBadge(o.risco)}</td></tr>`).join('')
-    : '<tr><td colspan="5" style="color:var(--text-3);padding:14px 10px;">Nenhum colaborador com exceções recorrentes neste filtro.</td></tr>';
+  const lim   = new Set(list.filter(x=>x.risco==='Limite atingido').map(x=>x.nome)).size;
+  const med   = new Set(list.filter(x=>x.risco==='Médio risco').map(x=>x.nome)).size;
+  const escopo= eMes==null ? '2026' : `competência ${MESNOME[eMes]}`;
+  const spark = eMonths.map(m => EXCECOES.filter(x=>x.comp===m && (eCC==null||x.cc===eCC)).reduce((s,x)=>s+x.valor,0));
+
+  document.getElementById('e-kpi-row').innerHTML =
+    heroCard({ label:'Valor reembolsado', big:BRLc(total), exact:BRL(total),
+               sub:`${list.length} exceções · ${nomes} colaboradores · ${escopo}`,
+               spark: eMes==null && spark.length>1 ? sparkline(spark,'#3a0e8c') : '' }) +
+    statCard({ label:'No limite de exceções', value:NUM(lim), tone:'alert',
+               sub: lim ? 'atingiram a 3ª exceção' : 'ninguém no limite' }) +
+    statCard({ label:'Em médio risco', value:NUM(med), tone:'warn',
+               sub: med ? 'estão na 2ª exceção' : 'ninguém na 2ª exceção' }) +
+    statCard({ label:'Ticket médio', value: list.length?BRL(total/list.length):'—', sub:'valor médio por exceção' });
+
+  const totals = (eMes==null ? eMonths : [eMes]).map(m => EXCECOES.filter(x=>x.comp===m && (eCC==null||x.cc===eCC)).reduce((s,x)=>s+x.valor,0));
+  document.getElementById('e-total').textContent = BRL(totals.reduce((a,b)=>a+b,0));
+  mkChart('eChart', { type:'bar', data:barData((eMes==null?eMonths:[eMes]).map(m=>MESAB[m]), totals), options:barOpts(), plugins:[peakLabel(totals)] });
+
+  const by = {};
+  list.forEach(x => { const o = by[x.nome] || (by[x.nome]={cc:x.cc,n:0,val:0,mx:0,risco:'Baixo risco'}); o.n++; o.val+=x.valor; if(x.num>o.mx){o.mx=x.num;o.risco=x.risco;} });
+  const rec = Object.entries(by).filter(([,o])=>o.mx>=2).sort((a,b)=>b[1].mx-a[1].mx || b[1].n-a[1].n);
+  document.getElementById('e-risk').innerHTML = rec.length
+    ? rec.map(([nome,o]) => meter({ name:shortName(nome,3), value:`${o.mx}ª`,
+        pct:o.mx/3*100, tone:o.mx>=3?'alert':undefined,
+        sub:`${plural(o.n,'exceção','exceções')} · ${BRL(o.val)} · ${o.cc}` })).join('')
+    : '<p class="text-[12px] text-ink-3">Nenhum colaborador recorrente neste recorte.</p>';
   renderExcecoesTable();
 }
 
@@ -1109,41 +874,43 @@ function renderExcecoesTable(){
   const fr = document.getElementById('e-f-risco').value;
   const list = eFiltered().filter(x => !fr || x.risco===fr).slice().sort((a,b)=>pd(a.data)-pd(b.data));
   const dm = s => pd(s).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit'});
-  let html = list.map(x=>`<tr class="${x.risco==='Limite atingido'?'alert-row':''}">
-     <td>${x.nome}</td>
-     <td>${ccBadge2(x.cc)}</td>
-     <td>${MESNOME[x.comp]}</td>
-     <td class="num">${BRL(x.valor)}</td>
-     <td>${dm(x.data)}</td>
-     <td>${numOrd(x.num)}</td>
-     <td>${riscoBadge(x.risco)}</td>
-   </tr>`).join('');
-  if(list.length){
-    const t = list.reduce((s,x)=>s+x.valor,0);
-    html += `<tr class="total-row"><td>Total</td><td></td><td></td><td class="num">${BRL(t)}</td><td></td><td></td><td></td></tr>`;
-  } else html = '<tr><td colspan="7" style="color:var(--text-3);padding:14px 10px;">Nenhuma exceção para este filtro.</td></tr>';
+  let html = list.map(x => `
+    <tr>
+      <td class="font-medium">${x.nome}</td>
+      <td>${ccPill(x.cc)}</td>
+      <td class="text-ink-2">${MESNOME[x.comp]}</td>
+      <td class="r font-semibold">${BRL(x.valor)}</td>
+      <td class="tabular-nums text-ink-2">${dm(x.data)}</td>
+      <td class="tabular-nums text-ink-2">${x.num}ª</td>
+      <td>${riscoPill(x.risco)}</td>
+    </tr>`).join('');
+  if (list.length){
+    html += `<tr class="tot"><td>Total</td><td></td><td></td><td class="r">${BRL(list.reduce((s,x)=>s+x.valor,0))}</td><td></td><td></td><td></td></tr>`;
+  } else html = '<tr><td colspan="7" class="py-6 text-center text-[12px] text-ink-3">Nenhuma exceção para este recorte.</td></tr>';
   document.getElementById('e-table-body').innerHTML = html;
 }
 
 // ============================================================
-// TROCA DE ABAS
+// ABAS
 // ============================================================
-window.switchTab = function(page){
-  document.querySelectorAll('.page').forEach(s=>{ s.hidden = (s.id !== 'page-'+page); });
-  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active', t.dataset.page===page));
-  const meta = {
-    ferias:  ['ti ti-beach',      'Gestão de Férias — Globo'],
-    viagens: ['ti ti-plane-tilt', 'Viagens — Globo'],
-    excecoes:['ti ti-receipt',    'Exceções de Ajuda de Custo — Globo'],
-  };
-  const [ic,ti] = meta[page];
-  const iconEl = document.getElementById('hdr-icon');
-  iconEl.className = ic; iconEl.style.color = '#E6449B';
-  document.getElementById('hdr-title').textContent = ti;
-  if(page==='viagens')  renderViagens();
-  if(page==='excecoes') renderExcecoes();
-  window.scrollTo({top:0});
+const TITLES = {
+  ferias:  'Gestão de Férias · Operação Globo',
+  viagens: 'Viagens · Operação Globo',
+  excecoes:'Exceções de Ajuda de Custo · Operação Globo'
 };
+window.switchTab = function(page){
+  document.querySelectorAll('main > section').forEach(s => { s.hidden = (s.id !== 'page-'+page); });
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('tab-on', t.dataset.page===page));
+  document.getElementById('hdr-title').textContent = TITLES[page];
+  if (page==='ferias')   renderFerias();
+  if (page==='viagens')  renderViagens();
+  if (page==='excecoes') renderExcecoes();
+  window.scrollTo({ top:0 });
+};
+
+document.getElementById('updated-at').textContent =
+  'Atualizado em ' + pd(UPDATED).toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
+renderFerias();
 </script>
 </body>
 </html>
